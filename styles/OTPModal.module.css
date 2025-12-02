@@ -1,0 +1,228 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalContent {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 16px;
+  max-width: 450px;
+  width: 90%;
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.closeButton:hover {
+  color: #000;
+}
+
+.modalHeader {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.modalHeader h2 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+  color: #1a1a1a;
+}
+
+.modalHeader p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.modalHeader strong {
+  color: #4CAF50;
+  font-weight: 600;
+}
+
+.otpInputContainer {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.otpInput {
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  transition: all 0.3s;
+  outline: none;
+}
+
+.otpInput:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+  transform: scale(1.05);
+}
+
+.otpInput:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.error {
+  background: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+  border-left: 4px solid #c62828;
+}
+
+.timerSection {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.timer {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.timer strong {
+  color: #4CAF50;
+  font-weight: 600;
+}
+
+.expired {
+  margin: 0;
+  font-size: 14px;
+  color: #f44336;
+  font-weight: 600;
+}
+
+.verifyButton {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 20px;
+}
+
+.verifyButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #45a049, #3d8b40);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.verifyButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.resendSection {
+  text-align: center;
+}
+
+.resendButton {
+  background: none;
+  border: none;
+  color: #4CAF50;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.resendButton:hover:not(:disabled) {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.resendButton:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.resendInfo {
+  margin: 0;
+  font-size: 13px;
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 30px 20px;
+  }
+
+  .otpInput {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .otpInputContainer {
+    gap: 10px;
+  }
+
+  .modalHeader h2 {
+    font-size: 24px;
+  }
+}

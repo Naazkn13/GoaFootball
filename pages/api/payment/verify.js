@@ -1,0 +1,119 @@
+import database from '../../../services/database';
+import paymentService from '../../../services/payment.service';
+import jwt from 'jsonwebtoken';
+
+// Middleware to verify JWT token
+function verifyToken(req) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  
+  if (!token) {
+    throw new Error('No token provided');
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    return decoded;
+  } catch (error) {
+    throw new Error('Invalid token');
+  }
+}
+
+export default async function handler(req, res) {
+  if (req.method === 'POST') {
+    try {
+      // Verify authentication
+      const user = verifyToken(req);
+
+      const { 
+        razorpay_order_id, 
+        razorpay_payment_id, 
+        razorpay_signature 
+      } = req.body;
+
+      // Validation
+      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Payment details are required' 
+        });
+      }
+
+      // Verify payment signature
+      const isValid = paymentService.verifyPaymentSignature(
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature
+      );
+
+      if (!isValid) {
+        // Log failed verification - skip history since we don't have payment_id
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Payment verification failed' 
+        });
+      }
+
+      // Get payment record from database
+      const payment = await database.getPaymentByRazorpayOrderId(razorpay_order_id);
+
+      if (!payment) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Payment record not found' 
+        });
+      }
+
+      // Update payment record
+      await database.updatePayment(payment.id, {
+        razorpay_payment_id: razorpay_payment_id,
+        razorpay_signature: razorpay_signature,
+        status: 'success',
+        paid_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+
+      // Update user's payment status
+      await database.updateUser(user.id, {
+        is_paid: true,
+        payment_date: new Date().toISOString(),
+      });
+
+      // Create payment history entry
+      await database.createPaymentHistory({
+        user_id: user.id,
+        payment_id: payment.id,
+        amount: payment.amount,
+        status: 'success',
+        razorpay_payment_id: razorpay_payment_id,
+      });
+
+      res.status(200).json({ 
+        success: true, 
+        message: 'Payment verified successfully',
+        payment: {
+          id: payment.id,
+          orderId: razorpay_order_id,
+          paymentId: razorpay_payment_id,
+          amount: payment.amount,
+          status: 'success',
+        },
+      });
+    } catch (error) {
+      console.error('Verify payment error:', error);
+      
+      if (error.message === 'No token provided' || error.message === 'Invalid token') {
+        return res.status(401).json({ 
+          success: false, 
+          message: 'Unauthorized' 
+        });
+      }
+      
+      res.status(500).json({ 
+        success: false, 
+        message: 'Payment verification failed' 
+      });
+    }
+  } else {
+    res.status(405).json({ message: 'Method not allowed' });
+  }
+}
