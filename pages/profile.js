@@ -13,6 +13,7 @@ export default function ProfilePage() {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [error, setError] = useState("");
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
@@ -109,9 +110,11 @@ export default function ProfilePage() {
             });
 
             if (verifyResponse.success) {
-              alert(`Payment successful! Your Football ID: ${user.football_id}`);
-              setIsPaid(true);
-              fetchPaymentHistory();
+              if (verifyResponse.success) {
+                setShowSuccessModal(true);
+                setIsPaid(true);
+                fetchPaymentHistory();
+              }
             }
           } catch (err) {
             setError("Payment verification failed. Please contact support.");
@@ -306,7 +309,7 @@ export default function ProfilePage() {
                     <h4>Payment History</h4>
                     {paymentHistory.map((payment) => (
                       <div key={payment.id} className={styles.paymentItem}>
-                        <span>₹{(payment.amount / 100).toFixed(2)}</span>
+                        <span>₹{parseFloat(payment.amount).toFixed(2)}</span>
                         <span>{new Date(payment.created_at).toLocaleDateString()}</span>
                         <span className={styles.paymentStatus}>{payment.status}</span>
                       </div>
@@ -318,6 +321,29 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+
+
+      {/* Success Modal */}
+      {
+        showSuccessModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+              <div className={styles.modalSuccessIcon}>✓</div>
+              <h3 className={styles.modalTitle}>Payment Successful!</h3>
+              <p className={styles.modalText}>
+                Your payment has been processed successfully.<br />
+                <strong>Football ID: {user.football_id}</strong>
+              </p>
+              <button
+                className={styles.modalBtn}
+                onClick={() => setShowSuccessModal(false)}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        )
+      }
     </>
   );
 }
