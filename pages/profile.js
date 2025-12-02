@@ -81,14 +81,14 @@ export default function ProfilePage() {
 
   const handleProceedToPayment = async () => {
     if (processingPayment) return;
-    
+
     setProcessingPayment(true);
     setError("");
 
     try {
       // Create Razorpay order
       const orderResponse = await paymentAPI.createOrder({
-        amount: 199900, // ₹1,999.00 in paise
+        amount: 50000, // ₹500.00 in paise
         currency: "INR"
       });
 
@@ -164,7 +164,7 @@ export default function ProfilePage() {
   return (
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-      
+
       <div className={styles.profileRoot}>
         <div className={styles.profileCard}>
           {/* Top header with gradient */}
@@ -179,7 +179,7 @@ export default function ProfilePage() {
                 <p className={styles.footballId}>ID: {user.football_id}</p>
               )}
             </div>
-            <button 
+            <button
               className={styles.logoutBtn}
               onClick={handleLogout}
               type="button"
@@ -251,16 +251,16 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <button 
-              className={styles.secondaryBtn} 
+            <button
+              className={styles.secondaryBtn}
               type="button"
               onClick={handleEditProfile}
             >
               {isEditing ? "Save Changes" : "Edit Profile"}
             </button>
             {isEditing && (
-              <button 
-                className={styles.cancelBtn} 
+              <button
+                className={styles.cancelBtn}
                 type="button"
                 onClick={() => {
                   setIsEditing(false);
@@ -284,11 +284,11 @@ export default function ProfilePage() {
                 <p className={styles.paymentText}>
                   Complete your payment securely to activate your account.
                 </p>
-                <p className={styles.paymentAmount}>₹ 1,999.00</p>
+                <p className={styles.paymentAmount}>₹ 500.00</p>
               </div>
 
-              <button 
-                className={styles.paymentBtn} 
+              <button
+                className={styles.paymentBtn}
                 type="button"
                 onClick={handleProceedToPayment}
                 disabled={processingPayment}

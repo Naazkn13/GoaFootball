@@ -137,7 +137,7 @@ class PaymentService {
     return {
       id: paymentId,
       orderId: 'order_mock_123456',
-      amount: 199900,
+      amount: 50000,
       currency: 'INR',
       status: 'captured',
       method: 'card',
