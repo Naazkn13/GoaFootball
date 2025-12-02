@@ -88,13 +88,13 @@ export default function ProfilePage() {
     try {
       // Create Razorpay order
       const orderResponse = await paymentAPI.createOrder({
-        amount: 50000, // ₹500.00 in paise
+        amount: 500, // ₹500.00
         currency: "INR"
       });
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderResponse.order.amount,
+        amount: orderResponse.order.amount * 100, // Convert to paise
         currency: orderResponse.order.currency,
         name: "Football Membership",
         description: "Membership Payment",
