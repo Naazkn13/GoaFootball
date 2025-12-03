@@ -10,37 +10,58 @@ export default async function handler(req, res) {
 
       // Validation
       if (!name || !email || !password || !phone) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'All fields are required' 
+        return res.status(400).json({
+          success: false,
+          message: 'All fields are required'
         });
       }
 
       // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Invalid email format' 
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid email format'
         });
       }
 
       // Phone validation
       const phoneRegex = /^[6-9]\d{9}$/;
       if (!phoneRegex.test(phone)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Invalid phone number' 
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid phone number'
         });
+      }
+
+      // Aadhaar validation
+      if (aadhaar) {
+        const aadhaarDigits = aadhaar.replace(/\D/g, ''); // Remove hyphens and non-digits
+
+        // Must be exactly 12 digits
+        if (aadhaarDigits.length !== 12) {
+          return res.status(400).json({
+            success: false,
+            message: 'Aadhaar must be exactly 12 digits'
+          });
+        }
+
+        // First digit must be 2-9 (per UIDAI standards)
+        if (!/^[2-9]{1}[0-9]{11}$/.test(aadhaarDigits)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid Aadhaar number format'
+          });
+        }
       }
 
       // Check if user already exists
       const existingUser = await database.getUserByEmail(email);
-      
+
       if (existingUser) {
-        return res.status(409).json({ 
-          success: false, 
-          message: 'User already exists with this email' 
+        return res.status(409).json({
+          success: false,
+          message: 'User already exists with this email'
         });
       }
 
@@ -61,9 +82,9 @@ export default async function handler(req, res) {
       }
 
       if (!isUnique) {
-        return res.status(500).json({ 
-          success: false, 
-          message: 'Failed to generate unique ID. Please try again.' 
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to generate unique ID. Please try again.'
         });
       }
 
@@ -83,12 +104,15 @@ export default async function handler(req, res) {
 
       // Store user data temporarily (will be activated after OTP verification)
       // For now, create the user but mark as not verified
+      // Clean Aadhaar: remove hyphens before storing
+      const cleanAadhaar = aadhaar ? aadhaar.replace(/\D/g, '') : null;
+
       await database.createUser({
         name: name,
         email: email,
         password_hash: passwordHash,
         phone: phone,
-        aadhaar: aadhaar || null,
+        aadhaar: cleanAadhaar,
         football_id: footballId,
         email_verified: false,
         is_paid: false,
@@ -97,8 +121,8 @@ export default async function handler(req, res) {
       // Send OTP via email
       await otpService.sendOTPEmail(email, otp, 'signup');
 
-      res.status(200).json({ 
-        success: true, 
+      res.status(200).json({
+        success: true,
         message: 'Verification OTP sent to your email',
         email: email,
         footballId: footballId,
@@ -106,9 +130,9 @@ export default async function handler(req, res) {
       });
     } catch (error) {
       console.error('Signup error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'An error occurred during signup' 
+      res.status(500).json({
+        success: false,
+        message: 'An error occurred during signup'
       });
     }
   } else {

@@ -21,6 +21,30 @@ export default function SignupPage() {
     password: ""
   });
 
+  // Aadhaar validation state
+  const [isAadhaarValid, setIsAadhaarValid] = useState(false);
+
+  // Format Aadhaar as XXXX-XXXX-XXXX
+  const formatAadhaar = (value) => {
+    const digits = value.replace(/\D/g, ''); // Remove non-digits
+    if (digits.length <= 4) return digits;
+    if (digits.length <= 8) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+    return `${digits.slice(0, 4)}-${digits.slice(4, 8)}-${digits.slice(8, 12)}`;
+  };
+
+  // Validate Aadhaar (12 digits, first digit 2-9)
+  const validateAadhaar = (aadhaar) => {
+    const digits = aadhaar.replace(/\D/g, '');
+    return /^[2-9]{1}[0-9]{11}$/.test(digits);
+  };
+
+  // Handle Aadhaar input with formatting and validation
+  const handleAadhaarChange = (e) => {
+    const formatted = formatAadhaar(e.target.value);
+    setSignupData({ ...signupData, aadhaar: formatted });
+    setIsAadhaarValid(validateAadhaar(formatted));
+  };
+
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
     if (signupLoading) return;
@@ -31,7 +55,7 @@ export default function SignupPage() {
 
     try {
       const response = await authAPI.signup(signupData);
-      
+
       if (response.requiresOTP) {
         setOtpEmail(signupData.email);
         setFootballId(response.footballId);
@@ -48,10 +72,10 @@ export default function SignupPage() {
   const handleVerifyOTP = async (otp) => {
     try {
       await authAPI.verifySignupOTP({ email: otpEmail, otp });
-      
+
       setShowOTPModal(false);
       setSuccessMessage("Email verified! Redirecting to login...");
-      
+
       setTimeout(() => {
         router.push("/login");
       }, 1500);
@@ -69,10 +93,7 @@ export default function SignupPage() {
     }
   };
 
-  const handleVerifyAadhaar = () => {
-    // TODO: Implement Aadhaar verification
-    alert("Aadhaar verification will be implemented");
-  };
+
 
   return (
     <div className={`${styles.authContainer} ${styles.signupMode}`}>
@@ -117,23 +138,24 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Aadhaar with Verification */}
+            {/* Aadhaar with Real-time Validation */}
             <div className={styles.inputGroup}>
               <label>Aadhaar Number</label>
               <div className={styles.aadhaarWrapper}>
                 <input
                   type="text"
-                  maxLength="12"
-                  placeholder="12-digit Aadhaar"
+                  maxLength="14"
+                  placeholder="XXXX-XXXX-XXXX"
                   className={styles.aadhaarInput}
                   value={signupData.aadhaar}
-                  onChange={(e) => setSignupData({ ...signupData, aadhaar: e.target.value })}
-                  pattern="[0-9]{12}"
+                  onChange={handleAadhaarChange}
                   required
                 />
-                <button type="button" className={styles.verifyBtn} onClick={handleVerifyAadhaar}>
-                  Verify
-                </button>
+                {signupData.aadhaar && (
+                  <span className={`${styles.validationIcon} ${isAadhaarValid ? styles.valid : styles.invalid}`}>
+                    {isAadhaarValid ? '✓' : '✗'}
+                  </span>
+                )}
               </div>
             </div>
 
