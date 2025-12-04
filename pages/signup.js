@@ -96,11 +96,11 @@ export default function SignupPage() {
 
 
   return (
-    <div className={`${styles.authContainer} ${styles.signupMode}`}>
+    <div className={styles.authContainer}>
       <div className={styles.formsWrapper}>
         <div className={styles.formsInner}>
           {/* Signup Form */}
-          <form className={`${styles.form} ${styles.signupForm}`} onSubmit={handleSignupSubmit}>
+          <form className={`${styles.form} ${styles.loginForm}`} onSubmit={handleSignupSubmit}>
             <h2>Create Account ✨</h2>
             <p className={styles.subtitle}>Join us in a few seconds</p>
 

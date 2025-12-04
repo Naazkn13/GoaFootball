@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [signupLoading, setSignupLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  
+
   // OTP Modal state
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otpPurpose, setOtpPurpose] = useState("login"); // 'login' or 'signup'
@@ -43,7 +43,7 @@ export default function LoginPage() {
 
     try {
       const response = await authAPI.login(loginData);
-      
+
       if (response.requiresOTP) {
         setOtpEmail(loginData.email);
         setOtpPurpose("login");
@@ -67,7 +67,7 @@ export default function LoginPage() {
 
     try {
       const response = await authAPI.signup(signupData);
-      
+
       if (response.requiresOTP) {
         setOtpEmail(signupData.email);
         setOtpPurpose("signup");
@@ -87,25 +87,25 @@ export default function LoginPage() {
       if (otpPurpose === "login") {
         // Verify login OTP
         const response = await authAPI.verifyLoginOTP({ email: otpEmail, otp });
-        
+
         // Store token and user data
         localStorage.setItem("token", response.token);
         localStorage.setItem("user", JSON.stringify(response.user));
-        
+
         setShowOTPModal(false);
         setSuccessMessage("Login successful! Redirecting...");
-        
+
         setTimeout(() => {
-          router.push("/profile");
+          router.push("/event-info");
         }, 1000);
       } else {
         // Verify signup OTP
         await authAPI.verifySignupOTP({ email: otpEmail, otp });
-        
+
         setShowOTPModal(false);
         setSuccessMessage("Email verified! Please login with your credentials.");
         setIsSignup(false);
-        
+
         // Reset signup form
         setSignupData({
           name: "",
@@ -137,10 +137,6 @@ export default function LoginPage() {
     setSignupData({ name: "", email: "", phone: "", aadhaar: "", password: "" });
   };
 
-  const handleVerifyAadhaar = () => {
-    // TODO: Implement Aadhaar verification
-    alert("Aadhaar verification will be implemented");
-  };
 
   return (
     <div className={`${styles.authContainer} ${isSignup ? styles.signupMode : ""}`}>
@@ -233,24 +229,18 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Aadhaar with Verification */}
+            {/* Aadhaar Number */}
             <div className={styles.inputGroup}>
               <label>Aadhaar Number</label>
-              <div className={styles.aadhaarWrapper}>
-                <input
-                  type="text"
-                  maxLength="12"
-                  placeholder="12-digit Aadhaar"
-                  className={styles.aadhaarInput}
-                  value={signupData.aadhaar}
-                  onChange={(e) => setSignupData({ ...signupData, aadhaar: e.target.value })}
-                  pattern="[0-9]{12}"
-                  required
-                />
-                <button type="button" className={styles.verifyBtn} onClick={handleVerifyAadhaar}>
-                  Verify
-                </button>
-              </div>
+              <input
+                type="text"
+                maxLength="12"
+                placeholder="12-digit Aadhaar"
+                value={signupData.aadhaar}
+                onChange={(e) => setSignupData({ ...signupData, aadhaar: e.target.value })}
+                pattern="[0-9]{12}"
+                required
+              />
             </div>
 
             <div className={styles.inputGroup}>

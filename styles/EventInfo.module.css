@@ -1,0 +1,328 @@
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #10b981 100%);
+    padding: 40px 20px;
+}
+
+.header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, #fbbf24 0%, #ffffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 15px;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    color: #e0f2fe;
+    margin: 0;
+    font-weight: 300;
+}
+
+/* Quotes Section */
+.quotesSection {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
+.sectionTitle {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    text-align: center;
+    background: linear-gradient(135deg, #fbbf24 0%, #10b981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 50px;
+}
+
+.quotesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.quoteCard {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 35px 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.4s ease;
+    animation: fadeInUp 0.8s ease-out;
+    animation-fill-mode: both;
+}
+
+.quoteCard:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.quoteCard:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.quoteCard:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.quoteCard:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quoteCard:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(251, 191, 36, 0.3);
+    border-color: rgba(251, 191, 36, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.quoteIcon {
+    font-size: 4rem;
+    color: #fbbf24;
+    line-height: 1;
+    margin-bottom: 15px;
+    font-family: Georgia, serif;
+}
+
+.quoteText {
+    font-size: 1.1rem;
+    color: #ffffff;
+    line-height: 1.7;
+    margin: 0 0 20px;
+    font-style: italic;
+}
+
+.quoteAuthor {
+    font-size: 1rem;
+    color: #fbbf24;
+    font-weight: 700;
+    margin: 0;
+    text-align: right;
+}
+
+/* Event Details */
+.eventDetails {
+    max-width: 1200px;
+    margin: 80px auto;
+    padding: 0 20px;
+}
+
+.detailsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 30px;
+}
+
+.detailCard {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 35px 25px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease;
+    animation: fadeInUp 0.8s ease-out;
+    animation-fill-mode: both;
+}
+
+.detailCard:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.detailCard:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.detailCard:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.detailCard:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.detailCard:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(16, 185, 129, 0.3);
+}
+
+.detailIcon {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+}
+
+.detailTitle {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin: 0 0 15px;
+}
+
+.detailText {
+    font-size: 1rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Important Info */
+.importantInfo {
+    max-width: 900px;
+    margin: 80px auto;
+    padding: 0 20px;
+}
+
+.infoBox {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
+    border: 2px solid rgba(251, 191, 36, 0.3);
+    animation: fadeInUp 0.8s ease-out 0.5s both;
+}
+
+.infoList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.infoList li {
+    font-size: 1.15rem;
+    color: #ffffff;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.infoList li:last-child {
+    border-bottom: none;
+}
+
+.infoList li:hover {
+    padding-left: 15px;
+    color: #fbbf24;
+}
+
+/* CTA Section */
+.ctaSection {
+    max-width: 700px;
+    margin: 80px auto 40px;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.ctaContent {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: 60px 40px;
+    border: 2px solid rgba(251, 191, 36, 0.3);
+    animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+.ctaTitle {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 20px;
+}
+
+.ctaDescription {
+    font-size: 1.2rem;
+    color: #e0f2fe;
+    margin: 0 0 40px;
+    line-height: 1.6;
+}
+
+.ctaButton {
+    padding: 18px 50px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4);
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.ctaButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(251, 191, 36, 0.6);
+    background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+}
+
+.backLink {
+    display: inline-block;
+    color: #e0f2fe;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+.backLink:hover {
+    color: #fbbf24;
+    transform: translateX(-5px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        padding: 40px 20px 30px;
+    }
+
+    .quotesGrid,
+    .detailsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .quoteCard,
+    .detailCard {
+        padding: 25px 20px;
+    }
+
+    .infoBox {
+        padding: 30px 20px;
+    }
+
+    .ctaContent {
+        padding: 40px 25px;
+    }
+}
