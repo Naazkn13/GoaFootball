@@ -4,39 +4,44 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(15, 23, 42, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease-in-out;
+  z-index: 2000;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-out;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
 
 .modalContent {
-  background: white;
-  padding: 40px 30px;
-  border-radius: 16px;
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 50px 40px;
+  border-radius: 28px;
   max-width: 450px;
   width: 90%;
   position: relative;
-  animation: slideUp 0.3s ease-out;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes slideUp {
   from {
-    transform: translateY(50px);
+    transform: translateY(40px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -45,166 +50,163 @@
 
 .closeButton {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 20px;
+  right: 20px;
   background: none;
   border: none;
   font-size: 32px;
   cursor: pointer;
-  color: #666;
-  transition: color 0.2s;
+  color: #94a3b8;
+  transition: color 0.3s ease;
   line-height: 1;
-  padding: 0;
-  width: 32px;
-  height: 32px;
 }
 
 .closeButton:hover {
-  color: #000;
+  color: #fff;
 }
 
 .modalHeader {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 35px;
 }
 
 .modalHeader h2 {
-  margin: 0 0 10px 0;
-  font-size: 28px;
-  color: #1a1a1a;
+  margin: 0 0 12px 0;
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fbbf24 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .modalHeader p {
   margin: 0;
-  font-size: 14px;
-  color: #666;
+  font-size: 15px;
+  color: #94a3b8;
   line-height: 1.6;
 }
 
 .modalHeader strong {
-  color: #4CAF50;
-  font-weight: 600;
+  color: #fff;
+  font-weight: 700;
 }
 
 .otpInputContainer {
   display: flex;
   gap: 15px;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .otpInput {
-  width: 60px;
-  height: 60px;
-  font-size: 24px;
-  font-weight: 600;
+  width: 65px;
+  height: 65px;
+  font-size: 28px;
+  font-weight: 800;
   text-align: center;
-  border: 2px solid #ddd;
-  border-radius: 12px;
-  transition: all 0.3s;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.6);
+  color: #fff;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
 }
 
 .otpInput:focus {
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
-  transform: scale(1.05);
-}
-
-.otpInput:disabled {
-  background: #f5f5f5;
-  cursor: not-allowed;
+  border-color: #10b981;
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+  transform: translateY(-2px);
 }
 
 .error {
-  background: #ffebee;
-  color: #c62828;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
   padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
   font-size: 14px;
   text-align: center;
-  border-left: 4px solid #c62828;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .timerSection {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .timer {
   margin: 0;
   font-size: 14px;
-  color: #666;
+  color: #94a3b8;
 }
 
 .timer strong {
-  color: #4CAF50;
-  font-weight: 600;
-}
-
-.expired {
-  margin: 0;
-  font-size: 14px;
-  color: #f44336;
-  font-weight: 600;
+  color: #fbbf24;
 }
 
 .verifyButton {
   width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  color: white;
+  padding: 16px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #0f172a;
   border: none;
-  border-radius: 8px;
+  border-radius: 14px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   margin-bottom: 20px;
+  box-shadow: 0 10px 20px rgba(251, 191, 36, 0.2);
 }
 
 .verifyButton:hover:not(:disabled) {
-  background: linear-gradient(135deg, #45a049, #3d8b40);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 15px 30px rgba(251, 191, 36, 0.3);
+  filter: brightness(1.1);
 }
 
 .verifyButton:disabled {
-  background: #ccc;
+  background: #4b5563;
+  color: #94a3b8;
   cursor: not-allowed;
   transform: none;
-}
-
-.resendSection {
-  text-align: center;
+  box-shadow: none;
 }
 
 .resendButton {
   background: none;
   border: none;
-  color: #4CAF50;
+  color: #10b981;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   padding: 8px 16px;
-  border-radius: 6px;
-  transition: all 0.2s;
+  border-radius: 10px;
+  transition: all 0.3s ease;
 }
 
 .resendButton:hover:not(:disabled) {
-  background: rgba(76, 175, 80, 0.1);
-}
-
-.resendButton:disabled {
-  color: #ccc;
-  cursor: not-allowed;
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .resendInfo {
   margin: 0;
   font-size: 13px;
-  color: #999;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 40px 20px;
+  }
+
+  .otpInput {
+    width: 55px;
+    height: 55px;
+    font-size: 24px;
+  }
 }
 
 @media (max-width: 768px) {

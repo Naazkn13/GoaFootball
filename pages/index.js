@@ -18,6 +18,7 @@ export default function Home() {
       <div className={styles.landingContainer}>
         {/* Hero Section */}
         <section className={styles.hero}>
+          <div className={styles.heroBackground}></div>
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>⚽ Football Event Registration</h1>
             <p className={styles.heroSubtitle}>Join the Ultimate Football Experience</p>
@@ -178,24 +179,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Final CTA Section */}
-        <section className={styles.ctaSection}>
-          <div className={styles.ctaContent}>
-            <h2 className={styles.ctaTitle}>Ready to Join the Action?</h2>
-            <p className={styles.ctaDescription}>
-              Don't miss out on this incredible football event. Register now and secure your place
-              among passionate players. Limited spots available - act fast!
-            </p>
-            <div className={styles.ctaButtons}>
-              <Link href="/signup" className={styles.primaryCta}>
-                Register Now - ₹500
-              </Link>
-              <Link href="/about" className={styles.secondaryCta}>
-                Learn More
-              </Link>
-            </div>
-          </div>
-        </section>
       </div>
     </>
   );
