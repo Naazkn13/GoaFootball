@@ -3,7 +3,6 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '@/styles/Landing.module.css';
-import Footer from '@/components/Footer';
 
 export default function Home() {
   const router = useRouter();
@@ -197,9 +196,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        {/* Footer */}
-        <Footer />
       </div>
     </>
   );
