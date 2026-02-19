@@ -379,82 +379,164 @@ CREATE INDEX idx_messages_created ON messages(created_at);
 
 ## 9. Homepage Redesign (FITEQ-Inspired)
 
-### Design Philosophy (Elements, not Categories)
+### Design Philosophy — Elements First, Not Categories
 
-Inspired by [fiteq.org](https://www.fiteq.org/), focusing on:
-- **Full-width hero** with video/image background and CTA
-- **News/Updates carousel** (horizontal scrolling cards)
-- **Role registration CTAs** (Become a Player, Coach, Referee cards)
-- **Partners/Sponsors section**
-- **Stats counter** (animated numbers)
-- **Sticky navigation bar**
-- **Footer with links and social media**
+> **Client clarification:** Focus on **visual design elements** from FITEQ (layout, animations, hero style, card UI, typography, glassmorphism). We do NOT have enough content for categories like News, Events calendar, Rankings, or Education — so those sections are **excluded** for now.
 
-### Section Breakdown
+### What We're Borrowing From FITEQ (Elements Only)
+
+| FITEQ Element | What We Take | What We Skip |
+|---------------|-------------|-------------|
+| **Full-bleed hero** with video/image + gradient overlay | ✅ Hero section with CTA buttons | — |
+| **Sticky transparent→solid navbar** | ✅ Glassmorphic navbar that becomes solid on scroll | — |
+| **"Become a Player/Coach/Referee" CTA cards** | ✅ Role registration cards with icons + descriptions | — |
+| **Clean section spacing** with bold typography | ✅ Large headers, generous whitespace, Inter/Outfit fonts | — |
+| **Partners/Sponsors logo bar** | ✅ Logo placeholder section (ready for when sponsors come) | — |
+| **Smooth scroll animations** | ✅ Fade-in-up, counters, hover effects | — |
+| News carousel | — | ❌ No news content yet |
+| Events calendar / timeline | — | ❌ No events content yet |
+| World rankings / Athletes | — | ❌ No ranking data yet |
+| Education / Documents | — | ❌ Not applicable |
+
+### What We Replace Skipped Sections With
+
+Since we're dropping News, Events, and Rankings, we need **relevant sections** that the client CAN fill right now:
+
+1. **"How It Works"** — 3-step visual explanation (Register → Pay → Get Approved)
+2. **"About the Federation"** — Mission/vision statement with image
+3. **"Animated Stats Bar"** — Numbers the client can set (Registered Players, States Covered, etc.)
+4. **Contact / CTA Banner** — "Have questions? Get in touch" section
+
+### Section Breakdown (Revised)
 
 ```
 ┌─────────────────────────────────────┐
 │  STICKY NAVBAR                       │
-│  Logo  |  Links  |  Login/Register   │
+│  Logo  |  Home  About  Contact       │
+│                    |  Login/Register  │
 ├─────────────────────────────────────┤
 │                                      │
-│  HERO SECTION (Full Viewport)        │
+│  1. HERO SECTION (Full Viewport)     │
 │  ┌─────────────────────────────┐     │
-│  │  Background: Video/Image    │     │
-│  │  Overlay gradient           │     │
+│  │  BG: Football stadium image │     │
+│  │  Dark gradient overlay      │     │
 │  │                             │     │
-│  │  "Indian Football           │     │
-│  │   Federation Platform"      │     │
+│  │  "Empowering Indian         │     │
+│  │   Football — Register,      │     │
+│  │   Play, Compete"            │     │
 │  │                             │     │
+│  │  Subtitle tagline           │     │
 │  │  [Register Now] [Login]     │     │
 │  └─────────────────────────────┘     │
 │                                      │
 ├─────────────────────────────────────┤
-│  ANIMATED STATS BAR                  │
-│  ┌────┐ ┌────┐ ┌────┐ ┌────┐       │
-│  │500+│ │50+ │ │100+│ │20+ │       │
-│  │Athl│ │Coac│ │Refs│ │Evnt│       │
-│  └────┘ └────┘ └────┘ └────┘       │
+│                                      │
+│  2. ANIMATED STATS BAR               │
+│  ┌────┐  ┌────┐  ┌────┐  ┌────┐    │
+│  │500+│  │15+ │  │100+│  │10+ │    │
+│  │Reg.│  │Stat│  │Refs│  │Dist│    │
+│  │Play│  │es  │  │    │  │rcts│    │
+│  └────┘  └────┘  └────┘  └────┘    │
+│  (animate counting on scroll-in)     │
+│                                      │
 ├─────────────────────────────────────┤
-│  NEWS / LATEST UPDATES               │
-│  ┌─────┐ ┌─────┐ ┌─────┐           │
-│  │Card1│ │Card2│ │Card3│  ◄──►     │
-│  └─────┘ └─────┘ └─────┘           │
-│                    [View All News]    │
-├─────────────────────────────────────┤
-│  BECOME A MEMBER                     │
+│                                      │
+│  3. BECOME A MEMBER (Role CTAs)      │
 │  ┌───────────┐┌───────────┐┌──────┐ │
-│  │🏃 Become  ││🏋️ Become  ││🏁 Be- │ │
+│  │🏃 Become  ││🏋️ Become  ││🏁 Be-│ │
 │  │a Player   ││a Coach    ││come a│ │
 │  │           ││           ││Ref.  │ │
+│  │ Icon      ││ Icon      ││ Icon │ │
+│  │ Short desc││ Short desc││ Desc │ │
 │  │[Register] ││[Register] ││[Reg.]│ │
 │  └───────────┘└───────────┘└──────┘ │
+│  (glassmorphism cards, hover scale)  │
+│                                      │
 ├─────────────────────────────────────┤
-│  ABOUT THE PLATFORM                  │
-│  Image | Text about the federation   │
-│         [Learn More]                 │
+│                                      │
+│  4. HOW IT WORKS (3-Step Visual)     │
+│                                      │
+│  ①──────────── ②──────────── ③──── │
+│  Register       Make Payment   Get   │
+│  & Submit       Securely       UID   │
+│  Documents                    Apprvd │
+│                                      │
+│  (connected by dotted line/arrows)   │
+│  (each step: icon + title + desc)    │
+│                                      │
 ├─────────────────────────────────────┤
-│  UPCOMING EVENTS                     │
-│  Timeline / Cards of events          │
+│                                      │
+│  5. ABOUT THE FEDERATION             │
+│  ┌──────────┐ ┌──────────────────┐  │
+│  │          │ │ Our Mission       │  │
+│  │  Image   │ │ We are dedicated  │  │
+│  │  (field/ │ │ to growing        │  │
+│  │  stadium)│ │ football across   │  │
+│  │          │ │ India...          │  │
+│  │          │ │                   │  │
+│  │          │ │ [Learn More]      │  │
+│  └──────────┘ └──────────────────┘  │
+│  (image left, text right on desktop) │
+│  (stacked on mobile)                 │
+│                                      │
 ├─────────────────────────────────────┤
-│  PARTNERS / SPONSORS                 │
-│  Logo carousel (auto-sliding)        │
+│                                      │
+│  6. PARTNERS / SPONSORS (Placeholder)│
+│  "Our Partners"                      │
+│  ┌────┐ ┌────┐ ┌────┐ ┌────┐       │
+│  │Logo│ │Logo│ │Logo│ │Logo│       │
+│  └────┘ └────┘ └────┘ └────┘       │
+│  (auto-scrolling logo strip)         │
+│  (placeholder logos for now)         │
+│                                      │
+├─────────────────────────────────────┤
+│                                      │
+│  7. CTA BANNER                       │
+│  ┌─────────────────────────────┐     │
+│  │  "Ready to Join?"           │     │
+│  │  "Register today and become │     │
+│  │   part of Indian football"  │     │
+│  │                             │     │
+│  │  [Register Now]             │     │
+│  └─────────────────────────────┘     │
+│  (gradient background, centered)     │
+│                                      │
 ├─────────────────────────────────────┤
 │  FOOTER                              │
 │  Links | Social | Contact | Legal    │
 └─────────────────────────────────────┘
 ```
 
-### Key Design Elements (FITEQ-Inspired)
-1. **Full-viewport hero** with subtle parallax effect and dark gradient overlay
-2. **Sticky transparent → solid navbar** on scroll
-3. **Animated counters** that trigger on scroll-into-view
-4. **Card hover effects** with subtle scale & shadow transitions
-5. **News carousel** with smooth horizontal scroll
-6. **CTA sections** with gradient backgrounds and glassmorphism cards
-7. **Color palette:** Deep navy (#0a1628) → Royal blue (#1a56db) → Gold accents (#f59e0b)
-8. **Typography:** Google Fonts — `Inter` (body) + `Outfit` (headings)
-9. **Micro-animations:** Fade-in-up on scroll, hover ripples, button press effects
+### Key Visual Design Elements (Borrowed from FITEQ)
+
+| # | Element | How We'll Implement It |
+|---|---------|----------------------|
+| 1 | **Full-viewport hero** | Large stadium/field background image, dark gradient overlay (`linear-gradient(135deg, rgba(10,22,40,0.85), rgba(26,86,219,0.6))`), centered text + CTA buttons |
+| 2 | **Sticky glassmorphic navbar** | `position: sticky`, transparent on top → solid dark background after 100px scroll (via `IntersectionObserver`), `backdrop-filter: blur(12px)` |
+| 3 | **Animated number counters** | IntersectionObserver triggers count-up animation from 0 to target (e.g., 0→500). Each stat has an icon + label below |
+| 4 | **Glassmorphism CTA cards** | `background: rgba(255,255,255,0.08)`, `backdrop-filter: blur(16px)`, `border: 1px solid rgba(255,255,255,0.15)`, hover: `transform: scale(1.03)` + deeper shadow |
+| 5 | **Fade-in-up scroll animations** | Each section has `opacity: 0; transform: translateY(30px)` by default, CSS class `.visible` added via IntersectionObserver to trigger `transition: opacity 0.6s, transform 0.6s` |
+| 6 | **Gradient section dividers** | Alternating section backgrounds: dark → slightly lighter → dark. Smooth color transitions between sections |
+| 7 | **Button micro-interactions** | Primary button: gradient fill, `transform: scale(0.98)` on active, subtle `box-shadow` on hover. Outline button: border glow on hover |
+| 8 | **Premium typography** | `font-family: 'Outfit', sans-serif` for headings (700 weight), `'Inter', sans-serif` for body (400/500). Large hero text: `clamp(2.5rem, 5vw, 4rem)` |
+| 9 | **Color palette** | Deep navy `#0a1628` (BG), Royal blue `#1a56db` (primary), Electric blue `#3b82f6` (accent), Gold `#f59e0b` (highlight), White `#f8fafc` (text) |
+| 10 | **Mobile-first responsive** | All sections stack vertically on mobile. Cards become full-width. Hero text scales down gracefully. Touch-friendly 48px tap targets |
+
+### Components for Homepage
+
+| Component | Purpose |
+|-----------|---------|
+| `components/Navbar.jsx` | Sticky responsive nav (glassmorphism → solid on scroll) |
+| `components/HeroSection.jsx` | Full-viewport hero with background image, overlay, title, CTAs |
+| `components/StatsCounter.jsx` | Animated counting numbers bar (IntersectionObserver-based) |
+| `components/RoleCTACards.jsx` | 3 glassmorphism cards: Player / Coach / Referee with [Register] |
+| `components/HowItWorks.jsx` | 3-step visual guide (Register → Pay → Approved) |
+| `components/AboutSection.jsx` | Image + text split-layout for mission/about |
+| `components/PartnersStrip.jsx` | Auto-scrolling partner logos (placeholder-ready) |
+| `components/CTABanner.jsx` | Final call-to-action gradient banner |
+| `components/HamburgerMenu.jsx` | Mobile nav slide-out menu |
+
+> **Note:** No `NewsCarousel.jsx` or `EventsTimeline.jsx` for now — these can be added later when the client has content for them.
 
 ---
 
@@ -570,11 +652,14 @@ CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at DESC);
 | `pages/api/messages/[userId].js` | Get conversation with user |
 | `pages/api/messages/unread.js` | Get unread count |
 | **Components** | |
-| `components/Navbar.jsx` | Sticky responsive navbar |
+| `components/Navbar.jsx` | Sticky responsive navbar (glassmorphism → solid on scroll) |
 | `components/HeroSection.jsx` | Full-viewport hero with CTA |
 | `components/StatsCounter.jsx` | Animated numbers section |
-| `components/NewsCarousel.jsx` | Horizontal scrolling news cards |
-| `components/RoleCTACards.jsx` | "Become a Player/Coach/Referee" cards |
+| `components/RoleCTACards.jsx` | "Become a Player/Coach/Referee" glassmorphism cards |
+| `components/HowItWorks.jsx` | 3-step visual guide (Register → Pay → Approved) |
+| `components/AboutSection.jsx` | Image + text split-layout for mission/about |
+| `components/PartnersStrip.jsx` | Auto-scrolling partner logos (placeholder-ready) |
+| `components/CTABanner.jsx` | Final call-to-action gradient banner |
 | `components/ChatDrawer.jsx` | Chat slide-in panel |
 | `components/ChatBubble.jsx` | Individual message component |
 | `components/ChatInput.jsx` | Message input component |
