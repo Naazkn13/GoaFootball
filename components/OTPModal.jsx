@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import styles from '@/styles/OTPModal.module.css';
 
 export default function OTPModal({ isOpen, email, purpose, onVerify, onResend, onClose }) {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [resendCooldown, setResendCooldown] = useState(30);
@@ -33,7 +33,7 @@ export default function OTPModal({ isOpen, email, purpose, onVerify, onResend, o
     setError('');
 
     // Auto-focus next input
-    if (value && index < 5) {
+    if (value && index < 3) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -47,24 +47,24 @@ export default function OTPModal({ isOpen, email, purpose, onVerify, onResend, o
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
     const newOtp = [...otp];
     for (let i = 0; i < pasted.length; i++) {
       newOtp[i] = pasted[i];
     }
     setOtp(newOtp);
-    if (pasted.length === 6) {
+    if (pasted.length === 4) {
       // Auto-submit on full paste
       handleSubmit(newOtp.join(''));
     } else {
-      inputRefs.current[Math.min(pasted.length, 5)]?.focus();
+      inputRefs.current[Math.min(pasted.length, 3)]?.focus();
     }
   };
 
   const handleSubmit = async (otpString) => {
     const code = otpString || otp.join('');
-    if (code.length !== 6) {
-      setError('Please enter the complete 6-digit OTP');
+    if (code.length !== 4) {
+      setError('Please enter the complete 4-digit OTP');
       return;
     }
 
@@ -75,7 +75,7 @@ export default function OTPModal({ isOpen, email, purpose, onVerify, onResend, o
       await onVerify(code);
     } catch (err) {
       setError(err.message || 'Invalid OTP');
-      setOtp(['', '', '', '', '', '']);
+      setOtp(['', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {
       setLoading(false);
@@ -89,7 +89,7 @@ export default function OTPModal({ isOpen, email, purpose, onVerify, onResend, o
     try {
       await onResend();
       setResendCooldown(30);
-      setOtp(['', '', '', '', '', '']);
+      setOtp(['', '', '', '']);
       inputRefs.current[0]?.focus();
     } catch (err) {
       setError(err.message || 'Failed to resend OTP');
@@ -111,7 +111,7 @@ export default function OTPModal({ isOpen, email, purpose, onVerify, onResend, o
           </div>
           <h3>Verify Your Email</h3>
           <p>
-            Enter the 6-digit code sent to<br />
+            Enter the 4-digit code sent to<br />
             <strong>{email}</strong>
           </p>
         </div>
@@ -142,7 +142,7 @@ export default function OTPModal({ isOpen, email, purpose, onVerify, onResend, o
           <button
             type="submit"
             className={styles.verifyBtn}
-            disabled={loading || otp.join('').length !== 6}
+            disabled={loading || otp.join('').length !== 4}
           >
             {loading ? (
               <>
