@@ -1,22 +1,15 @@
-import axiosInstance from '../axios';
+import axiosInstance from '@/services/axios';
 
-// Payment API endpoints
-export const paymentAPI = {
-  // Create Razorpay order
-  createOrder: async (orderData) => {
-    const response = await axiosInstance.post('/api/payment/create-order', orderData);
+const paymentAPI = {
+  // Create payment order (amount is server-side, not passed from client)
+  createOrder: async () => {
+    const response = await axiosInstance.post('/api/payment/create-order');
     return response.data;
   },
 
-  // Verify Razorpay payment
+  // Verify payment after Razorpay checkout
   verifyPayment: async (paymentData) => {
     const response = await axiosInstance.post('/api/payment/verify', paymentData);
-    return response.data;
-  },
-
-  // Get payment details
-  getPaymentDetails: async (paymentId) => {
-    const response = await axiosInstance.get(`/api/payment/${paymentId}`);
     return response.data;
   },
 

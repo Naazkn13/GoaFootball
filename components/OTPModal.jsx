@@ -1,92 +1,70 @@
-import { useState, useEffect } from 'react';
-import styles from '../styles/OTPModal.module.css';
+import { useState, useEffect, useRef } from 'react';
+import styles from '@/styles/OTPModal.module.css';
 
-export default function OTPModal({ 
-  isOpen, 
-  onClose, 
-  onVerify, 
-  onResend, 
-  email,
-  purpose = 'login' 
-}) {
-  const [otp, setOtp] = useState(['', '', '', '']);
+export default function OTPModal({ isOpen, email, purpose, onVerify, onResend, onClose }) {
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [timer, setTimer] = useState(300); // 5 minutes in seconds
-  const [canResend, setCanResend] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(30);
+  const [resending, setResending] = useState(false);
+  const inputRefs = useRef([]);
 
+  // Countdown timer for resend
   useEffect(() => {
-    if (isOpen && timer > 0) {
-      const interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            setCanResend(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, timer]);
+  }, [resendCooldown]);
 
+  // Focus first input on mount
   useEffect(() => {
-    if (isOpen) {
-      setOtp(['', '', '', '']);
-      setError('');
-      setTimer(300);
-      setCanResend(false);
+    if (isOpen && inputRefs.current[0]) {
+      inputRefs.current[0].focus();
     }
   }, [isOpen]);
 
   const handleChange = (index, value) => {
-    // Only allow numbers
-    if (value && !/^\d$/.test(value)) return;
+    if (!/^\d*$/.test(value)) return; // Only digits
 
     const newOtp = [...otp];
-    newOtp[index] = value;
+    newOtp[index] = value.slice(-1);
     setOtp(newOtp);
     setError('');
 
     // Auto-focus next input
-    if (value && index < 3) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      if (nextInput) nextInput.focus();
-    }
-
-    // Auto-submit when all fields are filled
-    if (newOtp.every((digit) => digit !== '') && index === 3) {
-      handleVerify(newOtp.join(''));
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
+    // Backspace → go to previous
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      if (prevInput) prevInput.focus();
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, 4);
-    
-    if (!/^\d+$/.test(pastedData)) return;
-
-    const newOtp = pastedData.split('').concat(['', '', '', '']).slice(0, 4);
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    const newOtp = [...otp];
+    for (let i = 0; i < pasted.length; i++) {
+      newOtp[i] = pasted[i];
+    }
     setOtp(newOtp);
-
-    if (newOtp.every((digit) => digit !== '')) {
-      handleVerify(newOtp.join(''));
+    if (pasted.length === 6) {
+      // Auto-submit on full paste
+      handleSubmit(newOtp.join(''));
+    } else {
+      inputRefs.current[Math.min(pasted.length, 5)]?.focus();
     }
   };
 
-  const handleVerify = async (otpValue = null) => {
-    const otpString = otpValue || otp.join('');
-    
-    if (otpString.length !== 4) {
-      setError('Please enter all 4 digits');
+  const handleSubmit = async (otpString) => {
+    const code = otpString || otp.join('');
+    if (code.length !== 6) {
+      setError('Please enter the complete 6-digit OTP');
       return;
     }
 
@@ -94,107 +72,103 @@ export default function OTPModal({
     setError('');
 
     try {
-      await onVerify(otpString);
+      await onVerify(code);
     } catch (err) {
-      setError(err.message || 'Invalid OTP. Please try again.');
-      setOtp(['', '', '', '']);
-      document.getElementById('otp-0')?.focus();
+      setError(err.message || 'Invalid OTP');
+      setOtp(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
     } finally {
       setLoading(false);
     }
   };
 
   const handleResend = async () => {
-    if (!canResend) return;
+    if (resendCooldown > 0 || resending) return;
 
-    setLoading(true);
-    setError('');
-
+    setResending(true);
     try {
       await onResend();
-      setTimer(300);
-      setCanResend(false);
-      setOtp(['', '', '', '']);
-      document.getElementById('otp-0')?.focus();
+      setResendCooldown(30);
+      setOtp(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
     } catch (err) {
       setError(err.message || 'Failed to resend OTP');
     } finally {
-      setLoading(false);
+      setResending(false);
     }
-  };
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.closeButton} onClick={onClose}>×</button>
-        
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
+        <button className={styles.closeBtn} onClick={onClose} type="button">&times;</button>
+
         <div className={styles.modalHeader}>
-          <h2>Enter OTP</h2>
+          <div className={styles.iconContainer}>
+            <span className={styles.icon}>🔐</span>
+          </div>
+          <h3>Verify Your Email</h3>
           <p>
-            We've sent a 4-digit OTP to<br />
+            Enter the 6-digit code sent to<br />
             <strong>{email}</strong>
           </p>
         </div>
 
-        <div className={styles.otpInputContainer}>
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              id={`otp-${index}`}
-              type="text"
-              maxLength="1"
-              value={digit}
-              onChange={(e) => handleChange(index, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              onPaste={handlePaste}
-              className={styles.otpInput}
-              disabled={loading}
-              autoFocus={index === 0}
-            />
-          ))}
-        </div>
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+          <div className={styles.otpInputs}>
+            {otp.map((digit, index) => (
+              <input
+                key={index}
+                ref={(el) => { inputRefs.current[index] = el; }}
+                type="text"
+                inputMode="numeric"
+                pattern="\d{1}"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleChange(index, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
+                onPaste={index === 0 ? handlePaste : undefined}
+                className={`${styles.otpInput} ${error ? styles.otpInputError : ''}`}
+                disabled={loading}
+                aria-label={`Digit ${index + 1}`}
+              />
+            ))}
+          </div>
 
-        {error && <div className={styles.error}>{error}</div>}
+          {error && <p className={styles.error}>{error}</p>}
 
-        <div className={styles.timerSection}>
-          {timer > 0 ? (
-            <p className={styles.timer}>
-              OTP expires in <strong>{formatTime(timer)}</strong>
-            </p>
-          ) : (
-            <p className={styles.expired}>OTP expired</p>
-          )}
-        </div>
-
-        <button
-          className={styles.verifyButton}
-          onClick={() => handleVerify()}
-          disabled={loading || otp.some((digit) => digit === '')}
-        >
-          {loading ? 'Verifying...' : 'Verify OTP'}
-        </button>
+          <button
+            type="submit"
+            className={styles.verifyBtn}
+            disabled={loading || otp.join('').length !== 6}
+          >
+            {loading ? (
+              <>
+                <span className={styles.spinner} />
+                Verifying...
+              </>
+            ) : (
+              'Verify OTP'
+            )}
+          </button>
+        </form>
 
         <div className={styles.resendSection}>
-          {canResend ? (
-            <button
-              className={styles.resendButton}
-              onClick={handleResend}
-              disabled={loading}
-            >
-              Resend OTP
-            </button>
-          ) : (
-            <p className={styles.resendInfo}>
-              Didn't receive OTP? Resend in {formatTime(timer)}
+          {resendCooldown > 0 ? (
+            <p className={styles.cooldown}>
+              Resend OTP in <strong>{resendCooldown}s</strong>
             </p>
+          ) : (
+            <button
+              className={styles.resendBtn}
+              onClick={handleResend}
+              disabled={resending}
+              type="button"
+            >
+              {resending ? 'Sending...' : 'Resend OTP'}
+            </button>
           )}
         </div>
       </div>

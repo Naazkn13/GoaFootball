@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import Script from "next/script";
 import styles from "@/styles/Profile.module.css";
 import userAPI from "@/services/api/user.api";
 import paymentAPI from "@/services/api/payment.api";
+import ApprovalBadge from "@/components/ApprovalBadge";
+import { useAuth } from "@/store/AuthContext";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { logout } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isPaid, setIsPaid] = useState(false);
@@ -74,7 +78,6 @@ export default function ProfilePage() {
       setUser(response.user);
       setIsEditing(false);
       setError("");
-      alert("Profile updated successfully!");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update profile");
     }
@@ -87,22 +90,17 @@ export default function ProfilePage() {
     setError("");
 
     try {
-      // Create Razorpay order
-      const orderResponse = await paymentAPI.createOrder({
-        amount: 500, // ₹500.00
-        currency: "INR"
-      });
+      const orderResponse = await paymentAPI.createOrder();
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderResponse.order.amount * 100, // Convert to paise
+        amount: orderResponse.order.amount * 100,
         currency: orderResponse.order.currency,
-        name: "Football Membership",
-        description: "Membership Payment",
+        name: "Football Registration",
+        description: "Registration Payment",
         order_id: orderResponse.order.id,
         handler: async function (response) {
           try {
-            // Verify payment on backend
             const verifyResponse = await paymentAPI.verifyPayment({
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
@@ -110,11 +108,9 @@ export default function ProfilePage() {
             });
 
             if (verifyResponse.success) {
-              if (verifyResponse.success) {
-                setShowSuccessModal(true);
-                setIsPaid(true);
-                fetchPaymentHistory();
-              }
+              setShowSuccessModal(true);
+              setIsPaid(true);
+              fetchPaymentHistory();
             }
           } catch (err) {
             setError("Payment verification failed. Please contact support.");
@@ -127,13 +123,11 @@ export default function ProfilePage() {
           email: user.email,
           contact: user.phone
         },
-        theme: {
-          color: "#3b82f6"
-        }
+        theme: { color: "#1a56db" }
       };
 
       const razorpay = new window.Razorpay(options);
-      razorpay.on("payment.failed", function (response) {
+      razorpay.on("payment.failed", function () {
         setError("Payment failed. Please try again.");
         setProcessingPayment(false);
       });
@@ -144,9 +138,8 @@ export default function ProfilePage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const handleLogout = async () => {
+    await logout();
     router.push('/login');
   };
 
@@ -166,6 +159,9 @@ export default function ProfilePage() {
 
   return (
     <>
+      <Head>
+        <title>Profile — Football Registration</title>
+      </Head>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
       <div className={styles.profileRoot}>
@@ -173,13 +169,18 @@ export default function ProfilePage() {
           {/* Top header with gradient */}
           <div className={styles.profileHeader}>
             <div className={styles.profileAvatar}>
-              {user.name.charAt(0).toUpperCase()}
+              {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className={styles.profileName}>{user.name}</h2>
+              <h2 className={styles.profileName}>{user.name || 'New User'}</h2>
               <p className={styles.profileEmail}>{user.email}</p>
               {user.football_id && (
                 <p className={styles.footballId}>ID: {user.football_id}</p>
+              )}
+              {user.role && (
+                <p className={styles.roleTag}>
+                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                </p>
               )}
             </div>
             <button
@@ -190,6 +191,15 @@ export default function ProfilePage() {
               Logout
             </button>
           </div>
+
+          {/* Approval Status Badge */}
+          {user.registration_completed && (
+            <ApprovalBadge
+              status={user.approval_status}
+              reason={user.approval_reason}
+              footballId={user.football_id}
+            />
+          )}
 
           {/* Error Message */}
           {error && (
@@ -213,7 +223,7 @@ export default function ProfilePage() {
                     onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                   />
                 ) : (
-                  <span className={styles.fieldValue}>{user.name}</span>
+                  <span className={styles.fieldValue}>{user.name || '—'}</span>
                 )}
               </div>
 
@@ -233,7 +243,7 @@ export default function ProfilePage() {
                     pattern="[0-9]{10}"
                   />
                 ) : (
-                  <span className={styles.fieldValue}>{user.phone}</span>
+                  <span className={styles.fieldValue}>{user.phone || '—'}</span>
                 )}
               </div>
 
@@ -249,9 +259,25 @@ export default function ProfilePage() {
                     pattern="[0-9]{12}"
                   />
                 ) : (
-                  <span className={styles.fieldValue}>{user.aadhaar}</span>
+                  <span className={styles.fieldValue}>{user.aadhaar || '—'}</span>
                 )}
               </div>
+
+              {user.role && (
+                <div className={styles.profileField}>
+                  <span className={styles.fieldLabel}>Role</span>
+                  <span className={styles.fieldValue}>
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </span>
+                </div>
+              )}
+
+              {user.date_of_birth && (
+                <div className={styles.profileField}>
+                  <span className={styles.fieldLabel}>Date of Birth</span>
+                  <span className={styles.fieldValue}>{new Date(user.date_of_birth).toLocaleDateString()}</span>
+                </div>
+              )}
             </div>
 
             <button
@@ -279,7 +305,7 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* Payment section */}
+          {/* Payment section — NO amount displayed */}
           {!isPaid ? (
             <div className={styles.profileFooter}>
               <div>
@@ -287,7 +313,6 @@ export default function ProfilePage() {
                 <p className={styles.paymentText}>
                   Complete your payment securely to activate your account.
                 </p>
-                <p className={styles.paymentAmount}>₹ 500.00</p>
               </div>
 
               <button
@@ -319,31 +344,41 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
+
+          {/* Chat with Admin button */}
+          {user.registration_completed && (
+            <div className={styles.chatSection}>
+              <button
+                className={styles.chatBtn}
+                type="button"
+                onClick={() => {/* Chat drawer will be added in Phase 6 */ }}
+              >
+                💬 Chat with Admin
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-
       {/* Success Modal */}
-      {
-        showSuccessModal && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
-              <div className={styles.modalSuccessIcon}>✓</div>
-              <h3 className={styles.modalTitle}>Payment Successful!</h3>
-              <p className={styles.modalText}>
-                Your payment has been processed successfully.<br />
-                <strong>Football ID: {user.football_id}</strong>
-              </p>
-              <button
-                className={styles.modalBtn}
-                onClick={() => setShowSuccessModal(false)}
-              >
-                Continue
-              </button>
-            </div>
+      {showSuccessModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalSuccessIcon}>✓</div>
+            <h3 className={styles.modalTitle}>Payment Successful!</h3>
+            <p className={styles.modalText}>
+              Your payment has been processed successfully.<br />
+              <strong>Football ID: {user.football_id}</strong>
+            </p>
+            <button
+              className={styles.modalBtn}
+              onClick={() => setShowSuccessModal(false)}
+            >
+              Continue
+            </button>
           </div>
-        )
-      }
+        </div>
+      )}
     </>
   );
 }

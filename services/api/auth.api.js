@@ -1,40 +1,27 @@
-import axiosInstance from '../axios';
+import axiosInstance from '@/services/axios';
 
-// Auth API endpoints
 export const authAPI = {
-  // Signup - Request OTP
-  signup: async (userData) => {
-    const response = await axiosInstance.post('/api/auth/signup', userData);
+  // Send OTP to email (email-only login, no password)
+  sendOTP: async (email) => {
+    const response = await axiosInstance.post('/api/auth/send-otp', { email });
     return response.data;
   },
 
-  // Verify OTP after signup
-  verifySignupOTP: async (data) => {
-    const response = await axiosInstance.post('/api/auth/verify-signup-otp', data);
+  // Verify OTP and create session
+  verifyOTP: async (email, otp) => {
+    const response = await axiosInstance.post('/api/auth/verify-otp', { email, otp });
     return response.data;
   },
 
-  // Login - Request OTP
-  login: async (credentials) => {
-    const response = await axiosInstance.post('/api/auth/login', credentials);
-    return response.data;
-  },
-
-  // Verify OTP after login
-  verifyLoginOTP: async (data) => {
-    const response = await axiosInstance.post('/api/auth/verify-login-otp', data);
+  // Logout — clear session cookie
+  logout: async () => {
+    const response = await axiosInstance.post('/api/auth/logout');
     return response.data;
   },
 
   // Resend OTP
-  resendOTP: async (data) => {
-    const response = await axiosInstance.post('/api/auth/resend-otp', data);
-    return response.data;
-  },
-
-  // Logout
-  logout: async () => {
-    const response = await axiosInstance.post('/api/auth/logout');
+  resendOTP: async (email) => {
+    const response = await axiosInstance.post('/api/auth/send-otp', { email });
     return response.data;
   },
 };

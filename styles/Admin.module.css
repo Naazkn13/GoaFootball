@@ -1,0 +1,644 @@
+/* ========================================
+   ADMIN DASHBOARD STYLES
+   ======================================== */
+
+.adminContainer {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0a1628 100%);
+    color: #f8fafc;
+}
+
+/* ---- Sidebar ---- */
+.sidebar {
+    width: 260px;
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 0;
+    flex-shrink: 0;
+}
+
+.sidebarHeader {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebarHeader h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.sidebarNav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1rem 0.8rem;
+    flex: 1;
+}
+
+.navBtn {
+    background: transparent;
+    border: none;
+    color: rgba(248, 250, 252, 0.6);
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.2s ease;
+}
+
+.navBtn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #f8fafc;
+}
+
+.navBtnActive {
+    background: rgba(26, 86, 219, 0.2) !important;
+    color: #93c5fd !important;
+    font-weight: 600;
+}
+
+.badge {
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    margin-left: auto;
+}
+
+.backBtn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(248, 250, 252, 0.5);
+    padding: 0.6rem;
+    margin: 0 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #f8fafc;
+}
+
+/* ---- Main Content ---- */
+.mainContent {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* ---- Stats Bar ---- */
+.statsBar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.statCard {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 1.2rem;
+    text-align: center;
+}
+
+.statNumber {
+    font-size: 2rem;
+    font-weight: 800;
+    display: block;
+}
+
+.statLabel {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(248, 250, 252, 0.5);
+}
+
+.statPending .statNumber {
+    color: #f59e0b;
+}
+
+.statApproved .statNumber {
+    color: #22c55e;
+}
+
+.statRejected .statNumber {
+    color: #ef4444;
+}
+
+.statOnHold .statNumber {
+    color: #f97316;
+}
+
+/* ---- Section Header ---- */
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.sectionHeader h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.filterGroup {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.filterBtn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(248, 250, 252, 0.6);
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.filterBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+}
+
+.filterActive {
+    background: rgba(26, 86, 219, 0.3) !important;
+    border-color: #3b82f6 !important;
+    color: #93c5fd !important;
+}
+
+/* ---- Registration Cards ---- */
+.registrationsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.regCard {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: border-color 0.2s ease;
+}
+
+.regCard:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.regCardHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.regAvatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a56db, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.regInfo h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.regInfo p {
+    font-size: 0.85rem;
+    color: rgba(248, 250, 252, 0.5);
+    margin: 0;
+}
+
+.regRole {
+    font-size: 0.78rem !important;
+    color: #93c5fd !important;
+    text-transform: capitalize;
+}
+
+.regMeta {
+    margin-left: auto;
+    text-align: right;
+    font-size: 0.8rem;
+    color: rgba(248, 250, 252, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.paidBadge {
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.regCardBody {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 2rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    font-size: 0.88rem;
+}
+
+.regDetail strong {
+    color: rgba(248, 250, 252, 0.5);
+    font-weight: 500;
+}
+
+.docLink {
+    color: #93c5fd;
+    text-decoration: none;
+    margin-left: 0.5rem;
+}
+
+.docLink:hover {
+    text-decoration: underline;
+}
+
+.regCardActions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+
+.approveBtn {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.approveBtn:hover {
+    background: rgba(34, 197, 94, 0.35);
+}
+
+.rejectBtn {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.rejectBtn:hover {
+    background: rgba(239, 68, 68, 0.35);
+}
+
+.holdBtn {
+    background: rgba(249, 115, 22, 0.2);
+    border: 1px solid rgba(249, 115, 22, 0.4);
+    color: #fdba74;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.holdBtn:hover {
+    background: rgba(249, 115, 22, 0.35);
+}
+
+.reasonBox {
+    margin-top: 0.8rem;
+    padding: 0.7rem 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 3px solid #ef4444;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.85rem;
+}
+
+/* ---- Users Table ---- */
+.searchBox {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.searchBox input {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    width: 280px;
+    outline: none;
+}
+
+.searchBox input:focus {
+    border-color: #3b82f6;
+}
+
+.searchBox button {
+    background: rgba(26, 86, 219, 0.3);
+    border: 1px solid rgba(26, 86, 219, 0.5);
+    color: #f8fafc;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.searchBox button:hover {
+    background: rgba(26, 86, 219, 0.5);
+}
+
+.tableWrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.usersTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.usersTable th {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(248, 250, 252, 0.5);
+}
+
+.usersTable td {
+    padding: 0.8rem 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.9rem;
+}
+
+.usersTable tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.statusBadge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status_pending {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.status_approved {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.status_rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.status_on_hold {
+    background: rgba(249, 115, 22, 0.2);
+    color: #f97316;
+}
+
+/* ---- Settings ---- */
+.settingsCard {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 500px;
+}
+
+.settingsCard h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.settingsCard p {
+    color: rgba(248, 250, 252, 0.5);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.adminForm {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.adminForm input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.adminForm input:focus {
+    border-color: #3b82f6;
+}
+
+.adminForm button {
+    background: linear-gradient(135deg, #1a56db, #3b82f6);
+    border: none;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+}
+
+.adminForm button:hover {
+    opacity: 0.9;
+}
+
+.adminForm button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ---- Messages ---- */
+.errorMsg {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.successMsg {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #86efac;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.loadingText {
+    color: rgba(248, 250, 252, 0.5);
+    text-align: center;
+    padding: 2rem;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem;
+    color: rgba(248, 250, 252, 0.4);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* ---- Modal ---- */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modalContent {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 450px;
+    width: 90%;
+}
+
+.modalContent h3 {
+    margin-bottom: 0.5rem;
+}
+
+.modalContent p {
+    color: rgba(248, 250, 252, 0.6);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.reasonInput {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+    padding: 0.7rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+}
+
+.reasonInput:focus {
+    border-color: #3b82f6;
+}
+
+.modalActions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+    justify-content: flex-end;
+}
+
+.cancelBtn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(248, 250, 252, 0.7);
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #f8fafc;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    .adminContainer {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1rem 0;
+    }
+
+    .sidebarNav {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .mainContent {
+        padding: 1rem;
+    }
+
+    .statsBar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .regCardBody {
+        grid-template-columns: 1fr;
+    }
+
+    .searchBox {
+        flex-direction: column;
+    }
+
+    .searchBox input {
+        width: 100%;
+    }
+}

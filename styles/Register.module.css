@@ -1,0 +1,376 @@
+/* ========================================
+   REGISTRATION PAGE STYLES
+   ======================================== */
+
+.registerContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0a1628 100%);
+  padding: 2rem 1rem;
+}
+
+.registerCard {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  max-width: 800px;
+  width: 100%;
+  padding: 2.5rem;
+  color: #f8fafc;
+}
+
+/* ---- Progress Bar ---- */
+.progressBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2.5rem;
+}
+
+.progressStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.progressStep.active {
+  opacity: 1;
+}
+
+.stepNumber {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(26, 86, 219, 0.3);
+  border: 2px solid rgba(26, 86, 219, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.progressStep.active .stepNumber {
+  background: #1a56db;
+  border-color: #3b82f6;
+  box-shadow: 0 0 15px rgba(26, 86, 219, 0.4);
+}
+
+.stepLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(248, 250, 252, 0.6);
+}
+
+.progressStep.active .stepLabel {
+  color: #f8fafc;
+}
+
+.progressLine {
+  width: 60px;
+  height: 2px;
+  background: rgba(26, 86, 219, 0.3);
+  margin: 0 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ---- Role Selection ---- */
+.roleSection {
+  text-align: center;
+}
+
+.stepTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #f8fafc;
+}
+
+.stepDescription {
+  font-size: 0.95rem;
+  color: rgba(248, 250, 252, 0.6);
+  margin-bottom: 2rem;
+}
+
+.roleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.roleCard {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  color: #f8fafc;
+}
+
+.roleCard:hover {
+  background: rgba(26, 86, 219, 0.15);
+  border-color: rgba(26, 86, 219, 0.5);
+  transform: translateY(-2px);
+}
+
+.roleCard.roleSelected {
+  background: rgba(26, 86, 219, 0.25);
+  border-color: #3b82f6;
+  box-shadow: 0 0 20px rgba(26, 86, 219, 0.3);
+}
+
+.roleIcon {
+  font-size: 2rem;
+  margin-bottom: 0.3rem;
+}
+
+.roleLabel {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.roleDescription {
+  font-size: 0.75rem;
+  color: rgba(248, 250, 252, 0.5);
+  text-align: center;
+}
+
+/* ---- Form Section ---- */
+.formSection {
+  margin-top: 1rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.5rem;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.inputGroup label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.8);
+}
+
+.inputGroup input,
+.inputGroup select {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.inputGroup input:focus,
+.inputGroup select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.inputGroup input::placeholder {
+  color: rgba(248, 250, 252, 0.3);
+}
+
+.inputGroup select option {
+  background: #1a2a4a;
+  color: #f8fafc;
+}
+
+.fileInput {
+  background: rgba(255, 255, 255, 0.05) !important;
+  padding: 0.6rem !important;
+  cursor: pointer;
+}
+
+.fileInput::-webkit-file-upload-button {
+  background: rgba(26, 86, 219, 0.3);
+  border: 1px solid rgba(26, 86, 219, 0.5);
+  color: #f8fafc;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-right: 0.8rem;
+  transition: background 0.3s ease;
+}
+
+.fileInput::-webkit-file-upload-button:hover {
+  background: rgba(26, 86, 219, 0.5);
+}
+
+.fieldError {
+  font-size: 0.78rem;
+  color: #ef4444;
+  margin-top: 0.2rem;
+}
+
+/* ---- Form Actions ---- */
+.formActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.backBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(248, 250, 252, 0.7);
+  padding: 0.7rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.backBtn:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #f8fafc;
+}
+
+.submitBtn {
+  background: linear-gradient(135deg, #1a56db, #3b82f6);
+  border: none;
+  color: #fff;
+  padding: 0.8rem 2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(26, 86, 219, 0.4);
+}
+
+.submitBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(26, 86, 219, 0.5);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---- Messages ---- */
+.errorMessage {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.progressMessage {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .registerCard {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .roleGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .formActions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .backBtn,
+  .submitBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .progressLine {
+    width: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .registerContainer {
+    padding: 1rem 0.5rem;
+  }
+
+  .registerCard {
+    padding: 1.2rem;
+  }
+
+  .roleGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+  }
+
+  .roleCard {
+    padding: 1rem 0.7rem;
+  }
+
+  .stepTitle {
+    font-size: 1.2rem;
+  }
+}

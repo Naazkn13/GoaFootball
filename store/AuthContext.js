@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axiosInstance from '@/services/axios';
 
 const AuthContext = createContext();
 
@@ -6,42 +7,66 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for stored auth token/user data on mount
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+  // Fetch user profile from cookie-authenticated API
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get('/api/user/profile');
+      if (response.data?.user) {
+        setUser(response.data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (err) {
+      // Not authenticated or error — clear user
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-  };
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
-  const signup = (userData) => {
+  // Called after OTP verification (cookie is already set by the API)
+  const login = useCallback((userData) => {
     setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-  };
+  }, []);
 
-  const logout = () => {
+  // Logout — call API to clear cookie, then clear local state
+  const logout = useCallback(async () => {
+    try {
+      await axiosInstance.post('/api/auth/logout');
+    } catch (err) {
+      // Even if API call fails, clear local state
+      console.error('Logout API error:', err);
+    }
     setUser(null);
-    localStorage.removeItem('user');
-  };
+  }, []);
 
-  const updateUser = (userData) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-  };
+  // Refresh user data from server (e.g., after registration or approval change)
+  const refreshUser = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get('/api/user/profile');
+      if (response.data?.user) {
+        setUser(response.data.user);
+        return response.data.user;
+      }
+    } catch (err) {
+      console.error('Failed to refresh user:', err);
+    }
+    return null;
+  }, []);
 
   const value = {
     user,
     login,
-    signup,
     logout,
-    updateUser,
-    loading
+    refreshUser,
+    loading,
+    isAuthenticated: !!user,
+    isAdmin: user?.is_admin || false,
+    isSuperAdmin: user?.is_super_admin || false,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

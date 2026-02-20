@@ -7,41 +7,27 @@ const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Cookies are sent automatically with every request
+  withCredentials: true,
 });
 
-// Request interceptor - Add auth token to requests
-axiosInstance.interceptors.request.use(
-  (config) => {
-    // Get token from localStorage (client-side only)
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor - Handle errors globally
+// Response interceptor — Handle errors globally
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
     if (error.response) {
-      // Handle 401 Unauthorized
+      // Handle 401 Unauthorized — redirect to login
       if (error.response.status === 401) {
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+          // Only redirect if not already on login page
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
         }
       }
-      
+
       // Handle other status codes
       const message = error.response.data?.message || 'An error occurred';
       console.error('API Error:', message);
@@ -50,7 +36,7 @@ axiosInstance.interceptors.response.use(
     } else {
       console.error('Error:', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );

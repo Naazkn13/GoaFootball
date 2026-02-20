@@ -1,43 +1,28 @@
 import database from '../../../services/database';
-import jwt from 'jsonwebtoken';
-
-// Middleware to verify JWT token
-function verifyToken(req) {
-  const token = req.headers.authorization?.replace('Bearer ', '');
-  
-  if (!token) {
-    throw new Error('No token provided');
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    return decoded;
-  } catch (error) {
-    throw new Error('Invalid token');
-  }
-}
+import { requireSession } from '../../../services/session.service';
 
 export default async function handler(req, res) {
-  try {
-    // Verify authentication
-    const user = verifyToken(req);
+  // Verify session via cookie
+  const session = requireSession(req, res);
+  if (!session) return; // 401 already sent
 
+  try {
     if (req.method === 'GET') {
       // Get user profile
-      const profile = await database.getUserByEmail(user.email);
+      const profile = await database.getUserByEmail(session.email);
 
       if (!profile) {
-        return res.status(404).json({ 
-          success: false, 
-          message: 'User not found' 
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
         });
       }
 
       // Remove sensitive data
       delete profile.password_hash;
 
-      res.status(200).json({ 
-        success: true, 
+      res.status(200).json({
+        success: true,
         user: profile,
       });
     } else if (req.method === 'PUT') {
@@ -50,13 +35,13 @@ export default async function handler(req, res) {
       if (aadhaar) updates.aadhaar = aadhaar;
       updates.updated_at = new Date().toISOString();
 
-      const updatedUser = await database.updateUser(user.id, updates);
+      const updatedUser = await database.updateUser(session.id, updates);
 
       // Remove sensitive data
       delete updatedUser.password_hash;
 
-      res.status(200).json({ 
-        success: true, 
+      res.status(200).json({
+        success: true,
         message: 'Profile updated successfully',
         user: updatedUser,
       });
@@ -65,17 +50,9 @@ export default async function handler(req, res) {
     }
   } catch (error) {
     console.error('Profile API error:', error);
-    
-    if (error.message === 'No token provided' || error.message === 'Invalid token') {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Unauthorized' 
-      });
-    }
-    
-    res.status(500).json({ 
-      success: false, 
-      message: 'An error occurred' 
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred'
     });
   }
 }

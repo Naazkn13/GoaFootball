@@ -1,185 +1,271 @@
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import Image from 'next/image';
-import styles from '@/styles/Landing.module.css';
+import styles from '@/styles/Home.module.css';
+import { useAuth } from '@/store/AuthContext';
 
-export default function Home() {
+// Counter animation hook
+function useCountUp(end, duration = 2000) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started.current) {
+          started.current = true;
+          const startTime = Date.now();
+          const timer = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            setCount(Math.floor(progress * end));
+            if (progress >= 1) clearInterval(timer);
+          }, 16);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [end, duration]);
+
+  return { count, ref };
+}
+
+export default function HomePage() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+
+  const stat1 = useCountUp(1200);
+  const stat2 = useCountUp(50);
+  const stat3 = useCountUp(25);
+  const stat4 = useCountUp(8);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
       <Head>
-        <title>Football Event Registration - Join the Game</title>
-        <meta name="description" content="Register for the ultimate football event. Join players, compete, and showcase your skills." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Football Registration — Join the Game</title>
+        <meta name="description" content="Register as a football player, coach, referee, or manager. Get your Football UID and join the community." />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className={styles.landingContainer}>
-        {/* Hero Section */}
+      {/* Sticky Navbar */}
+      <nav className={`${styles.navbar} ${scrolled ? styles.navScrolled : ''}`}>
+        <div className={styles.navInner}>
+          <Link href="/" className={styles.navLogo}>
+            ⚽ <span>FootballReg</span>
+          </Link>
+          <div className={styles.navLinks}>
+            <a href="#about" className={styles.navLink}>About</a>
+            <a href="#roles" className={styles.navLink}>Roles</a>
+            <a href="#how-it-works" className={styles.navLink}>How It Works</a>
+            {isAuthenticated ? (
+              <Link href="/profile" className={styles.navCta}>My Profile</Link>
+            ) : (
+              <Link href="/login" className={styles.navCta}>Login / Register</Link>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      <main className={styles.main}>
+        {/* ===== HERO SECTION ===== */}
         <section className={styles.hero}>
-          <div className={styles.heroBackground}></div>
+          <div className={styles.heroBackground}>
+            <div className={styles.heroBgGradient} />
+            <div className={styles.heroBgPattern} />
+          </div>
+
           <div className={styles.heroContent}>
-            <h1 className={styles.heroTitle}>⚽ Football Event Registration</h1>
-            <p className={styles.heroSubtitle}>Join the Ultimate Football Experience</p>
-            <p className={styles.heroDescription}>
-              Register now for our premier football event. Compete with the best, showcase your skills,
-              and be part of an unforgettable sporting experience. Limited spots available!
+            <div className={styles.heroBadge}>
+              <span className={styles.badgeDot} />
+              Registrations Open for 2026
+            </div>
+            <h1 className={styles.heroTitle}>
+              Your Football<br />
+              Journey Starts <span className={styles.highlight}>Here</span>
+            </h1>
+            <p className={styles.heroSubtitle}>
+              Register as a Player, Coach, Referee, or Manager.
+              Get your unique Football UID and become part of the community.
             </p>
-            <div className={styles.ctaButtons}>
-              <Link href="/signup" className={styles.primaryCta}>
+            <div className={styles.heroActions}>
+              <Link href={isAuthenticated ? "/register" : "/login"} className={styles.heroPrimaryBtn}>
                 Register Now
               </Link>
-              <Link href="/login" className={styles.secondaryCta}>
-                Already Registered? Login
-              </Link>
+              <a href="#how-it-works" className={styles.heroSecondaryBtn}>
+                Learn More ↓
+              </a>
+            </div>
+          </div>
+
+          {/* Floating decorative elements */}
+          <div className={styles.floatingBall1} />
+          <div className={styles.floatingBall2} />
+          <div className={styles.floatingBall3} />
+        </section>
+
+        {/* ===== STATS COUNTER ===== */}
+        <section className={styles.statsSection}>
+          <div className={styles.statsGrid}>
+            <div className={styles.statItem} ref={stat1.ref}>
+              <span className={styles.statValue}>{stat1.count}+</span>
+              <span className={styles.statLabel}>Registered Players</span>
+            </div>
+            <div className={styles.statItem} ref={stat2.ref}>
+              <span className={styles.statValue}>{stat2.count}+</span>
+              <span className={styles.statLabel}>Certified Coaches</span>
+            </div>
+            <div className={styles.statItem} ref={stat3.ref}>
+              <span className={styles.statValue}>{stat3.count}+</span>
+              <span className={styles.statLabel}>Active Referees</span>
+            </div>
+            <div className={styles.statItem} ref={stat4.ref}>
+              <span className={styles.statValue}>{stat4.count}+</span>
+              <span className={styles.statLabel}>Events Organized</span>
             </div>
           </div>
         </section>
 
-        {/* About Event Section */}
-        <section className={styles.aboutSection}>
-          <h2 className={styles.sectionTitle}>Why Join Our Event?</h2>
-          <p className={styles.sectionSubtitle}>
-            Experience the thrill of competitive football with professional organization and top-tier facilities
-          </p>
-          <div className={styles.aboutContent}>
-            <div className={styles.featureCard}>
-              <span className={styles.featureIcon}>🏆</span>
-              <h3 className={styles.featureTitle}>Competitive Matches</h3>
-              <p className={styles.featureDescription}>
-                Participate in professionally organized matches with skilled players from across the region.
-                Test your abilities and compete for glory.
-              </p>
-            </div>
-            <div className={styles.featureCard}>
-              <span className={styles.featureIcon}>⚡</span>
-              <h3 className={styles.featureTitle}>Premium Facilities</h3>
-              <p className={styles.featureDescription}>
-                Play on world-class football grounds with professional-grade turf, proper lighting,
-                and excellent amenities for the best experience.
-              </p>
-            </div>
-            <div className={styles.featureCard}>
-              <span className={styles.featureIcon}>🎯</span>
-              <h3 className={styles.featureTitle}>Easy Registration</h3>
-              <p className={styles.featureDescription}>
-                Simple online registration process with secure payment. Get confirmed instantly
-                and receive all event details via email and SMS.
-              </p>
+        {/* ===== ROLE CTAs ===== */}
+        <section className={styles.rolesSection} id="roles">
+          <div className={styles.sectionContainer}>
+            <h2 className={styles.sectionTitle}>Choose Your Role</h2>
+            <p className={styles.sectionSubtitle}>
+              Every role matters in football. Find yours and join the community.
+            </p>
+
+            <div className={styles.rolesGrid}>
+              {[
+                { icon: '🏃', title: 'Athlete', desc: 'Register as a football player and showcase your skills', color: '#3b82f6' },
+                { icon: '🏋️', title: 'Coach', desc: 'Guide and mentor the next generation of footballers', color: '#22c55e' },
+                { icon: '🏁', title: 'Referee', desc: 'Ensure fair play and uphold the spirit of the game', color: '#f59e0b' },
+                { icon: '📋', title: 'Manager', desc: 'Lead teams and manage operations behind the scenes', color: '#a855f7' },
+              ].map((role) => (
+                <div key={role.title} className={styles.roleHomeCard} style={{ '--accent': role.color }}>
+                  <span className={styles.roleHomeIcon}>{role.icon}</span>
+                  <h3>{role.title}</h3>
+                  <p>{role.desc}</p>
+                  <Link href={isAuthenticated ? "/register" : "/login"} className={styles.roleHomeBtn}>
+                    Register →
+                  </Link>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Featured Players Section */}
-        <section className={styles.playersSection}>
-          <h2 className={styles.sectionTitle}>Football Legends</h2>
-          <p className={styles.sectionSubtitle}>
-            Inspired by the greatest players who've graced the beautiful game
-          </p>
-          <div className={styles.playersGrid}>
-            <div className={styles.playerCard}>
-              <div className={styles.playerImageWrapper}>
-                <Image src="/messi.png" alt="Lionel Messi" width={150} height={150} className={styles.playerImg} />
-              </div>
-              <h3 className={styles.playerName}>Lionel Messi</h3>
-              <p className={styles.playerRole}>Forward Legend</p>
-              <p className={styles.playerDescription}>
-                8-time Ballon d'Or winner, World Cup champion, and one of the greatest players of all time.
-                Known for incredible dribbling and playmaking.
-              </p>
-            </div>
-            <div className={styles.playerCard}>
-              <div className={styles.playerImageWrapper}>
-                <Image src="/ronaldo.png" alt="Cristiano Ronaldo" width={150} height={150} className={styles.playerImg} />
-              </div>
-              <h3 className={styles.playerName}>Cristiano Ronaldo</h3>
-              <p className={styles.playerRole}>Striker Icon</p>
-              <p className={styles.playerDescription}>
-                5-time Ballon d'Or winner, all-time top scorer in football history.
-                Renowned for athleticism, heading ability, and clutch performances.
-              </p>
-            </div>
-            <div className={styles.playerCard}>
-              <div className={styles.playerImageWrapper}>
-                <Image src="/neymar.png" alt="Neymar Jr" width={150} height={150} className={styles.playerImg} />
-              </div>
-              <h3 className={styles.playerName}>Neymar Jr</h3>
-              <p className={styles.playerRole}>Skillful Winger</p>
-              <p className={styles.playerDescription}>
-                Brazilian superstar known for flair, creativity, and technical brilliance.
-                One of the most entertaining players in modern football.
-              </p>
-            </div>
-            <div className={styles.playerCard}>
-              <div className={styles.playerImageWrapper}>
-                <Image src="/mbappe.png" alt="Kylian Mbappé" width={150} height={150} className={styles.playerImg} />
-              </div>
-              <h3 className={styles.playerName}>Kylian Mbappé</h3>
-              <p className={styles.playerRole}>Speed Demon</p>
-              <p className={styles.playerDescription}>
-                World Cup winner and one of the fastest players in the world.
-                The future of football with exceptional pace and finishing ability.
-              </p>
-            </div>
-          </div>
-        </section>
+        {/* ===== HOW IT WORKS ===== */}
+        <section className={styles.howItWorks} id="how-it-works">
+          <div className={styles.sectionContainer}>
+            <h2 className={styles.sectionTitle}>How It Works</h2>
+            <p className={styles.sectionSubtitle}>
+              Get registered in 3 simple steps
+            </p>
 
-        {/* Events Timeline */}
-        <section className={styles.eventsSection}>
-          <h2 className={styles.sectionTitle}>Event Timeline</h2>
-          <p className={styles.sectionSubtitle}>
-            Important dates and milestones for the football event
-          </p>
-          <div className={styles.timeline}>
-            <div className={styles.timelineItem}>
-              <div className={styles.timelineDot}></div>
-              <div className={styles.timelineContent}>
-                <p className={styles.timelineDate}>Registration Phase</p>
-                <h3 className={styles.timelineTitle}>Open Registration</h3>
-                <p className={styles.timelineDescription}>
-                  Registration is now open! Secure your spot by completing the online registration
-                  and payment process. Limited slots available.
-                </p>
+            <div className={styles.stepsGrid}>
+              <div className={styles.stepCard}>
+                <div className={styles.stepNumber}>01</div>
+                <h3>Enter Your Email</h3>
+                <p>Provide your email to receive a one-time login code. No passwords needed.</p>
               </div>
-            </div>
-            <div className={styles.timelineItem}>
-              <div className={styles.timelineDot}></div>
-              <div className={styles.timelineContent}>
-                <p className={styles.timelineDate}>Team Formation</p>
-                <h3 className={styles.timelineTitle}>Team Assignments</h3>
-                <p className={styles.timelineDescription}>
-                  Players will be assigned to teams based on skill level and preferences.
-                  Team rosters and schedules will be announced via email.
-                </p>
+              <div className={styles.stepConnector}>→</div>
+              <div className={styles.stepCard}>
+                <div className={styles.stepNumber}>02</div>
+                <h3>Complete Registration</h3>
+                <p>Select your role, fill in your details, and upload required documents.</p>
               </div>
-            </div>
-            <div className={styles.timelineItem}>
-              <div className={styles.timelineDot}></div>
-              <div className={styles.timelineContent}>
-                <p className={styles.timelineDate}>Practice Sessions</p>
-                <h3 className={styles.timelineTitle}>Team Practice</h3>
-                <p className={styles.timelineDescription}>
-                  Teams will have dedicated practice sessions to prepare for the tournament.
-                  Build chemistry and develop strategies with your teammates.
-                </p>
-              </div>
-            </div>
-            <div className={styles.timelineItem}>
-              <div className={styles.timelineDot}></div>
-              <div className={styles.timelineContent}>
-                <p className={styles.timelineDate}>Main Event</p>
-                <h3 className={styles.timelineTitle}>Tournament Day</h3>
-                <p className={styles.timelineDescription}>
-                  The main tournament begins! Compete in matches, showcase your skills,
-                  and play for the championship. Prizes and trophies for winners!
-                </p>
+              <div className={styles.stepConnector}>→</div>
+              <div className={styles.stepCard}>
+                <div className={styles.stepNumber}>03</div>
+                <h3>Get Your Football UID</h3>
+                <p>After payment and admin approval, receive your unique Football ID.</p>
               </div>
             </div>
           </div>
         </section>
 
-      </div>
+        {/* ===== ABOUT SECTION ===== */}
+        <section className={styles.aboutSection} id="about">
+          <div className={styles.sectionContainer}>
+            <div className={styles.aboutGrid}>
+              <div className={styles.aboutContent}>
+                <h2 className={styles.sectionTitle}>About the Platform</h2>
+                <p>
+                  Our Football Registration platform provides a seamless, secure way for
+                  players, coaches, referees, and managers to register for football events
+                  and obtain their unique Football UID.
+                </p>
+                <p>
+                  Built with security at its core — email OTP authentication, secure document
+                  handling, and admin-verified approval ensures only legitimate registrations
+                  are processed. Chat directly with admins for quick resolution of any queries.
+                </p>
+                <ul className={styles.featureList}>
+                  <li>✓ Secure email OTP login</li>
+                  <li>✓ Role-based registration</li>
+                  <li>✓ Document verification</li>
+                  <li>✓ Admin approval system</li>
+                  <li>✓ Real-time chat support</li>
+                  <li>✓ Secure payment processing</li>
+                </ul>
+              </div>
+              <div className={styles.aboutVisual}>
+                <div className={styles.aboutCard}>
+                  <span className={styles.aboutIcon}>⚽</span>
+                  <h3>One Platform.<br />Every Role.</h3>
+                  <p>Join the community that powers football events.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== CTA BANNER ===== */}
+        <section className={styles.ctaBanner}>
+          <div className={styles.sectionContainer}>
+            <h2>Ready to Join the Game?</h2>
+            <p>Register today and get your unique Football UID</p>
+            <Link href={isAuthenticated ? "/register" : "/login"} className={styles.ctaBtn}>
+              Register Now ⚽
+            </Link>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+          <div className={styles.footerBrand}>
+            <span>⚽ FootballReg</span>
+            <p>Empowering football communities through seamless registration.</p>
+          </div>
+          <div className={styles.footerLinks}>
+            <div>
+              <h4>Platform</h4>
+              <Link href="/login">Login</Link>
+              <a href="#roles">Roles</a>
+              <a href="#how-it-works">How It Works</a>
+            </div>
+            <div>
+              <h4>Legal</h4>
+              <Link href="/privacy-policy">Privacy Policy</Link>
+              <Link href="/terms-and-conditions">Terms</Link>
+              <Link href="/refund-policy">Refund Policy</Link>
+            </div>
+          </div>
+          <p className={styles.footerCopy}>© 2026 FootballReg. All rights reserved.</p>
+        </div>
+      </footer>
     </>
   );
 }
