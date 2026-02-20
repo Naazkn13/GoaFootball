@@ -24,7 +24,7 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         if (!authLoading && !isAdmin) {
-            router.push('/profile');
+            router.push('/');
         }
     }, [authLoading, isAdmin, router]);
 

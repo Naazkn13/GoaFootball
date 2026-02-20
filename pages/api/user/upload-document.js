@@ -67,7 +67,7 @@ export default async function handler(req, res) {
 
         // Upload to Supabase Storage
         const { data, error: uploadError } = await supabaseAdmin.storage
-            .from('user-documents')
+            .from('documents')
             .upload(fileName, fileBuffer, {
                 contentType: file.mimetype,
                 upsert: true,
@@ -83,7 +83,7 @@ export default async function handler(req, res) {
 
         // Get the file URL (using signed URL for private bucket)
         const { data: urlData } = await supabaseAdmin.storage
-            .from('user-documents')
+            .from('documents')
             .createSignedUrl(fileName, 60 * 60 * 24 * 365); // 1 year signed URL
 
         res.status(200).json({

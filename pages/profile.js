@@ -305,8 +305,27 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* Payment section — NO amount displayed */}
-          {!isPaid ? (
+          {/* Registration incomplete — prompt to finish */}
+          {!user.registration_completed && (
+            <div className={styles.profileFooter} style={{ borderLeft: '4px solid #f59e0b' }}>
+              <div>
+                <h3 className={styles.sectionTitle}>⚠️ Registration Incomplete</h3>
+                <p className={styles.paymentText}>
+                  You haven&apos;t completed your registration yet. Please select your role, fill in your details, and upload documents to continue.
+                </p>
+              </div>
+              <button
+                className={styles.paymentBtn}
+                type="button"
+                onClick={() => router.push('/register')}
+              >
+                Complete Registration →
+              </button>
+            </div>
+          )}
+
+          {/* Payment section — only show AFTER registration is completed */}
+          {user.registration_completed && !isPaid && (
             <div className={styles.profileFooter}>
               <div>
                 <h3 className={styles.sectionTitle}>Payment</h3>
@@ -324,7 +343,9 @@ export default function ProfilePage() {
                 {processingPayment ? "Processing..." : "Proceed to Payment"}
               </button>
             </div>
-          ) : (
+          )}
+
+          {user.registration_completed && isPaid && (
             <div className={styles.profileFooter}>
               <div>
                 <h3 className={styles.sectionTitle}>Payment Status</h3>
