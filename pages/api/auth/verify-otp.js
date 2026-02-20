@@ -60,8 +60,15 @@ export default async function handler(req, res) {
         // Create session cookie
         const sessionPayload = createSession(res, user);
 
-        // Determine redirect
-        const isNewUser = !user.registration_completed;
+        // Determine redirect based on user type
+        let redirectTo = '/register'; // default: new user
+        if (user.is_admin) {
+            redirectTo = '/admin';
+        } else if (user.registration_completed) {
+            redirectTo = '/profile';
+        }
+
+        const isNewUser = !user.registration_completed && !user.is_admin;
 
         res.status(200).json({
             success: true,
@@ -77,7 +84,7 @@ export default async function handler(req, res) {
                 approval_status: user.approval_status,
             },
             isNewUser: isNewUser,
-            redirectTo: isNewUser ? '/register' : '/profile',
+            redirectTo: redirectTo,
         });
     } catch (error) {
         console.error('Verify OTP error:', error);

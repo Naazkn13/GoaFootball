@@ -305,8 +305,28 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* Registration incomplete — prompt to finish */}
-          {!user.registration_completed && (
+          {/* Admin users — show link to admin dashboard */}
+          {user.is_admin && (
+            <div className={styles.profileFooter} style={{ borderLeft: '4px solid #3b82f6' }}>
+              <div>
+                <h3 className={styles.sectionTitle}>🛡️ Admin Access</h3>
+                <p className={styles.paymentText}>
+                  You have administrator privileges. Manage registrations, users, and settings from the admin dashboard.
+                </p>
+              </div>
+              <button
+                className={styles.paymentBtn}
+                type="button"
+                onClick={() => router.push('/admin')}
+                style={{ background: 'linear-gradient(135deg, #3b82f6, #1e40af)' }}
+              >
+                Go to Admin Dashboard →
+              </button>
+            </div>
+          )}
+
+          {/* Registration incomplete — prompt to finish (non-admin users only) */}
+          {!user.is_admin && !user.registration_completed && (
             <div className={styles.profileFooter} style={{ borderLeft: '4px solid #f59e0b' }}>
               <div>
                 <h3 className={styles.sectionTitle}>⚠️ Registration Incomplete</h3>

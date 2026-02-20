@@ -36,7 +36,7 @@ function useCountUp(end, duration = 2000) {
 
 export default function HomePage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const [scrolled, setScrolled] = useState(false);
 
   const stat1 = useCountUp(1200);
@@ -68,6 +68,9 @@ export default function HomePage() {
             <a href="#about" className={styles.navLink}>About</a>
             <a href="#roles" className={styles.navLink}>Roles</a>
             <a href="#how-it-works" className={styles.navLink}>How It Works</a>
+            {isAuthenticated && isAdmin && (
+              <Link href="/admin" className={styles.navLink} style={{ color: '#3b82f6', fontWeight: 600 }}>🛡️ Admin</Link>
+            )}
             {isAuthenticated ? (
               <Link href="/profile" className={styles.navCta}>My Profile</Link>
             ) : (
