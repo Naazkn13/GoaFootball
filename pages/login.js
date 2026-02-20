@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import Link from "next/link";
 import styles from "@/styles/Auth.module.css";
 import { authAPI } from "@/services/api/auth.api";
 import OTPModal from "@/components/OTPModal";
@@ -96,8 +97,24 @@ export default function LoginPage() {
                 <span>{loading ? "Sending OTP..." : "Send OTP"}</span>
               </button>
 
+              <div className={styles.dividerRow}>
+                <span className={styles.dividerLine} />
+                <span className={styles.dividerText}>or</span>
+                <span className={styles.dividerLine} />
+              </div>
+
               <p className={styles.switchText}>
-                New here? Enter your email and we&apos;ll get you started!
+                New here?{" "}
+                <strong>Just enter your email above</strong> — we&apos;ll create your account
+                and redirect you to complete registration as a{" "}
+                <strong>Player, Coach, Referee, or Manager</strong>.
+              </p>
+
+              <p className={styles.switchText} style={{ marginTop: '0.5rem' }}>
+                Want to explore first?{" "}
+                <Link href="/" className={styles.linkBtn}>
+                  ← Back to Home
+                </Link>
               </p>
             </form>
           </div>
@@ -108,8 +125,17 @@ export default function LoginPage() {
           <div className={styles.panelContent}>
             <h2>Join the Game! ⚽</h2>
             <p>
-              Register as a Player, Coach, or Referee.
-              Get your Football UID and join the community.
+              Register as a Player, Coach, Referee, or Manager.
+              Get your unique Football UID and join the community.
+            </p>
+            <div className={styles.panelRoles}>
+              <span>🏃 Athlete</span>
+              <span>🏋️ Coach</span>
+              <span>🏁 Referee</span>
+              <span>📋 Manager</span>
+            </div>
+            <p className={styles.panelHint}>
+              Enter your email on the left to get started →
             </p>
           </div>
         </div>
