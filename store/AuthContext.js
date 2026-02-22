@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
     refreshUser,
     loading,
     isAuthenticated: !!user,
-    isAdmin: user?.is_admin || false,
+    isAdmin: user?.is_admin || user?.is_super_admin || false,
     isSuperAdmin: user?.is_super_admin || false,
   };
 

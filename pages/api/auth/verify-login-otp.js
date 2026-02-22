@@ -59,9 +59,20 @@ export default async function handler(req, res) {
       // Create session (access JWT + refresh token + DB record)
       await createSession(res, user, req);
 
+      // Determine redirect path
+      let redirectTo = '/profile';
+      const isSuperAdminEmail = SUPER_ADMIN_EMAILS.includes(email.toLowerCase());
+
+      if (user.is_admin || user.is_super_admin || isSuperAdminEmail) {
+        redirectTo = '/admin';
+      } else if (!user.registration_completed) {
+        redirectTo = '/register';
+      }
+
       res.status(200).json({
         success: true,
         message: 'Login successful',
+        redirectTo,
         user: {
           id: user.id,
           name: user.name,
@@ -69,9 +80,9 @@ export default async function handler(req, res) {
           phone: user.phone,
           football_id: user.football_id,
           is_paid: user.is_paid,
-          is_admin: user.is_admin,
-          is_super_admin: user.is_super_admin,
-          registration_completed: user.registration_completed,
+          is_admin: user.is_admin || false,
+          is_super_admin: user.is_super_admin || isSuperAdminEmail || false,
+          registration_completed: user.registration_completed || false,
           approval_status: user.approval_status,
         },
       });

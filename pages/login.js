@@ -5,9 +5,11 @@ import Link from "next/link";
 import styles from "@/styles/Auth.module.css";
 import { authAPI } from "@/services/api/auth.api";
 import OTPModal from "@/components/OTPModal";
+import { useAuth } from "@/store/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,6 +43,11 @@ export default function LoginPage() {
 
       setShowOTPModal(false);
       setSuccessMessage("Login successful! Redirecting...");
+
+      // Instantly update AuthContext with user data
+      if (response.user) {
+        login(response.user);
+      }
 
       // Redirect based on registration status
       const redirectTo = response.redirectTo || '/profile';

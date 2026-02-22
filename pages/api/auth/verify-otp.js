@@ -1,6 +1,12 @@
 import database from '../../../services/database';
 import { createSession } from '../../../services/session.service';
 
+// Super admin emails
+const SUPER_ADMIN_EMAILS = [
+    'knuzhat137@gmail.com',
+    'goafootballfestival.info@gmail.com',
+];
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method not allowed' });
@@ -62,13 +68,15 @@ export default async function handler(req, res) {
 
         // Determine redirect based on user type
         let redirectTo = '/register'; // default: new user
-        if (user.is_admin) {
+        const isSuperAdminEmail = SUPER_ADMIN_EMAILS.includes(email.toLowerCase());
+
+        if (user.is_admin || user.is_super_admin || isSuperAdminEmail) {
             redirectTo = '/admin';
         } else if (user.registration_completed) {
             redirectTo = '/profile';
         }
 
-        const isNewUser = !user.registration_completed && !user.is_admin;
+        const isNewUser = !user.registration_completed && !user.is_admin && !user.is_super_admin && !isSuperAdminEmail;
 
         res.status(200).json({
             success: true,
@@ -79,8 +87,8 @@ export default async function handler(req, res) {
                 name: user.name,
                 football_id: user.football_id,
                 role: user.role,
-                is_admin: user.is_admin,
-                is_super_admin: user.is_super_admin,
+                is_admin: user.is_admin || false,
+                is_super_admin: user.is_super_admin || isSuperAdminEmail || false,
                 registration_completed: user.registration_completed,
                 approval_status: user.approval_status,
             },

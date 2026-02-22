@@ -157,7 +157,7 @@ export function requireAdmin(req, res) {
   const session = requireSession(req, res);
   if (!session) return null;
 
-  if (!session.is_admin) {
+  if (!session.is_admin && !session.is_super_admin) {
     res.status(403).json({ success: false, message: 'Forbidden — admin access required' });
     return null;
   }
