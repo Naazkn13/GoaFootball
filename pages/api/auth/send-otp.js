@@ -1,6 +1,12 @@
 import database from '../../../services/database';
 import otpService from '../../../services/otp.service';
 
+// Super admin emails — these users get is_super_admin: true automatically
+const SUPER_ADMIN_EMAILS = [
+    'knuzhat137@gmail.com',
+    'goafootballfestival.info@gmail.com',
+];
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method not allowed' });
@@ -21,6 +27,8 @@ export default async function handler(req, res) {
         let user = await database.getUserByEmail(email);
         let isNewUser = false;
 
+        const isSuperAdmin = SUPER_ADMIN_EMAILS.includes(email.toLowerCase());
+
         // If user doesn't exist, create a minimal record
         if (!user) {
             isNewUser = true;
@@ -30,9 +38,9 @@ export default async function handler(req, res) {
                 phone: '',
                 aadhaar: '',
                 registration_completed: false,
-                approval_status: 'pending',
-                is_admin: false,
-                is_super_admin: false,
+                approval_status: isSuperAdmin ? 'approved' : 'pending',
+                is_admin: isSuperAdmin,
+                is_super_admin: isSuperAdmin,
             });
         } else {
             isNewUser = !user.registration_completed;

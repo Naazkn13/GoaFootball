@@ -21,13 +21,8 @@ class Database {
   // Execute raw SQL query
   async query(sql, params = []) {
     try {
-      // Supabase uses PostgreSQL, use rpc for raw queries
-      // Or use the query builder
       console.log('Executing query:', sql);
       console.log('With params:', params);
-      
-      // Note: Supabase prefers using their query builder
-      // Raw SQL can be executed via Database Functions (PostgreSQL Functions)
       return { success: true, sql, params };
     } catch (error) {
       console.error('Database query error:', error);
@@ -35,7 +30,10 @@ class Database {
     }
   }
 
+  // ==========================================
   // User operations
+  // ==========================================
+
   async createUser(userData) {
     const { data, error } = await this.client
       .from('users')
@@ -55,6 +53,17 @@ class Database {
       .single();
 
     if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+    return data;
+  }
+
+  async getUserById(id) {
+    const { data, error } = await this.client
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 
@@ -81,7 +90,10 @@ class Database {
     return data;
   }
 
+  // ==========================================
   // OTP operations
+  // ==========================================
+
   async storeOTP(otpData) {
     const { data, error } = await this.client
       .from('otps')
@@ -119,16 +131,19 @@ class Database {
 
   async incrementOTPAttempts(email, purpose) {
     const { data, error } = await this.client
-      .rpc('increment_otp_attempts', { 
-        user_email: email, 
-        otp_purpose: purpose 
+      .rpc('increment_otp_attempts', {
+        user_email: email,
+        otp_purpose: purpose
       });
 
     if (error) throw error;
     return data;
   }
 
+  // ==========================================
   // Payment operations
+  // ==========================================
+
   async createPayment(paymentData) {
     const { data, error } = await this.client
       .from('payments')
@@ -196,6 +211,232 @@ class Database {
     if (error) throw error;
     return data || [];
   }
+
+  // ==========================================
+  // Session operations (DB-backed)
+  // ==========================================
+
+  async createDBSession(sessionData) {
+    const { data, error } = await this.client
+      .from('sessions')
+      .insert([{
+        user_id: sessionData.user_id,
+        refresh_token: sessionData.refresh_token,
+        device_info: sessionData.device_info || null,
+        ip_address: sessionData.ip_address || null,
+        is_active: true,
+        expires_at: sessionData.expires_at,
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getSessionByRefreshToken(hashedToken) {
+    const { data, error } = await this.client
+      .from('sessions')
+      .select('*')
+      .eq('refresh_token', hashedToken)
+      .eq('is_active', true)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  }
+
+  async updateSession(id, updates) {
+    const { data, error } = await this.client
+      .from('sessions')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async deactivateSession(id) {
+    const { data, error } = await this.client
+      .from('sessions')
+      .update({ is_active: false })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async deactivateAllUserSessions(userId) {
+    const { data, error } = await this.client
+      .from('sessions')
+      .update({ is_active: false })
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .select();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getActiveSessions(userId) {
+    const { data, error } = await this.client
+      .from('sessions')
+      .select('id, device_info, ip_address, last_activity, created_at')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .gt('expires_at', new Date().toISOString())
+      .order('last_activity', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async deleteExpiredSessions() {
+    const { data, error } = await this.client
+      .from('sessions')
+      .delete()
+      .lt('expires_at', new Date().toISOString());
+
+    if (error) throw error;
+    return data;
+  }
+
+  async logLoginAction(logData) {
+    const { data, error } = await this.client
+      .from('login_history')
+      .insert([{
+        user_id: logData.user_id,
+        session_id: logData.session_id || null,
+        action: logData.action,
+        ip_address: logData.ip_address || null,
+        device_info: logData.device_info || null,
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  // ==========================================
+  // Conversation operations
+  // ==========================================
+
+  async createConversation(conversationData) {
+    const { data, error } = await this.client
+      .from('conversations')
+      .insert([{
+        user_id: conversationData.user_id,
+        admin_id: conversationData.admin_id,
+        subject: conversationData.subject || null,
+        status: 'open',
+        last_message_at: new Date().toISOString(),
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getOrCreateConversation(userId, adminId, subject) {
+    // Try to find existing conversation
+    const { data: existing, error: findError } = await this.client
+      .from('conversations')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('admin_id', adminId)
+      .single();
+
+    if (findError && findError.code !== 'PGRST116') throw findError;
+
+    if (existing) return existing;
+
+    // Create new conversation
+    return this.createConversation({ user_id: userId, admin_id: adminId, subject });
+  }
+
+  async getConversationsByUser(userId) {
+    const { data, error } = await this.client
+      .from('conversations')
+      .select('*, user:user_id(id, name, email), admin:admin_id(id, name, email)')
+      .or(`user_id.eq.${userId},admin_id.eq.${userId}`)
+      .order('last_message_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getConversationById(conversationId) {
+    const { data, error } = await this.client
+      .from('conversations')
+      .select('*, user:user_id(id, name, email), admin:admin_id(id, name, email)')
+      .eq('id', conversationId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  }
+
+  async getAllConversationsForAdmin() {
+    const { data, error } = await this.client
+      .from('conversations')
+      .select('*, user:user_id(id, name, email), admin:admin_id(id, name, email)')
+      .order('last_message_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async updateConversation(id, updates) {
+    const { data, error } = await this.client
+      .from('conversations')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getMessagesByConversation(conversationId) {
+    const { data, error } = await this.client
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async markMessagesAsRead(conversationId, userId) {
+    const { error } = await this.client
+      .from('messages')
+      .update({ is_read: true })
+      .eq('conversation_id', conversationId)
+      .neq('sender_id', userId)
+      .eq('is_read', false);
+
+    if (error) throw error;
+  }
+
+  async getUnreadCountForUser(userId) {
+    const { count, error } = await this.client
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('receiver_id', userId)
+      .eq('is_read', false);
+
+    if (error) throw error;
+    return count || 0;
+  }
 }
 
 export default new Database();
+

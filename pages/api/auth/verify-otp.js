@@ -57,8 +57,8 @@ export default async function handler(req, res) {
             updated_at: new Date().toISOString(),
         });
 
-        // Create session cookie
-        const sessionPayload = createSession(res, user);
+        // Create session (access JWT + refresh token + DB record)
+        await createSession(res, user, req);
 
         // Determine redirect based on user type
         let redirectTo = '/register'; // default: new user
@@ -80,6 +80,7 @@ export default async function handler(req, res) {
                 football_id: user.football_id,
                 role: user.role,
                 is_admin: user.is_admin,
+                is_super_admin: user.is_super_admin,
                 registration_completed: user.registration_completed,
                 approval_status: user.approval_status,
             },

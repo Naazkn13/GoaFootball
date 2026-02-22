@@ -1,5 +1,11 @@
 import database from '../../../services/database';
-import jwt from 'jsonwebtoken';
+import { createSession } from '../../../services/session.service';
+
+// Super admin emails
+const SUPER_ADMIN_EMAILS = [
+  'knuzhat137@gmail.com',
+  'goafootballfestival.info@gmail.com',
+];
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -22,11 +28,9 @@ export default async function handler(req, res) {
 
       // Check if this is the Razorpay test account with hardcoded OTP
       if (email.toLowerCase() === RAZORPAY_TEST_EMAIL.toLowerCase() && otp === RAZORPAY_TEST_OTP) {
-        // Bypass OTP verification for Razorpay review
         console.log('✅ Razorpay test account - using hardcoded OTP');
-        otpRecord = { verified: true }; // Mock OTP record
+        otpRecord = { verified: true };
       } else {
-        // Normal OTP verification for all other users
         otpRecord = await database.verifyOTP(email, otp, 'login');
       }
 
@@ -47,34 +51,28 @@ export default async function handler(req, res) {
         });
       }
 
-      // Generate JWT token
-      const token = jwt.sign(
-        {
-          id: user.id,
-          email: user.email,
-          footballId: user.football_id
-        },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '7d' }
-      );
-
       // Update last login
       await database.updateUser(user.id, {
         last_login: new Date().toISOString(),
       });
 
+      // Create session (access JWT + refresh token + DB record)
+      await createSession(res, user, req);
+
       res.status(200).json({
         success: true,
         message: 'Login successful',
-        token: token,
         user: {
           id: user.id,
           name: user.name,
           email: user.email,
           phone: user.phone,
-          footballId: user.football_id,
-          isPaid: user.is_paid,
-          isVerified: user.is_verified,
+          football_id: user.football_id,
+          is_paid: user.is_paid,
+          is_admin: user.is_admin,
+          is_super_admin: user.is_super_admin,
+          registration_completed: user.registration_completed,
+          approval_status: user.approval_status,
         },
       });
     } catch (error) {

@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '../../../services/database';
+import database from '../../../services/database';
 import { requireSession } from '../../../services/session.service';
 
 export default async function handler(req, res) {
@@ -10,7 +11,7 @@ export default async function handler(req, res) {
     if (!session) return;
 
     try {
-        const { receiverId, message } = req.body;
+        const { receiverId, message, conversationId, messageType } = req.body;
 
         if (!receiverId || !message) {
             return res.status(400).json({
@@ -19,18 +20,34 @@ export default async function handler(req, res) {
             });
         }
 
+        // Build message data
+        const messageData = {
+            sender_id: session.id,
+            receiver_id: receiverId,
+            message: message.trim(),
+            is_read: false,
+            message_type: messageType || 'text',
+        };
+
+        // Link to conversation if provided
+        if (conversationId) {
+            messageData.conversation_id = conversationId;
+        }
+
         const { data, error } = await supabaseAdmin
             .from('messages')
-            .insert({
-                sender_id: session.id,
-                receiver_id: receiverId,
-                message: message.trim(),
-                is_read: false,
-            })
+            .insert(messageData)
             .select()
             .single();
 
         if (error) throw error;
+
+        // Update conversation's last_message_at
+        if (conversationId) {
+            await database.updateConversation(conversationId, {
+                last_message_at: new Date().toISOString(),
+            });
+        }
 
         res.status(200).json({
             success: true,

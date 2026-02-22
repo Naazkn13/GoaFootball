@@ -3,7 +3,11 @@ import { NextResponse } from 'next/server';
 
 export function middleware(request) {
     const { pathname } = request.nextUrl;
-    const sessionToken = request.cookies.get('session_token')?.value;
+
+    // Check for access_token OR refresh_token (refresh will handle expired access tokens)
+    const accessToken = request.cookies.get('access_token')?.value;
+    const refreshToken = request.cookies.get('refresh_token')?.value;
+    const hasSession = accessToken || refreshToken;
 
     // Public routes — always accessible
     const publicRoutes = ['/', '/login', '/about', '/contact', '/privacy-policy', '/refund-policy', '/terms-and-conditions'];
@@ -16,8 +20,8 @@ export function middleware(request) {
         return NextResponse.next();
     }
 
-    // Protected routes — require session
-    if (!sessionToken) {
+    // Protected routes — require session (access OR refresh token)
+    if (!hasSession) {
         const loginUrl = new URL('/login', request.url);
         loginUrl.searchParams.set('redirect', pathname);
         return NextResponse.redirect(loginUrl);

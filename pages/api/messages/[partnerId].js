@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '../../../services/database';
+import database from '../../../services/database';
 import { requireSession } from '../../../services/session.service';
 
 export default async function handler(req, res) {
@@ -19,26 +20,41 @@ export default async function handler(req, res) {
             });
         }
 
-        // Fetch all messages between current user and partner
-        const { data, error } = await supabaseAdmin
-            .from('messages')
-            .select('*')
-            .or(`and(sender_id.eq.${session.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${session.id})`)
-            .order('created_at', { ascending: true });
+        // Check if partnerId is a conversation ID or a user ID
+        // Try to get it as a conversation first
+        const conversation = await database.getConversationById(partnerId);
 
-        if (error) throw error;
+        let messages;
 
-        // Mark messages as read
-        await supabaseAdmin
-            .from('messages')
-            .update({ is_read: true })
-            .eq('sender_id', partnerId)
-            .eq('receiver_id', session.id)
-            .eq('is_read', false);
+        if (conversation) {
+            // partnerId is actually a conversationId
+            messages = await database.getMessagesByConversation(partnerId);
+
+            // Mark messages as read
+            await database.markMessagesAsRead(partnerId, session.id);
+        } else {
+            // Legacy behavior: partnerId is a user ID, fetch messages by sender/receiver
+            const { data, error } = await supabaseAdmin
+                .from('messages')
+                .select('*')
+                .or(`and(sender_id.eq.${session.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${session.id})`)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            messages = data || [];
+
+            // Mark messages as read (legacy)
+            await supabaseAdmin
+                .from('messages')
+                .update({ is_read: true })
+                .eq('sender_id', partnerId)
+                .eq('receiver_id', session.id)
+                .eq('is_read', false);
+        }
 
         res.status(200).json({
             success: true,
-            messages: data || [],
+            messages: messages,
         });
     } catch (error) {
         console.error('Fetch messages error:', error);

@@ -6,8 +6,8 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Clear session cookie
-        clearSession(res);
+        // Clear session: marks DB session inactive + logs logout + clears both cookies
+        await clearSession(req, res);
 
         res.status(200).json({
             success: true,

@@ -4,6 +4,7 @@ import Head from 'next/head';
 import styles from '@/styles/Admin.module.css';
 import axiosInstance from '@/services/axios';
 import { useAuth } from '@/store/AuthContext';
+import ChatTab from '@/components/ChatTab';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -373,16 +374,9 @@ export default function AdminDashboard() {
                         </section>
                     )}
 
-                    {/* Chat Tab - Placeholder */}
+                    {/* Chat Tab - Full Implementation */}
                     {activeTab === 'chat' && (
-                        <section>
-                            <div className={styles.sectionHeader}>
-                                <h2>Chat</h2>
-                            </div>
-                            <div className={styles.emptyState}>
-                                <p>💬 Chat functionality will be implemented here</p>
-                            </div>
-                        </section>
+                        <ChatTab session={user} />
                     )}
 
                     {/* Settings Tab - Super Admin Only */}
