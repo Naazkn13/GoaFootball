@@ -34,11 +34,16 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Public pages that should never trigger a redirect to /login
+    const publicPages = ['/', '/login', '/about', '/contact', '/privacy-policy', '/refund-policy', '/terms-and-conditions'];
+    const isOnPublicPage = typeof window !== 'undefined' && publicPages.includes(window.location.pathname);
+
     // Handle 401 Unauthorized — try to refresh before redirecting
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Don't retry refresh endpoint itself
       if (originalRequest.url === '/api/auth/refresh') {
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        // Only redirect to /login if we're on a PROTECTED page
+        if (typeof window !== 'undefined' && !isOnPublicPage) {
           window.location.href = '/login';
         }
         return Promise.reject(error);
@@ -68,10 +73,10 @@ axiosInstance.interceptors.response.use(
         // Retry the original request
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // Refresh failed — redirect to login
+        // Refresh failed — only redirect if on a protected page
         processQueue(refreshError);
 
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        if (typeof window !== 'undefined' && !isOnPublicPage) {
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);
