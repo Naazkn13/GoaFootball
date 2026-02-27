@@ -65,10 +65,13 @@ export default async function handler(req, res) {
         const ext = file.originalFilename?.split('.').pop() || 'jpg';
         const fileName = `${session.id}/${documentType}_${Date.now()}.${ext}`;
 
+        // Convert Node Buffer to ArrayBuffer to fix Undici/fetch SocketError for large payloads
+        const fileArrayBuffer = new Uint8Array(fileBuffer).buffer;
+
         // Upload to Supabase Storage
         const { data, error: uploadError } = await supabaseAdmin.storage
             .from('documents')
-            .upload(fileName, fileBuffer, {
+            .upload(fileName, fileArrayBuffer, {
                 contentType: file.mimetype,
                 upsert: true,
             });
