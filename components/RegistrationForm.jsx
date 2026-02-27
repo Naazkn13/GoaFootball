@@ -30,6 +30,47 @@ const ROLE_FIELDS = {
 export default function RegistrationForm({ role, formData, onChange, errors, docVerificationStatus }) {
     const roleFields = ROLE_FIELDS[role] || [];
 
+    // --- Date of Birth dropdown helpers ---
+    const currentYear = new Date().getFullYear();
+    const MONTHS = [
+        { value: '01', label: 'January' }, { value: '02', label: 'February' },
+        { value: '03', label: 'March' }, { value: '04', label: 'April' },
+        { value: '05', label: 'May' }, { value: '06', label: 'June' },
+        { value: '07', label: 'July' }, { value: '08', label: 'August' },
+        { value: '09', label: 'September' }, { value: '10', label: 'October' },
+        { value: '11', label: 'November' }, { value: '12', label: 'December' },
+    ];
+
+    // Parse existing date_of_birth (YYYY-MM-DD) into parts
+    const dobParts = (formData.date_of_birth || '').split('-');
+    const dobYear = dobParts[0] || '';
+    const dobMonth = dobParts[1] || '';
+    const dobDay = dobParts[2] || '';
+
+    // Calculate max days for selected month/year
+    const getDaysInMonth = (month, year) => {
+        if (!month) return 31;
+        return new Date(year || 2000, parseInt(month), 0).getDate();
+    };
+    const maxDays = getDaysInMonth(dobMonth, dobYear);
+
+    // When any dropdown changes, reconstruct YYYY-MM-DD
+    const handleDobChange = (part, value) => {
+        let y = dobYear, m = dobMonth, d = dobDay;
+        if (part === 'year') y = value;
+        if (part === 'month') m = value;
+        if (part === 'day') d = value;
+
+        // Auto-clamp day if month changed and day exceeds new max
+        if (d) {
+            const newMax = getDaysInMonth(m, y);
+            if (parseInt(d) > newMax) d = String(newMax).padStart(2, '0');
+        }
+
+        const combined = (y && m && d) ? `${y}-${m}-${d}` : '';
+        handleChange('date_of_birth', combined);
+    };
+
     const handleChange = (field, value) => {
         onChange({ ...formData, [field]: value });
     };
@@ -77,14 +118,49 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
                 </div>
 
                 <div className={styles.inputGroup}>
-                    <label htmlFor="reg-dob">Date of Birth *</label>
-                    <input
-                        id="reg-dob"
-                        type="date"
-                        value={formData.date_of_birth || ''}
-                        onChange={(e) => handleChange('date_of_birth', e.target.value)}
-                        required
-                    />
+                    <label>Date of Birth *</label>
+                    <div className={styles.dobDropdownRow}>
+                        <select
+                            id="reg-dob-day"
+                            value={dobDay}
+                            onChange={(e) => handleDobChange('day', e.target.value)}
+                            required
+                            aria-label="Day"
+                        >
+                            <option value="">Day</option>
+                            {Array.from({ length: maxDays }, (_, i) => {
+                                const d = String(i + 1).padStart(2, '0');
+                                return <option key={d} value={d}>{i + 1}</option>;
+                            })}
+                        </select>
+
+                        <select
+                            id="reg-dob-month"
+                            value={dobMonth}
+                            onChange={(e) => handleDobChange('month', e.target.value)}
+                            required
+                            aria-label="Month"
+                        >
+                            <option value="">Month</option>
+                            {MONTHS.map((m) => (
+                                <option key={m.value} value={m.value}>{m.label}</option>
+                            ))}
+                        </select>
+
+                        <select
+                            id="reg-dob-year"
+                            value={dobYear}
+                            onChange={(e) => handleDobChange('year', e.target.value)}
+                            required
+                            aria-label="Year"
+                        >
+                            <option value="">Year</option>
+                            {Array.from({ length: currentYear - 1950 + 1 }, (_, i) => {
+                                const y = currentYear - i;
+                                return <option key={y} value={String(y)}>{y}</option>;
+                            })}
+                        </select>
+                    </div>
                     {errors?.date_of_birth && <span className={styles.fieldError}>{errors.date_of_birth}</span>}
                 </div>
 
