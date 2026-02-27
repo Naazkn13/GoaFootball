@@ -153,14 +153,15 @@ export default function RegisterPage() {
         setError('');
 
         try {
-            // 1. Verify documents before uploading
-            setUploadProgress('Verifying documents...');
+            // 1. Verify documents sequentially (not in parallel, to avoid auth token race conditions)
+            setUploadProgress('Verifying photo...');
+            const photoVerify = await verifyDocument(formData.photo_file, 'photo');
 
-            const [photoVerify, idProofVerify, birthCertVerify] = await Promise.all([
-                verifyDocument(formData.photo_file, 'photo'),
-                verifyDocument(formData.id_proof_file, 'id_proof'),
-                verifyDocument(formData.birth_certificate_file, 'birth_certificate'),
-            ]);
+            setUploadProgress('Verifying ID proof...');
+            const idProofVerify = await verifyDocument(formData.id_proof_file, 'id_proof');
+
+            setUploadProgress('Verifying birth certificate...');
+            const birthCertVerify = await verifyDocument(formData.birth_certificate_file, 'birth_certificate');
 
             // Check if any verification failed
             const failedDocs = [];
@@ -217,7 +218,7 @@ export default function RegisterPage() {
 
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: orderResponse.order.amount * 100,
+                amount: orderResponse.order.amount, // Already in paise from server
                 currency: orderResponse.order.currency,
                 name: 'Football Registration',
                 description: 'Registration Payment',

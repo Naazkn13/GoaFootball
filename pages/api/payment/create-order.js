@@ -21,7 +21,9 @@ export default async function handler(req, res) {
       }
 
       // Create Razorpay order
-      const receipt = `receipt_${session.football_id || session.id}_${Date.now()}`;
+      // Razorpay limits receipt to 40 chars
+      const shortId = (session.football_id || session.id).slice(-8);
+      const receipt = `rcpt_${shortId}_${Date.now()}`;
       const order = await paymentService.createOrder(amount, 'INR', receipt);
 
       // Store payment record in database

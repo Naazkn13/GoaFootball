@@ -53,7 +53,7 @@ class PaymentService {
       return {
         success: true,
         orderId: order.id,
-        amount: order.amount / 100, // Convert back to rupees
+        amount: amountInPaise, // Amount in paise, ready for Razorpay checkout
         currency: order.currency,
         receipt: order.receipt,
         status: order.status,

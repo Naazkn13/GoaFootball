@@ -1,7 +1,7 @@
 import { IncomingForm } from 'formidable';
 import { readFileSync } from 'fs';
 import { createWorker } from 'tesseract.js';
-import { requireSession } from '../../services/session.service';
+import { getSession, refreshSession } from '../../services/session.service';
 
 // Disable Next.js body parser for file uploads
 export const config = {
@@ -23,7 +23,7 @@ const DOCUMENT_KEYWORDS = {
         label: 'Birth Certificate',
     },
     photo: {
-        keywords: [], // No OCR needed for passport photos
+        keywords: [],
         minTextLength: 0,
         label: 'Passport Photo',
     },
@@ -34,8 +34,14 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: 'Method not allowed' });
     }
 
-    const session = requireSession(req, res);
-    if (!session) return;
+    // Try access token first, then refresh if expired
+    let session = getSession(req);
+    if (!session) {
+        session = await refreshSession(req, res);
+    }
+    if (!session) {
+        return res.status(401).json({ verified: false, reason: 'Unauthorized — please log in' });
+    }
 
     let worker = null;
 
@@ -96,8 +102,8 @@ export default async function handler(req, res) {
         }
 
         // Run OCR on the image to detect text
-        const config = DOCUMENT_KEYWORDS[documentType];
-        if (!config) {
+        const docConfig = DOCUMENT_KEYWORDS[documentType];
+        if (!docConfig) {
             return res.status(400).json({
                 verified: false,
                 reason: `Unknown document type: ${documentType}`,
@@ -113,26 +119,26 @@ export default async function handler(req, res) {
         const textLength = detectedText.replace(/\s+/g, '').length;
 
         // Check 1: Is there enough text in the image?
-        if (textLength < config.minTextLength) {
+        if (textLength < docConfig.minTextLength) {
             return res.status(400).json({
                 verified: false,
-                reason: `This doesn't appear to be a valid ${config.label}. No readable text was detected in the uploaded image. Please upload a clear image of your ${config.label}.`,
+                reason: `This doesn't appear to be a valid ${docConfig.label}. No readable text was detected in the uploaded image. Please upload a clear image of your ${docConfig.label}.`,
             });
         }
 
         // Check 2: Does the text contain expected keywords?
-        const foundKeywords = config.keywords.filter(kw => detectedText.includes(kw));
+        const foundKeywords = docConfig.keywords.filter(kw => detectedText.includes(kw));
 
         if (foundKeywords.length === 0) {
             return res.status(400).json({
                 verified: false,
-                reason: `The uploaded image does not appear to be a valid ${config.label}. Please make sure you are uploading the correct document.`,
+                reason: `The uploaded image does not appear to be a valid ${docConfig.label}. Please make sure you are uploading the correct document.`,
             });
         }
 
         return res.status(200).json({
             verified: true,
-            reason: `${config.label} verified successfully.`,
+            reason: `${docConfig.label} verified successfully.`,
             detectedKeywords: foundKeywords,
         });
 
