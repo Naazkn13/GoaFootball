@@ -13,16 +13,9 @@ const INDIAN_STATES = [
     'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
 ];
 
-// Role-specific field definitions
+// Role-specific field definitions (athlete has no extra fields)
 const ROLE_FIELDS = {
-    athlete: [
-        { name: 'playing_position', label: 'Playing Position', type: 'select', options: ['GK', 'DEF', 'MID', 'FWD'], required: true },
-        { name: 'preferred_foot', label: 'Preferred Foot', type: 'select', options: ['Left', 'Right', 'Both'], required: true },
-        { name: 'height_cm', label: 'Height (cm)', type: 'number', required: false },
-        { name: 'weight_kg', label: 'Weight (kg)', type: 'number', required: false },
-        { name: 'previous_club', label: 'Previous Club/Team', type: 'text', required: false },
-        { name: 'years_experience', label: 'Years of Experience', type: 'number', required: true },
-    ],
+    athlete: [],
     coach: [
         { name: 'specialization', label: 'Specialization', type: 'select', options: ['Youth', 'Senior', 'Goalkeeping', 'Fitness'], required: true },
         { name: 'years_experience', label: 'Years of Experience', type: 'number', required: true },
@@ -32,18 +25,9 @@ const ROLE_FIELDS = {
         { name: 'grade_level', label: 'Grade/Level', type: 'select', options: ['District', 'State', 'National', 'FIFA'], required: true },
         { name: 'years_experience', label: 'Years of Experience', type: 'number', required: true },
     ],
-    manager: [
-        { name: 'organization_name', label: 'Organization Name', type: 'text', required: true },
-        { name: 'designation', label: 'Designation', type: 'text', required: true },
-        { name: 'years_experience', label: 'Years of Experience', type: 'number', required: true },
-    ],
-    other: [
-        { name: 'role_specification', label: 'Specify Your Role', type: 'text', required: true },
-        { name: 'years_experience', label: 'Years of Experience', type: 'number', required: false },
-    ],
 };
 
-export default function RegistrationForm({ role, formData, onChange, errors }) {
+export default function RegistrationForm({ role, formData, onChange, errors, docVerificationStatus }) {
     const roleFields = ROLE_FIELDS[role] || [];
 
     const handleChange = (field, value) => {
@@ -55,6 +39,22 @@ export default function RegistrationForm({ role, formData, onChange, errors }) {
             ...formData,
             role_details: { ...formData.role_details, [field]: value },
         });
+    };
+
+    // Helper to render verification status badge
+    const renderVerifyStatus = (docType) => {
+        const status = docVerificationStatus?.[docType];
+        if (!status) return null;
+        if (status.loading) {
+            return <span className={styles.verifyBadge + ' ' + styles.verifyLoading}>⏳ Verifying...</span>;
+        }
+        if (status.verified === true) {
+            return <span className={styles.verifyBadge + ' ' + styles.verifySuccess}>✅ Verified</span>;
+        }
+        if (status.verified === false) {
+            return <span className={styles.verifyBadge + ' ' + styles.verifyError}>❌ {status.reason}</span>;
+        }
+        return null;
     };
 
     return (
@@ -204,7 +204,7 @@ export default function RegistrationForm({ role, formData, onChange, errors }) {
                 </div>
             </div>
 
-            {/* Role-Specific Fields */}
+            {/* Role-Specific Fields (only for coach/referee) */}
             {roleFields.length > 0 && (
                 <>
                     <h3 className={styles.stepTitle} style={{ marginTop: '2rem' }}>
@@ -260,6 +260,7 @@ export default function RegistrationForm({ role, formData, onChange, errors }) {
                         required
                         className={styles.fileInput}
                     />
+                    {renderVerifyStatus('photo')}
                     {errors?.photo && <span className={styles.fieldError}>{errors.photo}</span>}
                 </div>
 
@@ -273,9 +274,25 @@ export default function RegistrationForm({ role, formData, onChange, errors }) {
                         required
                         className={styles.fileInput}
                     />
+                    {renderVerifyStatus('id_proof')}
                     {errors?.id_proof && <span className={styles.fieldError}>{errors.id_proof}</span>}
+                </div>
+
+                <div className={styles.inputGroup}>
+                    <label htmlFor="reg-birthcert">Birth Certificate * (PDF/JPEG/PNG, max 5MB)</label>
+                    <input
+                        id="reg-birthcert"
+                        type="file"
+                        accept="image/jpeg,image/png,application/pdf"
+                        onChange={(e) => handleChange('birth_certificate_file', e.target.files[0])}
+                        required
+                        className={styles.fileInput}
+                    />
+                    {renderVerifyStatus('birth_certificate')}
+                    {errors?.birth_certificate && <span className={styles.fieldError}>{errors.birth_certificate}</span>}
                 </div>
             </div>
         </div>
     );
 }
+

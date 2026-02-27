@@ -52,7 +52,7 @@ export default async function handler(req, res) {
         }
 
         // Validate file size
-        const maxSize = documentType === 'photo' ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
+        const maxSize = documentType === 'photo' ? 2 * 1024 * 1024 : 5 * 1024 * 1024; // 5MB for id_proof and birth_certificate
         if (file.size > maxSize) {
             return res.status(400).json({
                 success: false,

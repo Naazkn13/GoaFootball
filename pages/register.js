@@ -26,16 +26,58 @@ export default function RegisterPage() {
         role_details: {},
         photo_file: null,
         id_proof_file: null,
+        birth_certificate_file: null,
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [uploadProgress, setUploadProgress] = useState('');
+    const [docVerificationStatus, setDocVerificationStatus] = useState({});
 
     // Step 1 → Step 2
     const handleRoleSelect = (role) => {
         setSelectedRole(role);
         setStep(2);
+    };
+
+    // Verify a single document file via the /api/verify-document endpoint
+    const verifyDocument = async (file, docType) => {
+        if (!file) return { verified: true };
+
+        // Skip verification for PDFs (OCR not applicable)
+        if (file.type === 'application/pdf') {
+            return { verified: true, reason: 'PDF accepted.' };
+        }
+
+        // Update status to loading
+        setDocVerificationStatus(prev => ({
+            ...prev,
+            [docType]: { loading: true },
+        }));
+
+        try {
+            const formDataUpload = new FormData();
+            formDataUpload.append('file', file);
+            formDataUpload.append('documentType', docType);
+
+            const response = await axiosInstance.post('/api/verify-document', formDataUpload, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            const result = response.data;
+            setDocVerificationStatus(prev => ({
+                ...prev,
+                [docType]: { verified: result.verified, reason: result.reason },
+            }));
+            return result;
+        } catch (err) {
+            const reason = err.response?.data?.reason || 'Verification failed. Please try a different image.';
+            setDocVerificationStatus(prev => ({
+                ...prev,
+                [docType]: { verified: false, reason },
+            }));
+            return { verified: false, reason };
+        }
     };
 
     // Validate form data
@@ -66,6 +108,7 @@ export default function RegisterPage() {
         }
         if (!formData.photo_file) newErrors.photo = 'Passport-size photo is required';
         if (!formData.id_proof_file) newErrors.id_proof = 'ID proof document is required';
+        if (!formData.birth_certificate_file) newErrors.birth_certificate = 'Birth certificate is required';
 
         // Validate photo size (max 2MB)
         if (formData.photo_file && formData.photo_file.size > 2 * 1024 * 1024) {
@@ -74,6 +117,10 @@ export default function RegisterPage() {
         // Validate ID proof size (max 5MB)
         if (formData.id_proof_file && formData.id_proof_file.size > 5 * 1024 * 1024) {
             newErrors.id_proof = 'ID proof must be less than 5MB';
+        }
+        // Validate birth certificate size (max 5MB)
+        if (formData.birth_certificate_file && formData.birth_certificate_file.size > 5 * 1024 * 1024) {
+            newErrors.birth_certificate = 'Birth certificate must be less than 5MB';
         }
 
         setErrors(newErrors);
@@ -106,14 +153,38 @@ export default function RegisterPage() {
         setError('');
 
         try {
-            // 1. Upload documents
+            // 1. Verify documents before uploading
+            setUploadProgress('Verifying documents...');
+
+            const [photoVerify, idProofVerify, birthCertVerify] = await Promise.all([
+                verifyDocument(formData.photo_file, 'photo'),
+                verifyDocument(formData.id_proof_file, 'id_proof'),
+                verifyDocument(formData.birth_certificate_file, 'birth_certificate'),
+            ]);
+
+            // Check if any verification failed
+            const failedDocs = [];
+            if (!idProofVerify.verified) failedDocs.push('ID Proof');
+            if (!birthCertVerify.verified) failedDocs.push('Birth Certificate');
+
+            if (failedDocs.length > 0) {
+                setError(`Document verification failed for: ${failedDocs.join(', ')}. Please upload valid documents.`);
+                setLoading(false);
+                setUploadProgress('');
+                return;
+            }
+
+            // 2. Upload documents
             setUploadProgress('Uploading photo...');
             const photoResult = await uploadDocument(formData.photo_file, 'photo');
 
             setUploadProgress('Uploading ID proof...');
             const idProofResult = await uploadDocument(formData.id_proof_file, 'id_proof');
 
-            // 2. Submit registration data
+            setUploadProgress('Uploading birth certificate...');
+            const birthCertResult = await uploadDocument(formData.birth_certificate_file, 'birth_certificate');
+
+            // 3. Submit registration data
             setUploadProgress('Saving registration...');
             const registrationPayload = {
                 name: formData.name,
@@ -133,13 +204,14 @@ export default function RegisterPage() {
                 documents: [
                     { type: 'photo', url: photoResult.url, filename: photoResult.filename },
                     { type: 'id_proof', url: idProofResult.url, filename: idProofResult.filename },
+                    { type: 'birth_certificate', url: birthCertResult.url, filename: birthCertResult.filename },
                 ],
                 profile_photo_url: photoResult.url,
             };
 
             await axiosInstance.post('/api/user/register', registrationPayload);
 
-            // 3. Proceed to payment
+            // 4. Proceed to payment
             setUploadProgress('Initiating payment...');
             const orderResponse = await paymentAPI.createOrder();
 
@@ -237,6 +309,7 @@ export default function RegisterPage() {
                                 formData={formData}
                                 onChange={setFormData}
                                 errors={errors}
+                                docVerificationStatus={docVerificationStatus}
                             />
 
                             <div className={styles.formActions}>
