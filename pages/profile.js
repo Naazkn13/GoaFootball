@@ -6,6 +6,7 @@ import styles from "@/styles/Profile.module.css";
 import userAPI from "@/services/api/user.api";
 import paymentAPI from "@/services/api/payment.api";
 import ApprovalBadge from "@/components/ApprovalBadge";
+import ChatDrawer from "@/components/ChatDrawer";
 import { useAuth } from "@/store/AuthContext";
 
 export default function ProfilePage() {
@@ -25,6 +26,11 @@ export default function ProfilePage() {
     phone: "",
     aadhaar: ""
   });
+
+  // Chat parameters
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [adminId, setAdminId] = useState(null);
+  const [startingChat, setStartingChat] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
@@ -141,6 +147,31 @@ export default function ProfilePage() {
   const handleLogout = async () => {
     await logout();
     router.push('/login');
+  };
+
+  const handleOpenChat = async () => {
+    if (adminId) {
+      setIsChatOpen(true);
+      return;
+    }
+
+    setStartingChat(true);
+    try {
+      // Find an available admin
+      const response = await userAPI.getAdmins();
+      if (response.admins && response.admins.length > 0) {
+        // Pick the first admin
+        setAdminId(response.admins[0].id);
+        setIsChatOpen(true);
+      } else {
+        setError("No admins currently available to chat.");
+      }
+    } catch (err) {
+      console.error("Failed to fetch admin list", err);
+      setError("Unable to start chat. Please try again later.");
+    } finally {
+      setStartingChat(false);
+    }
   };
 
   if (loading) {
@@ -392,14 +423,22 @@ export default function ProfilePage() {
               <button
                 className={styles.chatBtn}
                 type="button"
-                onClick={() => {/* Chat drawer will be added in Phase 6 */ }}
+                onClick={handleOpenChat}
+                disabled={startingChat}
               >
-                💬 Chat with Admin
+                {startingChat ? "Connecting..." : "💬 Chat with Admin"}
               </button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Chat Drawer */}
+      <ChatDrawer
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        adminId={adminId}
+      />
 
       {/* Success Modal */}
       {showSuccessModal && (

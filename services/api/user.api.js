@@ -25,6 +25,12 @@ export const userAPI = {
     const response = await axiosInstance.get('/api/user/payment-status');
     return response.data;
   },
+
+  // Get available admins for chat
+  getAdmins: async () => {
+    const response = await axiosInstance.get('/api/user/admins');
+    return response.data;
+  },
 };
 
 export default userAPI;

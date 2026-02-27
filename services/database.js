@@ -2,15 +2,19 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Create Supabase client (for frontend - row level security enabled)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Create Supabase admin client (for backend - bypasses RLS)
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+// The fallback 'dummy-key' prevents a frontend crash when this file is imported by client components
+export const supabaseAdmin = createClient(
+  supabaseUrl,
+  supabaseServiceKey || 'dummy-key-for-client-side-imports'
+);
 
 // Database query helper
 class Database {
