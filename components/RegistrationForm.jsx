@@ -41,11 +41,10 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
         { value: '11', label: 'November' }, { value: '12', label: 'December' },
     ];
 
-    // Parse existing date_of_birth (YYYY-MM-DD) into parts
-    const dobParts = (formData.date_of_birth || '').split('-');
-    const dobYear = dobParts[0] || '';
-    const dobMonth = dobParts[1] || '';
-    const dobDay = dobParts[2] || '';
+    // Use separate fields for partial selection so dropdowns always reflect values
+    const dobDay = formData._dob_day || '';
+    const dobMonth = formData._dob_month || '';
+    const dobYear = formData._dob_year || '';
 
     // Calculate max days for selected month/year
     const getDaysInMonth = (month, year) => {
@@ -54,7 +53,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
     };
     const maxDays = getDaysInMonth(dobMonth, dobYear);
 
-    // When any dropdown changes, reconstruct YYYY-MM-DD
+    // When any dropdown changes, update individual fields + combined date_of_birth
     const handleDobChange = (part, value) => {
         let y = dobYear, m = dobMonth, d = dobDay;
         if (part === 'year') y = value;
@@ -62,13 +61,19 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
         if (part === 'day') d = value;
 
         // Auto-clamp day if month changed and day exceeds new max
-        if (d) {
+        if (d && m) {
             const newMax = getDaysInMonth(m, y);
             if (parseInt(d) > newMax) d = String(newMax).padStart(2, '0');
         }
 
         const combined = (y && m && d) ? `${y}-${m}-${d}` : '';
-        handleChange('date_of_birth', combined);
+        onChange({
+            ...formData,
+            _dob_day: d,
+            _dob_month: m,
+            _dob_year: y,
+            date_of_birth: combined,
+        });
     };
 
     const handleChange = (field, value) => {

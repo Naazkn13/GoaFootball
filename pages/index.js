@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from '@/styles/Home.module.css';
 import { useAuth } from '@/store/AuthContext';
 
@@ -53,8 +54,8 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>Football Registration — Join the Game</title>
-        <meta name="description" content="Register as a football player, coach, referee, or manager. Get your Football UID and join the community." />
+        <title>Goa Football Festival — Join the Game</title>
+        <meta name="description" content="Register for the Goa Football Festival as a player, coach, referee, or manager. Get your Football UID and join the community." />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </Head>
 
@@ -62,7 +63,8 @@ export default function HomePage() {
       <nav className={`${styles.navbar} ${scrolled ? styles.navScrolled : ''}`}>
         <div className={styles.navInner}>
           <Link href="/" className={styles.navLogo}>
-            ⚽ <span>FootballReg</span>
+            <Image src="/images/logo.png" alt="Goa Football Festival" width={40} height={40} className={styles.navLogoImg} />
+            <span>Goa Football Festival</span>
           </Link>
           <div className={styles.navLinks}>
             <a href="#about" className={styles.navLink}>About</a>
@@ -224,7 +226,7 @@ export default function HomePage() {
               </div>
               <div className={styles.aboutVisual}>
                 <div className={styles.aboutCard}>
-                  <span className={styles.aboutIcon}>⚽</span>
+                  <Image src="/images/logo.png" alt="Goa Football Festival" width={80} height={80} className={styles.aboutLogoImg} />
                   <h3>One Platform.<br />Every Role.</h3>
                   <p>Join the community that powers football events.</p>
                 </div>
@@ -249,7 +251,10 @@ export default function HomePage() {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
-            <span>⚽ FootballReg</span>
+            <div className={styles.footerLogoRow}>
+              <Image src="/images/logo.png" alt="Goa Football Festival" width={36} height={36} />
+              <span>Goa Football Festival</span>
+            </div>
             <p>Empowering football communities through seamless registration.</p>
           </div>
           <div className={styles.footerLinks}>
@@ -266,7 +271,7 @@ export default function HomePage() {
               <Link href="/refund-policy">Refund Policy</Link>
             </div>
           </div>
-          <p className={styles.footerCopy}>© 2026 FootballReg. All rights reserved.</p>
+          <p className={styles.footerCopy}>© 2026 Goa Football Festival. All rights reserved.</p>
         </div>
       </footer>
     </>

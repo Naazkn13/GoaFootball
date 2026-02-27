@@ -45,6 +45,11 @@
     -webkit-text-fill-color: transparent;
 }
 
+.navLogoImg {
+    border-radius: 50%;
+    object-fit: contain;
+}
+
 .navLinks {
     display: flex;
     align-items: center;
@@ -555,6 +560,12 @@
     margin-bottom: 1rem;
 }
 
+.aboutLogoImg {
+    border-radius: 50%;
+    object-fit: contain;
+    margin-bottom: 1rem;
+}
+
 .aboutCard h3 {
     font-size: 1.5rem;
     font-weight: 800;
@@ -629,6 +640,12 @@
     font-size: 0.85rem;
     color: rgba(248, 250, 252, 0.4);
     margin: 0.5rem 0 0;
+}
+
+.footerLogoRow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
 }
 
 .footerLinks {
