@@ -20,18 +20,6 @@ const roles = [
         icon: '🏁',
         description: 'Register as a match referee',
     },
-    {
-        id: 'manager',
-        label: 'Manager',
-        icon: '📋',
-        description: 'Register as a team manager',
-    },
-    {
-        id: 'other',
-        label: 'Other',
-        icon: '⚽',
-        description: 'Other football-related role',
-    },
 ];
 
 export default function RoleSelectionForm({ selectedRole, onSelectRole }) {
