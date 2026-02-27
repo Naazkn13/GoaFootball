@@ -347,28 +347,27 @@ class Database {
     return data;
   }
 
-  async getOrCreateConversation(userId, adminId, subject) {
-    // Try to find existing conversation
+  async getOrCreateConversation(userId, subject) {
+    // Try to find existing conversation for this user
     const { data: existing, error: findError } = await this.client
       .from('conversations')
       .select('*')
       .eq('user_id', userId)
-      .eq('admin_id', adminId)
       .single();
 
     if (findError && findError.code !== 'PGRST116') throw findError;
 
     if (existing) return existing;
 
-    // Create new conversation
-    return this.createConversation({ user_id: userId, admin_id: adminId, subject });
+    // Create new conversation (not locked to any admin)
+    return this.createConversation({ user_id: userId, admin_id: null, subject });
   }
 
   async getConversationsByUser(userId) {
     const { data, error } = await this.client
       .from('conversations')
       .select('*, user:user_id(id, name, email), admin:admin_id(id, name, email)')
-      .or(`user_id.eq.${userId},admin_id.eq.${userId}`)
+      .eq('user_id', userId)
       .order('last_message_at', { ascending: false });
 
     if (error) throw error;

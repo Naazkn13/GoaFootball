@@ -12,27 +12,24 @@ export default async function handler(req, res) {
     try {
         const { partnerId, subject } = req.body;
 
-        if (!partnerId) {
+        if (session.is_admin && !partnerId) {
             return res.status(400).json({
                 success: false,
-                message: 'partnerId is required'
+                message: 'partnerId (user_id) is required for admins'
             });
         }
 
-        // Determine user_id and admin_id based on who initiates
-        let userId, adminId;
+        // If an admin is creating the chat, partnerId is the user. If the user is creating it, the user is the session.id
+        let userId;
         if (session.is_admin) {
-            adminId = session.id;
             userId = partnerId;
         } else {
             userId = session.id;
-            adminId = partnerId;
         }
 
         const conversation = await database.getOrCreateConversation(
             userId,
-            adminId,
-            subject || null
+            subject || 'Support Chat'
         );
 
         res.status(200).json({

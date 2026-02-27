@@ -59,18 +59,11 @@ export default function ChatTab({ session }) {
 
         setSendingMsg(true);
         try {
-            // Determine receiver: if admin opened conv, receiver is the user; otherwise the admin
-            const receiverId = session.id === activeConv.admin_id
-                ? activeConv.user_id
-                : activeConv.admin_id;
-
-            // Use the user object to get the right ID
-            const actualReceiverId = activeConv.user?.id === session.id
-                ? activeConv.admin?.id
-                : activeConv.user?.id;
+            // In group chat architecture, admins always message the user
+            const receiverId = session.is_admin ? activeConv.user_id : activeConv.admin_id;
 
             await axiosInstance.post('/api/messages/send', {
-                receiverId: actualReceiverId || receiverId,
+                receiverId: receiverId,
                 message: newMessage.trim(),
                 conversationId: activeConv.id,
                 messageType: 'text',
@@ -88,19 +81,20 @@ export default function ChatTab({ session }) {
 
     const getPartnerName = (conv) => {
         if (!conv) return 'Unknown';
-        // Admin sees user info, user sees admin info
-        if (session.id === conv.admin_id || session.id === conv.admin?.id) {
+        // If the viewer is an admin, the partner is ALWAYS the user
+        if (session.is_admin) {
             return conv.user?.name || conv.user?.email || 'User';
         }
-        return conv.admin?.name || conv.admin?.email || 'Admin';
+        // If the viewer is a user, the partner is Support/Admin
+        return 'Customer Support';
     };
 
     const getPartnerEmail = (conv) => {
         if (!conv) return '';
-        if (session.id === conv.admin_id || session.id === conv.admin?.id) {
+        if (session.is_admin) {
             return conv.user?.email || '';
         }
-        return conv.admin?.email || '';
+        return 'goafootballfestival.info@gmail.com';
     };
 
     const formatTime = (dateStr) => {
@@ -191,17 +185,29 @@ export default function ChatTab({ session }) {
                                         <p>No messages yet. Start the conversation!</p>
                                     </div>
                                 ) : (
-                                    messages.map((msg) => (
-                                        <div
-                                            key={msg.id}
-                                            className={`${styles.messageBubble} ${msg.sender_id === session.id ? styles.messageSent : styles.messageReceived}`}
-                                        >
-                                            <div className={styles.messageText}>{msg.message}</div>
-                                            <div className={styles.messageTime}>
-                                                {formatTime(msg.created_at)}
+                                    messages.map((msg) => {
+                                        const isMyMessage = msg.sender_id === session.id;
+                                        // Try to find the admin's name if they sent it (from conversations or session)
+                                        const isFromAdmin = !isMyMessage && session.is_admin === false;
+
+                                        return (
+                                            <div
+                                                key={msg.id}
+                                                className={`${styles.messageBubble} ${isMyMessage ? styles.messageSent : styles.messageReceived}`}
+                                            >
+                                                {/* In group chat, show which admin sent the reply */}
+                                                {!isMyMessage && session.is_admin && (
+                                                    <div className={styles.messageSenderName}>
+                                                        {msg.sender_id === activeConv.user_id ? getPartnerName(activeConv) : "Admin"}
+                                                    </div>
+                                                )}
+                                                <div className={styles.messageText}>{msg.message}</div>
+                                                <div className={styles.messageTime}>
+                                                    {formatTime(msg.created_at)}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 )}
                                 <div ref={messagesEndRef} />
                             </div>

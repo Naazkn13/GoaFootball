@@ -5,6 +5,7 @@ import Script from "next/script";
 import styles from "@/styles/Profile.module.css";
 import userAPI from "@/services/api/user.api";
 import paymentAPI from "@/services/api/payment.api";
+import axiosInstance from "@/services/axios";
 import ApprovalBadge from "@/components/ApprovalBadge";
 import ChatDrawer from "@/components/ChatDrawer";
 import { useAuth } from "@/store/AuthContext";
@@ -30,12 +31,14 @@ export default function ProfilePage() {
   // Chat parameters
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [adminId, setAdminId] = useState(null);
+  const [conversationId, setConversationId] = useState(null);
   const [startingChat, setStartingChat] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
     checkPaymentStatus();
     fetchPaymentHistory();
+    fetchConversations();
   }, []);
 
   const fetchUserProfile = async () => {
@@ -52,6 +55,19 @@ export default function ProfilePage() {
       setTimeout(() => router.push("/login"), 2000);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchConversations = async () => {
+    try {
+      const resp = await axiosInstance.get('/api/messages/conversations');
+      if (resp.data.conversations && resp.data.conversations.length > 0) {
+        const conv = resp.data.conversations[0];
+        setConversationId(conv.id);
+        setAdminId(conv.admin_id);
+      }
+    } catch (err) {
+      console.error("Failed to load previous conversations", err);
     }
   };
 
@@ -150,24 +166,22 @@ export default function ProfilePage() {
   };
 
   const handleOpenChat = async () => {
-    if (adminId) {
+    if (conversationId) {
       setIsChatOpen(true);
       return;
     }
 
     setStartingChat(true);
     try {
-      // Find an available admin
-      const response = await userAPI.getAdmins();
-      if (response.admins && response.admins.length > 0) {
-        // Pick the first admin
-        setAdminId(response.admins[0].id);
-        setIsChatOpen(true);
-      } else {
-        setError("No admins currently available to chat.");
-      }
+      // Create or get conversation ID
+      const convRes = await axiosInstance.post('/api/messages/create-conversation', {
+        subject: 'Support Chat'
+      });
+
+      setConversationId(convRes.data.conversation.id);
+      setIsChatOpen(true);
     } catch (err) {
-      console.error("Failed to fetch admin list", err);
+      console.error("Failed to start chat", err);
       setError("Unable to start chat. Please try again later.");
     } finally {
       setStartingChat(false);
@@ -438,6 +452,7 @@ export default function ProfilePage() {
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
         adminId={adminId}
+        conversationId={conversationId}
       />
 
       {/* Success Modal */}

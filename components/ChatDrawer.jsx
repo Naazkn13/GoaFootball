@@ -4,7 +4,7 @@ import axiosInstance from '@/services/axios';
 import { useAuth } from '@/store/AuthContext';
 import styles from '@/styles/ChatDrawer.module.css';
 
-export default function ChatDrawer({ isOpen, onClose, adminId }) {
+export default function ChatDrawer({ isOpen, onClose, adminId, conversationId }) {
     const { user } = useAuth();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
@@ -21,7 +21,8 @@ export default function ChatDrawer({ isOpen, onClose, adminId }) {
         if (!adminId || !user) return;
         setLoading(true);
         try {
-            const response = await axiosInstance.get(`/api/messages/${adminId}`);
+            const fetchId = conversationId || adminId;
+            const response = await axiosInstance.get(`/api/messages/${fetchId}`);
             setMessages(response.data.messages || []);
         } catch (err) {
             console.error('Failed to fetch messages:', err);
@@ -34,11 +35,15 @@ export default function ChatDrawer({ isOpen, onClose, adminId }) {
         if (isOpen && adminId) {
             fetchMessages();
         }
-    }, [isOpen, adminId, fetchMessages]);
+    }, [isOpen, adminId, conversationId, fetchMessages]);
 
     // Supabase Realtime subscription
     useEffect(() => {
         if (!isOpen || !user) return;
+
+        const filterQuery = conversationId
+            ? `conversation_id=eq.${conversationId}`
+            : `receiver_id=eq.${user.id}`;
 
         const channel = supabase
             .channel('chat_messages')
@@ -46,7 +51,7 @@ export default function ChatDrawer({ isOpen, onClose, adminId }) {
                 event: 'INSERT',
                 schema: 'public',
                 table: 'messages',
-                filter: `receiver_id=eq.${user.id}`,
+                filter: filterQuery,
             }, (payload) => {
                 setMessages(prev => [...prev, payload.new]);
             })
@@ -55,7 +60,7 @@ export default function ChatDrawer({ isOpen, onClose, adminId }) {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [isOpen, user]);
+    }, [isOpen, user, conversationId]);
 
     // Scroll to bottom on new messages
     useEffect(() => {
@@ -71,6 +76,7 @@ export default function ChatDrawer({ isOpen, onClose, adminId }) {
             const response = await axiosInstance.post('/api/messages/send', {
                 receiverId: adminId,
                 message: newMessage.trim(),
+                conversationId: conversationId,
             });
 
             // Optimistically add message
