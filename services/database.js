@@ -360,7 +360,8 @@ class Database {
     if (existing) return existing;
 
     // Create new conversation (not locked to any admin)
-    return this.createConversation({ user_id: userId, admin_id: null, subject });
+    // We use a dummy UUID to bypass the database's NOT NULL constraint without locking the chat.
+    return this.createConversation({ user_id: userId, admin_id: '00000000-0000-0000-0000-000000000000', subject });
   }
 
   async getConversationsByUser(userId) {

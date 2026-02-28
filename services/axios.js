@@ -38,8 +38,11 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Don't retry refresh endpoint itself
       if (originalRequest.url === '/api/auth/refresh') {
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-          window.location.href = '/login';
+        if (typeof window !== 'undefined') {
+          const publicPaths = ['/', '/login', '/register', '/about', '/contact', '/privacy-policy', '/refund-policy', '/terms-and-conditions'];
+          if (!publicPaths.includes(window.location.pathname)) {
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(error);
       }
@@ -68,11 +71,15 @@ axiosInstance.interceptors.response.use(
         // Retry the original request
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // Refresh failed — redirect to login
+        // Refresh failed — handle gracefully
         processQueue(refreshError);
 
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-          window.location.href = '/login';
+        // Only redirect client to login if they are on a protected route
+        if (typeof window !== 'undefined') {
+          const publicPaths = ['/', '/login', '/register', '/about', '/contact', '/privacy-policy', '/refund-policy', '/terms-and-conditions'];
+          if (!publicPaths.includes(window.location.pathname)) {
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(refreshError);
       } finally {
