@@ -347,7 +347,7 @@ class Database {
     return data;
   }
 
-  async getOrCreateConversation(userId, subject) {
+  async getOrCreateConversation(userId, adminId, subject) {
     // Try to find existing conversation for this user
     const { data: existing, error: findError } = await this.client
       .from('conversations')
@@ -359,9 +359,8 @@ class Database {
 
     if (existing) return existing;
 
-    // Create new conversation (not locked to any admin)
-    // We use a dummy UUID to bypass the database's NOT NULL constraint without locking the chat.
-    return this.createConversation({ user_id: userId, admin_id: '00000000-0000-0000-0000-000000000000', subject });
+    // Create new conversation, satisfying the foreign key constraint with ANY valid admin id
+    return this.createConversation({ user_id: userId, admin_id: adminId, subject });
   }
 
   async getConversationsByUser(userId) {
