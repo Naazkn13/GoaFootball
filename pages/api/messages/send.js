@@ -13,17 +13,28 @@ export default async function handler(req, res) {
     try {
         const { receiverId, message, conversationId, messageType } = req.body;
 
-        if (!receiverId || !message) {
+        if (!message || (!receiverId && !conversationId)) {
             return res.status(400).json({
                 success: false,
-                message: 'receiverId and message are required'
+                message: 'message and either receiverId or conversationId are required'
             });
+        }
+
+        // Dynamically figure out the receiver if omitted by the frontend (group chat logic)
+        let finalReceiverId = receiverId;
+        if (!finalReceiverId && conversationId) {
+            const conversation = await database.getConversationById(conversationId);
+            if (!conversation) {
+                return res.status(404).json({ success: false, message: 'Conversation not found' });
+            }
+            // If sender is an admin, the receiver is the user. If sender is the user, the receiver is the dummy/assigned admin ID.
+            finalReceiverId = session.is_admin ? conversation.user_id : conversation.admin_id;
         }
 
         // Build message data
         const messageData = {
             sender_id: session.id,
-            receiver_id: receiverId,
+            receiver_id: finalReceiverId,
             message: message.trim(),
             is_read: false,
             message_type: messageType || 'text',

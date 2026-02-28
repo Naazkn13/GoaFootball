@@ -18,10 +18,10 @@ export default function ChatDrawer({ isOpen, onClose, adminId, conversationId })
 
     // Fetch existing messages
     const fetchMessages = useCallback(async () => {
-        if (!adminId || !user) return;
+        if (!conversationId || !user) return;
         setLoading(true);
         try {
-            const fetchId = conversationId || adminId;
+            const fetchId = conversationId;
             const response = await axiosInstance.get(`/api/messages/${fetchId}`);
             setMessages(response.data.messages || []);
         } catch (err) {
@@ -29,13 +29,13 @@ export default function ChatDrawer({ isOpen, onClose, adminId, conversationId })
         } finally {
             setLoading(false);
         }
-    }, [adminId, user]);
+    }, [conversationId, user]);
 
     useEffect(() => {
-        if (isOpen && adminId) {
+        if (isOpen && conversationId) {
             fetchMessages();
         }
-    }, [isOpen, adminId, conversationId, fetchMessages]);
+    }, [isOpen, conversationId, fetchMessages]);
 
     // Supabase Realtime subscription
     useEffect(() => {
@@ -74,7 +74,6 @@ export default function ChatDrawer({ isOpen, onClose, adminId, conversationId })
         setSending(true);
         try {
             const response = await axiosInstance.post('/api/messages/send', {
-                receiverId: adminId,
                 message: newMessage.trim(),
                 conversationId: conversationId,
             });
