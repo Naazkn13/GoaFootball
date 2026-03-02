@@ -10,27 +10,22 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Create Supabase admin client (for backend - bypasses RLS)
-// The fallback 'dummy-key' prevents a frontend crash when this file is imported by client components
-export const supabaseAdmin = createClient(
-  supabaseUrl,
-  supabaseServiceKey || 'dummy-key-for-client-side-imports'
-);
+// Only created server-side where SUPABASE_SERVICE_ROLE_KEY is available
+let supabaseAdmin = null;
+if (supabaseServiceKey) {
+  supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+}
+
+export { supabaseAdmin };
 
 // Database query helper
 class Database {
   constructor() {
-    this.client = supabaseAdmin;
-  }
-
-  // Execute raw SQL query
-  async query(sql, params = []) {
-    try {
-      console.log('Executing query:', sql);
-      console.log('With params:', params);
-      return { success: true, sql, params };
-    } catch (error) {
-      console.error('Database query error:', error);
-      throw error;
+    if (!supabaseAdmin) {
+      // On the client side, supabaseAdmin won't be available — use the public client
+      this.client = supabase;
+    } else {
+      this.client = supabaseAdmin;
     }
   }
 

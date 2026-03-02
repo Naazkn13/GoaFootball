@@ -3,10 +3,11 @@ import { AuthProvider } from "@/store/AuthContext";
 import Footer from '../components/Footer';
 import { useRouter } from 'next/router';
 
+const NO_FOOTER_PAGES = ['/login', '/signup'];
+
 function App({ Component, pageProps }) {
   const router = useRouter();
-  const noFooterPages = ['/login', '/signup'];
-  const showFooter = !noFooterPages.includes(router.pathname);
+  const showFooter = !NO_FOOTER_PAGES.includes(router.pathname);
 
   return (
     <AuthProvider>

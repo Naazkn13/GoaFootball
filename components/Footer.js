@@ -8,12 +8,12 @@ export default function Footer() {
                 <div className={styles.footerGrid}>
                     {/* Company Info */}
                     <div className={styles.footerSection}>
-                        <h3 className={styles.footerTitle}>Futsalindia</h3>
+                        <h3 className={styles.footerTitle}>Goa Football Festival</h3>
                         <p className={styles.footerText}>
-                            Your premier destination for futsal and football court bookings in Mumbai.
+                            Your premier destination for football registration and community events in Goa.
                         </p>
                         <p className={styles.footerText}>
-                            Book your game, play your passion.
+                            Register today, play your passion.
                         </p>
                     </div>
 
@@ -69,7 +69,7 @@ export default function Footer() {
 
                 <div className={styles.footerBottom}>
                     <p className={styles.copyright}>
-                        © {new Date().getFullYear()} <span className={styles.brandName}>Futsalindia</span>. All rights reserved.
+                        © {new Date().getFullYear()} <span className={styles.brandName}>Goa Football Festival</span>. All rights reserved.
                     </p>
                 </div>
             </div>

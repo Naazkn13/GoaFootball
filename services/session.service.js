@@ -3,7 +3,10 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import database from './database';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is not set. Cannot start the application.');
+}
 const ACCESS_COOKIE = 'access_token';
 const REFRESH_COOKIE = 'refresh_token';
 const ACCESS_MAX_AGE = 15 * 60; // 15 minutes

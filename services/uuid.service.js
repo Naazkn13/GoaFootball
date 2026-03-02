@@ -1,10 +1,11 @@
 // UUID Generator Service for Football IDs (FB20261234 format)
+import crypto from 'crypto';
 class UUIDService {
   // Generate Football ID: FB + Year + Sequential Number
   // Format: FB20261234
   generateFootballID() {
     const year = new Date().getFullYear();
-    const randomNum = Math.floor(1000 + Math.random() * 9000); // 4 digit random number
+    const randomNum = crypto.randomInt(1000, 10000); // 4 digit cryptographically secure random number
     return `FB${year}${randomNum}`;
   }
 
@@ -12,12 +13,12 @@ class UUIDService {
   async generateUniqueFootballID() {
     // SQL Query to generate unique ID
     const footballId = this.generateFootballID();
-    
+
     // Check if ID already exists
     const checkQuery = `
       SELECT id FROM users WHERE football_id = $1;
     `;
-    
+
     // If exists, generate new one (handled in API route)
     return { footballId, checkQuery, params: [footballId] };
   }
@@ -26,7 +27,7 @@ class UUIDService {
   async getNextFootballID() {
     const year = new Date().getFullYear();
     const prefix = `FB${year}`;
-    
+
     // Get the last ID for current year
     const query = `
       SELECT football_id 
@@ -35,7 +36,7 @@ class UUIDService {
       ORDER BY football_id DESC 
       LIMIT 1;
     `;
-    
+
     return { query, params: [`${prefix}%`], prefix };
   }
 

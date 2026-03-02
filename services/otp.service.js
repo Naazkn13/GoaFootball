@@ -3,77 +3,16 @@ import crypto from 'crypto';
 import emailService from './email.service.js';
 
 class OTPService {
-  // Generate 4-digit OTP
+  // Generate 4-digit OTP using cryptographically secure random
   generateOTP() {
-    return Math.floor(1000 + Math.random() * 9000).toString();
-  }
-
-  // Store OTP in database with expiry (5 minutes)
-  async storeOTP(email, otp, purpose = 'login') {
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
-    
-    // SQL Query to store OTP
-    const query = `
-      INSERT INTO otps (email, otp, purpose, expires_at, created_at)
-      VALUES ($1, $2, $3, $4, NOW())
-      ON CONFLICT (email, purpose) 
-      DO UPDATE SET 
-        otp = $2,
-        expires_at = $4,
-        created_at = NOW(),
-        is_verified = false,
-        attempts = 0
-      RETURNING id;
-    `;
-    
-    return { query, params: [email, otp, purpose, expiresAt] };
-  }
-
-  // Verify OTP
-  async verifyOTP(email, otp, purpose = 'login') {
-    // SQL Query to verify OTP
-    const query = `
-      UPDATE otps 
-      SET is_verified = true, verified_at = NOW()
-      WHERE email = $1 
-        AND otp = $2 
-        AND purpose = $3
-        AND is_verified = false
-        AND expires_at > NOW()
-        AND attempts < 3
-      RETURNING id, email;
-    `;
-    
-    return { query, params: [email, otp, purpose] };
-  }
-
-  // Increment failed attempts
-  async incrementAttempts(email, purpose) {
-    const query = `
-      UPDATE otps 
-      SET attempts = attempts + 1
-      WHERE email = $1 AND purpose = $2 AND is_verified = false
-      RETURNING attempts;
-    `;
-    
-    return { query, params: [email, purpose] };
-  }
-
-  // Delete old OTPs (cleanup)
-  async cleanupExpiredOTPs() {
-    const query = `
-      DELETE FROM otps 
-      WHERE expires_at < NOW() OR created_at < NOW() - INTERVAL '1 day';
-    `;
-    
-    return { query, params: [] };
+    return crypto.randomInt(1000, 10000).toString();
   }
 
   // Send OTP via email (placeholder for email service)
   async sendOTPEmail(email, otp, purpose) {
     // TODO: Integrate with email service (SendGrid, AWS SES, etc.)
     // For now, return the email configuration
-    
+
     const emailTemplates = {
       signup: {
         subject: 'Football App - Verify Your Email',
@@ -107,8 +46,7 @@ class OTPService {
       from: process.env.EMAIL_FROM || 'noreply@footballapp.com',
     };
 
-    console.log(`📧 Sending OTP Email to ${email}: ${otp}`);
-    console.log('Email Config:', JSON.stringify(emailConfig, null, 2));
+
 
     // Send email via email service
     try {

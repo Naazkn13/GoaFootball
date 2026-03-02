@@ -8,29 +8,17 @@ class EmailService {
   async send(emailConfig) {
     const { to, subject, html, from } = emailConfig;
 
-    // TODO: Integrate with actual email service
-    // For now, log to console
-    console.log('=================================');
-    console.log('📧 EMAIL SERVICE');
-    console.log('=================================');
-    console.log('Provider:', this.provider);
-    console.log('From:', from);
-    console.log('To:', to);
-    console.log('Subject:', subject);
-    console.log('HTML Body:', html);
-    console.log('=================================');
-
     // Placeholder for different email providers
     switch (this.provider) {
       case 'sendgrid':
         return this.sendWithSendGrid(emailConfig);
-      
+
       case 'aws-ses':
         return this.sendWithAWSSES(emailConfig);
-      
+
       case 'nodemailer':
         return this.sendWithNodemailer(emailConfig);
-      
+
       default:
         return this.sendToConsole(emailConfig);
     }
@@ -42,7 +30,7 @@ class EmailService {
     // const sgMail = require('@sendgrid/mail');
     // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     // await sgMail.send(emailConfig);
-    
+
     console.log('Would send via SendGrid');
     return { success: true, provider: 'sendgrid' };
   }
@@ -52,7 +40,7 @@ class EmailService {
     // TODO: Implement AWS SES
     // const AWS = require('aws-sdk');
     // const ses = new AWS.SES({ region: process.env.AWS_REGION });
-    
+
     console.log('Would send via AWS SES');
     return { success: true, provider: 'aws-ses' };
   }
@@ -61,7 +49,7 @@ class EmailService {
   async sendWithNodemailer(emailConfig) {
     try {
       const nodemailer = require('nodemailer');
-      
+
       // Create transporter
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
@@ -83,7 +71,7 @@ class EmailService {
 
       console.log('✅ Email sent successfully via Nodemailer');
       console.log('Message ID:', info.messageId);
-      
+
       return { success: true, provider: 'nodemailer', messageId: info.messageId };
     } catch (error) {
       console.error('❌ Nodemailer error:', error.message);

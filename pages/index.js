@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '@/styles/Home.module.css';
-import { useAuth } from '@/store/AuthContext';
 
 // Counter animation hook
 function useCountUp(end, duration = 2000) {
@@ -36,8 +34,6 @@ function useCountUp(end, duration = 2000) {
 }
 
 export default function HomePage() {
-  const router = useRouter();
-  const { isAuthenticated, isAdmin } = useAuth();
   const [scrolled, setScrolled] = useState(false);
 
   const stat1 = useCountUp(1200);
@@ -70,14 +66,7 @@ export default function HomePage() {
             <a href="#about" className={styles.navLink}>About</a>
             <a href="#roles" className={styles.navLink}>Roles</a>
             <a href="#how-it-works" className={styles.navLink}>How It Works</a>
-            {isAuthenticated && isAdmin && (
-              <Link href="/admin" className={styles.navLink} style={{ color: '#3b82f6', fontWeight: 600 }}>🛡️ Admin</Link>
-            )}
-            {isAuthenticated ? (
-              <Link href="/profile" className={styles.navCta}>My Profile</Link>
-            ) : (
-              <Link href="/login" className={styles.navCta}>Login / Register</Link>
-            )}
+            <Link href="/login" className={styles.navCta}>Login / Register</Link>
           </div>
         </div>
       </nav>
@@ -104,7 +93,7 @@ export default function HomePage() {
               Get your unique Football UID and become part of the community.
             </p>
             <div className={styles.heroActions}>
-              <Link href={isAuthenticated ? "/register" : "/login"} className={styles.heroPrimaryBtn}>
+              <Link href="/login" className={styles.heroPrimaryBtn}>
                 Register Now
               </Link>
               <a href="#how-it-works" className={styles.heroSecondaryBtn}>
@@ -160,7 +149,7 @@ export default function HomePage() {
                   <span className={styles.roleHomeIcon}>{role.icon}</span>
                   <h3>{role.title}</h3>
                   <p>{role.desc}</p>
-                  <Link href={isAuthenticated ? "/register" : "/login"} className={styles.roleHomeBtn}>
+                  <Link href="/login" className={styles.roleHomeBtn}>
                     Register →
                   </Link>
                 </div>
@@ -240,40 +229,12 @@ export default function HomePage() {
           <div className={styles.sectionContainer}>
             <h2>Ready to Join the Game?</h2>
             <p>Register today and get your unique Football UID</p>
-            <Link href={isAuthenticated ? "/register" : "/login"} className={styles.ctaBtn}>
+            <Link href="/login" className={styles.ctaBtn}>
               Register Now ⚽
             </Link>
           </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div className={styles.footerBrand}>
-            <div className={styles.footerLogoRow}>
-              <Image src="/images/logo.png" alt="Goa Football Festival" width={36} height={36} />
-              <span>Goa Football Festival</span>
-            </div>
-            <p>Empowering football communities through seamless registration.</p>
-          </div>
-          <div className={styles.footerLinks}>
-            <div>
-              <h4>Platform</h4>
-              <Link href="/login">Login</Link>
-              <a href="#roles">Roles</a>
-              <a href="#how-it-works">How It Works</a>
-            </div>
-            <div>
-              <h4>Legal</h4>
-              <Link href="/privacy-policy">Privacy Policy</Link>
-              <Link href="/terms-and-conditions">Terms</Link>
-              <Link href="/refund-policy">Refund Policy</Link>
-            </div>
-          </div>
-          <p className={styles.footerCopy}>© 2026 Goa Football Festival. All rights reserved.</p>
-        </div>
-      </footer>
     </>
   );
 }

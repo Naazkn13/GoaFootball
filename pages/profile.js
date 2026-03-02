@@ -116,7 +116,7 @@ export default function ProfilePage() {
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderResponse.order.amount * 100,
+        amount: orderResponse.order.amount, // Already in paise from server
         currency: orderResponse.order.currency,
         name: "Football Registration",
         description: "Registration Payment",

@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '../../../services/database';
+import database from '../../../services/database';
 import { requireAdmin } from '../../../services/session.service';
 
 export default async function handler(req, res) {
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         const { status = 'pending' } = req.query;
 
         // Fetch registrations by approval status
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await database.client
             .from('users')
             .select('id, email, name, phone, role, role_details, registration_completed, approval_status, approval_reason, date_of_birth, gender, address, documents, profile_photo_url, football_id, is_paid, created_at, updated_at')
             .eq('registration_completed', true)
