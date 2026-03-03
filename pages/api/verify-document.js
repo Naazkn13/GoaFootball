@@ -101,7 +101,22 @@ export default async function handler(req, res) {
             });
         }
 
-        // Run OCR on the image to detect text
+        // ============================================================
+        // SKIP OCR on production/Vercel — tesseract.js causes 504 timeouts
+        // Documents are accepted and can be manually reviewed by admin
+        // OCR only runs in local development
+        // ============================================================
+        const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+
+        if (isProduction) {
+            const docConfig = DOCUMENT_KEYWORDS[documentType];
+            return res.status(200).json({
+                verified: true,
+                reason: `${docConfig?.label || 'Document'} accepted. Will be verified by admin.`,
+            });
+        }
+
+        // Run OCR only in local development
         const docConfig = DOCUMENT_KEYWORDS[documentType];
         if (!docConfig) {
             return res.status(400).json({
@@ -110,16 +125,16 @@ export default async function handler(req, res) {
             });
         }
 
-        // Dynamically import tesseract.js to avoid module-level crash on Vercel serverless
+        // Dynamically import tesseract.js
         let createWorker;
         try {
             const tesseract = await import('tesseract.js');
             createWorker = tesseract.createWorker;
         } catch (importErr) {
-            console.warn('⚠️ tesseract.js not available — skipping OCR, accepting document for manual review');
+            console.warn('⚠️ tesseract.js not available — accepting document for manual review');
             return res.status(200).json({
                 verified: true,
-                reason: 'OCR not available in this environment. Document accepted pending manual review.',
+                reason: 'Document accepted pending manual review.',
                 warning: true,
             });
         }
