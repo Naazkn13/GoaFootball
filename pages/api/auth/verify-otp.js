@@ -28,6 +28,7 @@ export default async function handler(req, res) {
         try {
             otpRecord = await database.verifyOTP(email, otp, 'login');
         } catch (error) {
+            console.error('❌ verifyOTP failed:', error.message, error.code, error.details);
             // Increment failed attempts
             try {
                 await database.incrementOTPAttempts(email, 'login');

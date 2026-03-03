@@ -10,23 +10,18 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Create Supabase admin client (for backend - bypasses RLS)
-// Only created server-side where SUPABASE_SERVICE_ROLE_KEY is available
-let supabaseAdmin = null;
-if (supabaseServiceKey) {
-  supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-}
-
-export { supabaseAdmin };
+// The fallback 'dummy-key' prevents a frontend crash when this file is imported by client components
+export const supabaseAdmin = createClient(
+  supabaseUrl,
+  supabaseServiceKey || 'dummy-key-for-client-side-imports'
+);
 
 // Database query helper
 class Database {
   constructor() {
-    if (!supabaseAdmin) {
-      // On the client side, supabaseAdmin won't be available — use the public client
-      this.client = supabase;
-    } else {
-      this.client = supabaseAdmin;
-    }
+    // Always use the admin client (service role key) to bypass RLS
+    // This is critical for OTP operations which require UPDATE access on the otps table
+    this.client = supabaseAdmin;
   }
 
   // ==========================================
