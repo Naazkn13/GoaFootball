@@ -1,6 +1,6 @@
 import { IncomingForm } from 'formidable';
 import { readFileSync } from 'fs';
-import { createWorker } from 'tesseract.js';
+// NOTE: tesseract.js is imported dynamically below to prevent module-level crash on Vercel
 import { getSession, refreshSession } from '../../services/session.service';
 
 // Disable Next.js body parser for file uploads
@@ -107,6 +107,20 @@ export default async function handler(req, res) {
             return res.status(400).json({
                 verified: false,
                 reason: `Unknown document type: ${documentType}`,
+            });
+        }
+
+        // Dynamically import tesseract.js to avoid module-level crash on Vercel serverless
+        let createWorker;
+        try {
+            const tesseract = await import('tesseract.js');
+            createWorker = tesseract.createWorker;
+        } catch (importErr) {
+            console.warn('⚠️ tesseract.js not available — skipping OCR, accepting document for manual review');
+            return res.status(200).json({
+                verified: true,
+                reason: 'OCR not available in this environment. Document accepted pending manual review.',
+                warning: true,
             });
         }
 
