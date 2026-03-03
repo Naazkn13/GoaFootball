@@ -3,9 +3,13 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import database from './database';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error('FATAL: JWT_SECRET environment variable is not set. Cannot start the application.');
+// Lazy getter — do NOT throw at module load time or Vercel serverless functions crash on import
+function getJWTSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not set. Add it to Vercel Environment Variables.');
+  }
+  return secret;
 }
 const ACCESS_COOKIE = 'access_token';
 const REFRESH_COOKIE = 'refresh_token';
@@ -90,7 +94,7 @@ export async function createSession(res, user, req) {
     football_id: user.football_id || null,
   };
 
-  const accessToken = jwt.sign(accessPayload, JWT_SECRET, { expiresIn: `${ACCESS_MAX_AGE}s` });
+  const accessToken = jwt.sign(accessPayload, getJWTSecret(), { expiresIn: `${ACCESS_MAX_AGE}s` });
 
   // 2. Generate random refresh token
   const rawRefreshToken = generateRefreshToken();
@@ -134,7 +138,7 @@ export function getSession(req) {
     const cookies = parseCookies(req);
     const token = cookies[ACCESS_COOKIE];
     if (!token) return null;
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, getJWTSecret());
     return decoded;
   } catch (error) {
     return null;
@@ -224,7 +228,7 @@ export async function refreshSession(req, res) {
       football_id: user.football_id || null,
     };
 
-    const newAccessToken = jwt.sign(accessPayload, JWT_SECRET, { expiresIn: `${ACCESS_MAX_AGE}s` });
+    const newAccessToken = jwt.sign(accessPayload, getJWTSecret(), { expiresIn: `${ACCESS_MAX_AGE}s` });
 
     // Rotate refresh token
     const newRawRefreshToken = generateRefreshToken();
