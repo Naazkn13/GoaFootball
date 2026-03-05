@@ -47,7 +47,13 @@ export default function ChatTab({ session }) {
     const fetchMessages = async (conversationId) => {
         try {
             const response = await axiosInstance.get(`/api/messages/${conversationId}`);
-            setMessages(response.data.messages || []);
+            setMessages(prev => {
+                const newMessages = response.data.messages || [];
+                // Only update state if the number of messages or the last message has changed
+                if (prev.length !== newMessages.length) return newMessages;
+                if (prev.length > 0 && newMessages.length > 0 && prev[prev.length - 1].id !== newMessages[newMessages.length - 1].id) return newMessages;
+                return prev;
+            });
         } catch (err) {
             console.error('Failed to fetch messages:', err);
         }
