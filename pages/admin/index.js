@@ -276,7 +276,7 @@ export default function AdminDashboard() {
                                                         <strong>Documents:</strong>
                                                         {reg.documents.map((doc, i) => (
                                                             <a key={i} href={doc.url} target="_blank" rel="noreferrer" className={styles.docLink}>
-                                                                📄 {doc.type}
+                                                                📄 {doc.type === 'id_proof' ? 'id_proof1' : doc.type === 'birth_certificate' ? 'id_proof2' : doc.type}
                                                             </a>
                                                         ))}
                                                     </div>
