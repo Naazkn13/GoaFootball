@@ -78,10 +78,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Floating decorative elements */}
-          <div className={styles.floatingBall1} />
-          <div className={styles.floatingBall2} />
-          <div className={styles.floatingBall3} />
+
         </section>
 
         {/* ===== STATS COUNTER ===== */}
