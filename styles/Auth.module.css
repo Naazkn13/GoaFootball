@@ -6,9 +6,9 @@
   border-radius: 28px;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  background: rgba(30, 41, 59, 0.7);
+  background: var(--surface-primary);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-light);
   position: relative;
   font-family: inherit;
   animation: fadeIn 0.8s ease-out;
@@ -67,7 +67,7 @@
 .subtitle {
   margin: -5px 0 5px;
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .inputGroup {
@@ -79,24 +79,24 @@
 .inputGroup label {
   font-size: 14px;
   font-weight: 600;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   margin-left: 4px;
 }
 
 .inputGroup input {
   padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(15, 23, 42, 0.6);
-  color: #fff;
+  border: 1px solid var(--border-medium);
+  background: var(--surface-tertiary);
+  color: var(--text-primary);
   outline: none;
   font-size: 14px;
   transition: all 0.3s ease;
 }
 
 .inputGroup input:focus {
-  border-color: #10b981;
-  background: rgba(15, 23, 42, 0.8);
+  border-color: var(--accent-secondary);
+  background: var(--surface-secondary);
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
 }
 
@@ -105,8 +105,8 @@
   padding: 12px 20px;
   border-radius: 14px;
   border: none;
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: #0f172a;
+  background: linear-gradient(135deg, var(--accent-primary) 0%, #2563eb 100%);
+  color: #ffffff;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
@@ -115,12 +115,12 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 10px 20px rgba(251, 191, 36, 0.2);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
 }
 
 .primaryBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 30px rgba(251, 191, 36, 0.3);
+  box-shadow: 0 15px 30px rgba(59, 130, 246, 0.3);
   filter: brightness(1.1);
 }
 
@@ -136,14 +136,14 @@
 .switchText {
   margin-top: 10px;
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-muted);
   text-align: center;
 }
 
 .linkBtn {
   border: none;
   background: none;
-  color: #fbbf24;
+  color: var(--accent-primary);
   cursor: pointer;
   font-size: 14px;
   font-weight: 700;
@@ -152,7 +152,7 @@
 }
 
 .linkBtn:hover {
-  color: #f59e0b;
+  color: #2563eb;
   text-decoration: underline;
 }
 
@@ -240,12 +240,12 @@
 .dividerLine {
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-light);
 }
 
 .dividerText {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 500;
@@ -261,8 +261,8 @@
 }
 
 .panelRoles span {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-light);
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 13px;

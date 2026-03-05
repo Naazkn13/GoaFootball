@@ -25,8 +25,8 @@
 }
 
 .modal {
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-light);
   border-radius: 20px;
   padding: 2.5rem 2rem;
   max-width: 400px;
@@ -34,6 +34,7 @@
   text-align: center;
   position: relative;
   animation: slideUp 0.3s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 @keyframes slideUp {
@@ -54,7 +55,7 @@
   right: 1rem;
   background: transparent;
   border: none;
-  color: rgba(248, 250, 252, 0.4);
+  color: var(--text-muted);
   font-size: 1.5rem;
   cursor: pointer;
   width: 36px;
@@ -67,8 +68,8 @@
 }
 
 .closeBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #f8fafc;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
 }
 
 .modalHeader {
@@ -79,7 +80,8 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgba(26, 86, 219, 0.2);
+  background: var(--surface-secondary);
+  color: var(--accent-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,19 +95,19 @@
 .modalHeader h3 {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-primary);
   margin: 0 0 0.5rem;
 }
 
 .modalHeader p {
   font-size: 0.9rem;
-  color: rgba(248, 250, 252, 0.5);
+  color: var(--text-muted);
   margin: 0;
   line-height: 1.5;
 }
 
 .modalHeader strong {
-  color: #93c5fd;
+  color: var(--text-primary);
 }
 
 /* ---- OTP Inputs ---- */
@@ -122,19 +124,19 @@
   text-align: center;
   font-size: 1.4rem;
   font-weight: 700;
-  color: #f8fafc;
-  background: rgba(255, 255, 255, 0.08);
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+  background: var(--surface-secondary);
+  border: 2px solid var(--border-medium);
   border-radius: 12px;
   outline: none;
   transition: all 0.2s ease;
-  caret-color: #3b82f6;
+  caret-color: var(--accent-primary);
 }
 
 .otpInput:focus {
-  border-color: #3b82f6;
-  background: rgba(26, 86, 219, 0.1);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-primary);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-glow);
 }
 
 .otpInputError {
@@ -142,7 +144,7 @@
 }
 
 .error {
-  color: #fca5a5;
+  color: #ef4444;
   font-size: 0.85rem;
   margin: -0.5rem 0 1rem;
 }
@@ -150,7 +152,7 @@
 /* ---- Verify Button ---- */
 .verifyBtn {
   width: 100%;
-  background: linear-gradient(135deg, #1a56db, #3b82f6);
+  background: var(--accent-primary);
   border: none;
   color: #fff;
   padding: 0.8rem;
@@ -163,11 +165,11 @@
   justify-content: center;
   gap: 0.5rem;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .verifyBtn:hover:not(:disabled) {
-  box-shadow: 0 6px 20px rgba(26, 86, 219, 0.45);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
@@ -180,8 +182,8 @@
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border: 2px solid var(--border-medium);
+  border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -198,18 +200,18 @@
 }
 
 .cooldown {
-  color: rgba(248, 250, 252, 0.4);
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
 .cooldown strong {
-  color: #93c5fd;
+  color: var(--text-primary);
 }
 
 .resendBtn {
   background: transparent;
   border: none;
-  color: #93c5fd;
+  color: var(--accent-primary);
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
@@ -218,11 +220,11 @@
 }
 
 .resendBtn:hover {
-  color: #bfdbfe;
+  color: var(--accent-secondary);
 }
 
 .resendBtn:disabled {
-  color: rgba(248, 250, 252, 0.3);
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 

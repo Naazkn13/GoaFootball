@@ -7,7 +7,7 @@
 /* ---- MAIN ---- */
 .main {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #f8fafc;
+    color: var(--text-primary);
 }
 
 /* ---- HERO SECTION ---- */
@@ -30,7 +30,7 @@
 .heroBgGradient {
     position: absolute;
     inset: 0;
-    background: linear-gradient(160deg, #0a1628 0%, #0f2044 30%, #1a2a4a 50%, #0d1b30 70%, #0a1628 100%);
+    background: var(--bg-gradient);
 }
 
 .heroBgPattern {
@@ -59,7 +59,7 @@
     border-radius: 999px;
     font-size: 0.8rem;
     font-weight: 500;
-    color: #86efac;
+    color: var(--accent-secondary);
     margin-bottom: 1.5rem;
 }
 
@@ -100,7 +100,7 @@
 
 .heroSubtitle {
     font-size: 1.15rem;
-    color: rgba(248, 250, 252, 0.55);
+    color: var(--text-muted);
     line-height: 1.6;
     margin: 0 0 2.5rem;
     max-width: 550px;
@@ -132,9 +132,9 @@
 }
 
 .heroSecondaryBtn {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(248, 250, 252, 0.8);
+    background: var(--surface-tertiary);
+    border: 1px solid var(--border-medium);
+    color: var(--text-secondary);
     text-decoration: none;
     padding: 0.85rem 2rem;
     border-radius: 12px;
@@ -144,9 +144,9 @@
 }
 
 .heroSecondaryBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.25);
-    color: #f8fafc;
+    background: var(--surface-secondary);
+    border-color: var(--border-light);
+    color: var(--text-primary);
 }
 
 /* Floating decorative elements */
@@ -224,9 +224,9 @@
 
 /* ---- STATS SECTION ---- */
 .statsSection {
-    background: rgba(255, 255, 255, 0.02);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--surface-secondary);
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
     padding: 3rem 2rem;
 }
 
@@ -259,7 +259,7 @@
 
 .statLabel {
     font-size: 0.85rem;
-    color: rgba(248, 250, 252, 0.45);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-top: 0.3rem;
@@ -283,7 +283,7 @@
 
 .sectionSubtitle {
     text-align: center;
-    color: rgba(248, 250, 252, 0.5);
+    color: var(--text-muted);
     font-size: 1.05rem;
     margin: 0 0 3rem;
     max-width: 500px;
@@ -294,7 +294,7 @@
 /* ---- ROLES SECTION ---- */
 .rolesSection {
     padding: 6rem 2rem;
-    background: linear-gradient(180deg, #0a1628, #0f1f3a, #0a1628);
+    background: var(--bg-base);
 }
 
 .rolesGrid {
@@ -304,8 +304,9 @@
 }
 
 .roleHomeCard {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface-primary);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
     border-radius: 20px;
     padding: 2rem 1.5rem;
     text-align: center;
@@ -328,8 +329,8 @@
 
 .roleHomeCard:hover {
     transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    border-color: var(--border-medium);
+    box-shadow: var(--shadow-md);
 }
 
 .roleHomeCard:hover::before {
@@ -350,7 +351,7 @@
 
 .roleHomeCard p {
     font-size: 0.88rem;
-    color: rgba(248, 250, 252, 0.45);
+    color: var(--text-muted);
     line-height: 1.5;
     margin: 0 0 1.5rem;
 }
@@ -371,7 +372,7 @@
 /* ---- HOW IT WORKS ---- */
 .howItWorks {
     padding: 6rem 2rem;
-    background: rgba(255, 255, 255, 0.01);
+    background: var(--surface-secondary);
 }
 
 .stepsGrid {
@@ -382,8 +383,8 @@
 }
 
 .stepCard {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface-primary);
+    border: 1px solid var(--border-light);
     border-radius: 20px;
     padding: 2rem 2rem;
     text-align: center;
@@ -394,7 +395,8 @@
 
 .stepCard:hover {
     transform: translateY(-3px);
-    border-color: rgba(59, 130, 246, 0.3);
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-sm);
 }
 
 .stepNumber {
@@ -412,7 +414,7 @@
 
 .stepCard p {
     font-size: 0.88rem;
-    color: rgba(248, 250, 252, 0.45);
+    color: var(--text-muted);
     line-height: 1.5;
     margin: 0;
 }
@@ -426,7 +428,7 @@
 /* ---- ABOUT SECTION ---- */
 .aboutSection {
     padding: 6rem 2rem;
-    background: linear-gradient(180deg, #0a1628, #0f1f3a);
+    background: var(--bg-base);
 }
 
 .aboutGrid {
@@ -441,7 +443,7 @@
 }
 
 .aboutContent p {
-    color: rgba(248, 250, 252, 0.55);
+    color: var(--text-secondary);
     font-size: 0.95rem;
     line-height: 1.7;
     margin: 0 0 1rem;
@@ -458,7 +460,7 @@
 
 .featureList li {
     font-size: 0.88rem;
-    color: rgba(248, 250, 252, 0.6);
+    color: var(--text-secondary);
 }
 
 .aboutVisual {
@@ -468,8 +470,9 @@
 }
 
 .aboutCard {
-    background: rgba(26, 86, 219, 0.1);
-    border: 1px solid rgba(26, 86, 219, 0.25);
+    background: var(--surface-primary);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
     border-radius: 24px;
     padding: 3rem 2.5rem;
     text-align: center;
@@ -496,14 +499,14 @@
 
 .aboutCard p {
     font-size: 0.9rem;
-    color: rgba(248, 250, 252, 0.5);
+    color: var(--text-muted);
     margin: 0;
 }
 
 /* ---- CTA BANNER ---- */
 .ctaBanner {
     padding: 5rem 2rem;
-    background: linear-gradient(135deg, rgba(26, 86, 219, 0.15), rgba(34, 197, 94, 0.1));
+    background: var(--bg-gradient);
     text-align: center;
 }
 
@@ -514,7 +517,7 @@
 }
 
 .ctaBanner p {
-    color: rgba(248, 250, 252, 0.5);
+    color: var(--text-secondary);
     margin: 0 0 2rem;
 }
 
@@ -538,9 +541,9 @@
 
 /* ---- FOOTER ---- */
 .footer {
-    background: #060e1a;
+    background: var(--footer-bg);
     padding: 3rem 2rem 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--border-light);
 }
 
 .footerInner {
@@ -554,12 +557,12 @@
 .footerBrand span {
     font-size: 1.2rem;
     font-weight: 800;
-    color: #f8fafc;
+    color: var(--text-primary);
 }
 
 .footerBrand p {
     font-size: 0.85rem;
-    color: rgba(248, 250, 252, 0.4);
+    color: var(--text-muted);
     margin: 0.5rem 0 0;
 }
 
@@ -579,13 +582,13 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    color: rgba(248, 250, 252, 0.5);
+    color: var(--text-secondary);
     margin: 0 0 0.8rem;
 }
 
 .footerLinks a {
     display: block;
-    color: rgba(248, 250, 252, 0.35);
+    color: var(--text-muted);
     text-decoration: none;
     font-size: 0.85rem;
     margin-bottom: 0.5rem;
@@ -593,17 +596,17 @@
 }
 
 .footerLinks a:hover {
-    color: #f8fafc;
+    color: var(--text-primary);
 }
 
 .footerCopy {
     grid-column: 1 / -1;
     font-size: 0.78rem;
-    color: rgba(248, 250, 252, 0.2);
+    color: var(--text-muted);
     text-align: center;
     margin: 2rem 0 0;
     padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--border-light);
 }
 
 /* ---- RESPONSIVE ---- */

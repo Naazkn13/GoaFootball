@@ -16,8 +16,8 @@
     width: 380px;
     max-width: 90vw;
     height: 100vh;
-    background: #1e293b;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--surface-primary);
+    border-left: 1px solid var(--border-light);
     display: flex;
     flex-direction: column;
     animation: slideIn 0.3s ease;
@@ -38,20 +38,20 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .drawerHeader h3 {
     font-size: 1.05rem;
     font-weight: 600;
-    color: #f8fafc;
+    color: var(--text-primary);
     margin: 0;
 }
 
 .closeBtn {
     background: transparent;
     border: none;
-    color: rgba(248, 250, 252, 0.5);
+    color: var(--text-muted);
     font-size: 1.5rem;
     cursor: pointer;
     width: 36px;
@@ -64,8 +64,8 @@
 }
 
 .closeBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #f8fafc;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
 }
 
 .messagesContainer {
@@ -80,7 +80,7 @@
 .loadingText,
 .emptyText {
     text-align: center;
-    color: rgba(248, 250, 252, 0.4);
+    color: var(--text-muted);
     font-size: 0.9rem;
     margin-top: 2rem;
 }
@@ -95,15 +95,16 @@
 
 .sent {
     align-self: flex-end;
-    background: linear-gradient(135deg, #1a56db, #3b82f6);
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     color: #fff;
     border-bottom-right-radius: 4px;
 }
 
 .received {
     align-self: flex-start;
-    background: rgba(255, 255, 255, 0.08);
-    color: #f8fafc;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
     border-bottom-left-radius: 4px;
 }
 
@@ -115,7 +116,7 @@
 .messageTime {
     display: block;
     font-size: 0.7rem;
-    opacity: 0.6;
+    color: var(--text-muted);
     margin-top: 0.3rem;
     text-align: right;
 }
@@ -124,14 +125,14 @@
     display: flex;
     gap: 0.5rem;
     padding: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border-light);
 }
 
 .inputArea input {
     flex: 1;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #f8fafc;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border-medium);
+    color: var(--text-primary);
     padding: 0.7rem 1rem;
     border-radius: 24px;
     font-size: 0.9rem;
@@ -139,18 +140,18 @@
 }
 
 .inputArea input:focus {
-    border-color: #3b82f6;
+    border-color: var(--accent-primary);
 }
 
 .inputArea input::placeholder {
-    color: rgba(248, 250, 252, 0.3);
+    color: var(--text-muted);
 }
 
 .inputArea button {
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #1a56db, #3b82f6);
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     border: none;
     color: #fff;
     font-size: 1.1rem;

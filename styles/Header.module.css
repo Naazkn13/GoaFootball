@@ -6,17 +6,17 @@
     z-index: 100;
     padding: 1rem 0;
     transition: all 0.3s ease;
-    background: rgba(10, 22, 40, 0.95);
+    background: var(--header-bg);
     /* added background since it was completely transparent before scrolling */
     backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .navScrolled {
     padding: 0.7rem 0;
-    background: rgba(10, 22, 40, 0.99);
+    background: var(--header-scrolled);
     /* Slightly darker when scrolled */
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-md);
     /* added subtle shadow on scroll */
 }
 
@@ -32,7 +32,7 @@
 .navLogo {
     font-size: 1.3rem;
     font-weight: 800;
-    color: #f8fafc;
+    color: var(--text-primary);
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -58,7 +58,7 @@
 }
 
 .navLink {
-    color: rgba(248, 250, 252, 0.6);
+    color: var(--text-muted);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
@@ -66,7 +66,7 @@
 }
 
 .navLink:hover {
-    color: #f8fafc;
+    color: var(--text-primary);
 }
 
 .navCta {

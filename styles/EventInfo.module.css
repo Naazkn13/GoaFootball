@@ -1,6 +1,6 @@
 .container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #10b981 100%);
+    background: var(--bg-base);
     padding: 40px 20px;
 }
 
@@ -25,19 +25,16 @@
 .title {
     font-size: clamp(2.5rem, 5vw, 4rem);
     font-weight: 900;
-    background: linear-gradient(135deg, #fbbf24 0%, #ffffff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
     margin: 0 0 15px;
     letter-spacing: -0.02em;
 }
 
 .subtitle {
     font-size: clamp(1.1rem, 2vw, 1.5rem);
-    color: #e0f2fe;
+    color: var(--text-muted);
     margin: 0;
-    font-weight: 300;
+    font-weight: 400;
 }
 
 /* Quotes Section */
@@ -51,10 +48,7 @@
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 800;
     text-align: center;
-    background: linear-gradient(135deg, #fbbf24 0%, #10b981 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
     margin: 0 0 50px;
 }
 
@@ -65,11 +59,11 @@
 }
 
 .quoteCard {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-primary);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 35px 30px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-light);
     transition: all 0.4s ease;
     animation: fadeInUp 0.8s ease-out;
     animation-fill-mode: both;
@@ -105,14 +99,13 @@
 
 .quoteCard:hover {
     transform: translateY(-10px);
-    box-shadow: 0 20px 60px rgba(251, 191, 36, 0.3);
-    border-color: rgba(251, 191, 36, 0.5);
-    background: rgba(255, 255, 255, 0.15);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-medium);
 }
 
 .quoteIcon {
     font-size: 4rem;
-    color: #fbbf24;
+    color: var(--accent-primary);
     line-height: 1;
     margin-bottom: 15px;
     font-family: Georgia, serif;
@@ -120,7 +113,7 @@
 
 .quoteText {
     font-size: 1.1rem;
-    color: #ffffff;
+    color: var(--text-primary);
     line-height: 1.7;
     margin: 0 0 20px;
     font-style: italic;
@@ -128,7 +121,7 @@
 
 .quoteAuthor {
     font-size: 1rem;
-    color: #fbbf24;
+    color: var(--text-secondary);
     font-weight: 700;
     margin: 0;
     text-align: right;
@@ -148,13 +141,13 @@
 }
 
 .detailCard {
-    background: rgba(30, 41, 59, 0.7);
+    background: var(--surface-secondary);
     backdrop-filter: blur(12px);
     border-radius: 20px;
     padding: 35px 25px;
     text-align: center;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
     transition: all 0.4s ease;
     animation: fadeInUp 0.8s ease-out;
     animation-fill-mode: both;
@@ -178,8 +171,8 @@
 
 .detailCard:hover {
     transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 20px 60px rgba(16, 185, 129, 0.2);
-    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-medium);
 }
 
 .detailIcon {
@@ -190,13 +183,13 @@
 .detailTitle {
     font-size: 1.4rem;
     font-weight: 700;
-    color: #fbbf24;
+    color: var(--text-primary);
     margin: 0 0 15px;
 }
 
 .detailText {
     font-size: 1rem;
-    color: #94a3b8;
+    color: var(--text-muted);
     line-height: 1.6;
     margin: 0;
 }
@@ -209,11 +202,11 @@
 }
 
 .infoBox {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-primary);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 40px;
-    border: 2px solid rgba(251, 191, 36, 0.3);
+    border: 2px solid var(--border-light);
     animation: fadeInUp 0.8s ease-out 0.5s both;
 }
 
@@ -225,9 +218,9 @@
 
 .infoList li {
     font-size: 1.15rem;
-    color: #ffffff;
+    color: var(--text-primary);
     padding: 15px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-medium);
     transition: all 0.3s ease;
 }
 
@@ -237,7 +230,7 @@
 
 .infoList li:hover {
     padding-left: 15px;
-    color: #fbbf24;
+    color: var(--text-secondary);
 }
 
 /* CTA Section */
@@ -249,24 +242,25 @@
 }
 
 .ctaContent {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-primary);
     backdrop-filter: blur(10px);
     border-radius: 30px;
     padding: 60px 40px;
-    border: 2px solid rgba(251, 191, 36, 0.3);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
     animation: fadeInUp 0.8s ease-out 0.6s both;
 }
 
 .ctaTitle {
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 800;
-    color: #ffffff;
+    color: var(--text-primary);
     margin: 0 0 20px;
 }
 
 .ctaDescription {
     font-size: 1.2rem;
-    color: #e0f2fe;
+    color: var(--text-muted);
     margin: 0 0 40px;
     line-height: 1.6;
 }
@@ -275,25 +269,25 @@
     padding: 18px 50px;
     font-size: 1.2rem;
     font-weight: 700;
-    color: #1e3a8a;
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #fff;
+    background: var(--accent-primary);
     border: none;
     border-radius: 50px;
     cursor: pointer;
-    box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4);
+    box-shadow: var(--shadow-sm);
     transition: all 0.3s ease;
     margin-bottom: 20px;
 }
 
 .ctaButton:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(251, 191, 36, 0.6);
-    background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+    box-shadow: var(--shadow-md);
+    background: #2563eb;
 }
 
 .backLink {
     display: inline-block;
-    color: #e0f2fe;
+    color: var(--text-secondary);
     text-decoration: none;
     font-size: 1rem;
     transition: all 0.3s ease;
@@ -301,7 +295,7 @@
 }
 
 .backLink:hover {
-    color: #fbbf24;
+    color: var(--accent-primary);
     transform: translateX(-5px);
 }
 

@@ -11,11 +11,11 @@
 .profileCard {
   width: 100%;
   max-width: 750px;
-  background: rgba(30, 41, 59, 0.7);
+  background: var(--surface-primary);
   backdrop-filter: blur(12px);
   border-radius: 28px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
   overflow: hidden;
   animation: fadeIn 0.8s ease-out;
 }
@@ -26,7 +26,7 @@
   align-items: center;
   gap: 20px;
   padding: 35px;
-  background: linear-gradient(135deg, #1e3a8a 0%, #10b981 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, #2563eb 100%);
   color: #fff;
   position: relative;
 }
@@ -59,10 +59,10 @@
   padding: 8px 16px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
@@ -81,7 +81,7 @@
   margin: 0 0 20px;
   font-size: 18px;
   font-weight: 700;
-  color: #fbbf24;
+  color: var(--accent-primary);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -103,7 +103,7 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
@@ -111,9 +111,9 @@
   font-size: 15px;
   padding: 12px 16px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(15, 23, 42, 0.5);
-  color: #fff;
+  border: 1px solid var(--border-medium);
+  background: var(--surface-secondary);
+  color: var(--text-primary);
 }
 
 /* Buttons */
@@ -121,9 +121,9 @@
   margin-top: 15px;
   padding: 12px 24px;
   border-radius: 12px;
-  border: 1px solid #10b981;
+  border: 1px solid #16a34a;
   background: transparent;
-  color: #10b981;
+  color: #16a34a;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -142,7 +142,7 @@
 /* Payment section */
 .profileFooter {
   padding: 18px 26px 22px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -152,14 +152,14 @@
 .paymentText {
   margin: 4px 0 8px;
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .paymentAmount {
   margin: 0;
   font-size: 24px;
   font-weight: 800;
-  color: #fbbf24;
+  color: var(--accent-primary);
 }
 
 /* Payment button */
@@ -167,7 +167,7 @@
   padding: 11px 20px;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, #16a34a, #15803d);
   color: #ffffff;
   font-size: 14px;
   font-weight: 600;
@@ -198,13 +198,13 @@
 .footballId {
   margin: 4px 0 0;
   font-size: 13px;
-  opacity: 0.9;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
 .fieldInput {
   padding: 8px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-medium);
   border-radius: 6px;
   font-size: 14px;
   width: 100%;
@@ -216,7 +216,7 @@
   border-radius: 999px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -225,8 +225,8 @@
 }
 
 .cancelBtn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--surface-tertiary);
+  border-color: var(--border-medium);
 }
 
 .paidStatus {
@@ -242,7 +242,7 @@
 
 .paymentHistory h4 {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0 0 12px;
 }
 
@@ -251,7 +251,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background: #f8fafc;
+  background: var(--surface-tertiary);
   border-radius: 8px;
   margin-bottom: 8px;
   font-size: 13px;
@@ -383,9 +383,9 @@
   gap: 8px;
   padding: 10px 20px;
   border-radius: 999px;
-  border: 1px solid rgba(59, 130, 246, 0.5);
-  background: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
+  border: 1px solid var(--border-medium);
+  background: var(--surface-secondary);
+  color: var(--accent-primary);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -393,8 +393,8 @@
 }
 
 .chatBtn:hover {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.8);
+  background: var(--surface-tertiary);
+  border-color: var(--accent-primary);
   transform: translateY(-2px);
 }
 

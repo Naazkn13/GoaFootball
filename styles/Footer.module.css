@@ -1,10 +1,11 @@
 .footer {
-    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #10b981 100%);
-    color: #e5e7eb;
+    background: var(--surface-primary);
+    color: var(--text-secondary);
     padding: 20px 20px 10px;
     margin-top: auto;
     position: relative;
     overflow: hidden;
+    border-top: 1px solid var(--border-light);
 }
 
 .footer::before {
@@ -14,7 +15,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #fbbf24, #10b981, #3b82f6, #fbbf24);
+    background: linear-gradient(90deg, var(--bg-base), var(--accent-primary), var(--accent-secondary), var(--bg-base));
     background-size: 200% 100%;
     animation: shimmer 3s linear infinite;
 }
@@ -81,10 +82,7 @@
 .footerTitle {
     font-size: 1.1rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #fbbf24 0%, #10b981 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
     margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 1.5px;
@@ -99,7 +97,7 @@
     left: 0;
     width: 30px;
     height: 2px;
-    background: linear-gradient(90deg, #fbbf24, #10b981);
+    background: var(--accent-primary);
     border-radius: 2px;
 }
 
@@ -115,7 +113,7 @@
 }
 
 .footerLink a {
-    color: #d1d5db;
+    color: var(--text-muted);
     text-decoration: none;
     font-size: 0.95rem;
     transition: all 0.3s ease;
@@ -123,44 +121,42 @@
 }
 
 .footerLink a:hover {
-    color: #10b981;
+    color: var(--accent-primary);
     transform: translateX(5px);
 }
 
 .footerText {
-    color: #d1d5db;
+    color: var(--text-muted);
     font-size: 0.9rem;
     line-height: 1.6;
     margin-bottom: 5px;
 }
 
 .footerText a {
-    color: #10b981;
+    color: var(--accent-primary);
     text-decoration: none;
     transition: all 0.3s ease;
 }
 
 .footerText a:hover {
-    color: #fbbf24;
+    color: var(--accent-primary);
+    text-decoration: underline;
 }
 
 .footerBottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--border-light);
     padding-top: 15px;
     text-align: center;
     position: relative;
 }
 
 .copyright {
-    color: #9ca3af;
+    color: var(--text-muted);
     font-size: 0.85rem;
 }
 
 .brandName {
-    background: linear-gradient(135deg, #fbbf24 0%, #10b981 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--accent-primary);
     font-weight: 700;
 }
 
