@@ -1,33 +1,34 @@
 import "@/styles/globals.css";
 import { AuthProvider } from "@/store/AuthContext";
+import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useRouter } from 'next/router';
 
-const NO_FOOTER_PAGES = ['/login', '/signup'];
+const NO_LAYOUT_PAGES = ['/login', '/signup'];
 
 function App({ Component, pageProps }) {
   const router = useRouter();
-  const showFooter = !NO_FOOTER_PAGES.includes(router.pathname);
+  const showLayout = !NO_LAYOUT_PAGES.includes(router.pathname);
 
   return (
     <AuthProvider>
       <div style={{
-        display: 'flex',
-        flexDirection: 'column',
         minHeight: '100vh',
-        scrollBehavior: 'smooth',
-        justifyContent: showFooter ? 'flex-start' : 'center'
+        display: 'flex',
+        flexDirection: 'column'
       }}>
+        {showLayout && <Header />}
         <main style={{
-          flex: '1 0 auto',
-          display: showFooter ? 'block' : 'flex',
-          alignItems: showFooter ? 'normal' : 'center',
-          justifyContent: showFooter ? 'normal' : 'center',
-          width: '100%'
+          flex: '1',
+          display: showLayout ? 'block' : 'flex',
+          alignItems: showLayout ? 'normal' : 'center',
+          justifyContent: showLayout ? 'normal' : 'center',
+          width: '100%',
+          paddingTop: showLayout ? '80px' : '0' // Offset for the fixed header
         }}>
           <Component {...pageProps} />
         </main>
-        {showFooter && <Footer />}
+        {showLayout && <Footer />}
       </div>
     </AuthProvider>
   );

@@ -34,18 +34,10 @@ function useCountUp(end, duration = 2000) {
 }
 
 export default function HomePage() {
-  const [scrolled, setScrolled] = useState(false);
-
   const stat1 = useCountUp(1200);
   const stat2 = useCountUp(50);
   const stat3 = useCountUp(25);
   const stat4 = useCountUp(8);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <>
@@ -54,22 +46,6 @@ export default function HomePage() {
         <meta name="description" content="Register for the Goa Football Festival as a player, coach, referee, or manager. Get your Football UID and join the community." />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </Head>
-
-      {/* Sticky Navbar */}
-      <nav className={`${styles.navbar} ${scrolled ? styles.navScrolled : ''}`}>
-        <div className={styles.navInner}>
-          <Link href="/" className={styles.navLogo}>
-            <Image src="/images/logo.png" alt="Goa Football Festival" width={40} height={40} className={styles.navLogoImg} />
-            <span>Goa Football Festival</span>
-          </Link>
-          <div className={styles.navLinks}>
-            <a href="#about" className={styles.navLink}>About</a>
-            <a href="#roles" className={styles.navLink}>Roles</a>
-            <a href="#how-it-works" className={styles.navLink}>How It Works</a>
-            <Link href="/login" className={styles.navCta}>Login / Register</Link>
-          </div>
-        </div>
-      </nav>
 
       <main className={styles.main}>
         {/* ===== HERO SECTION ===== */}
