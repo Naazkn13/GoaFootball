@@ -6,16 +6,6 @@ export default function Footer() {
         <footer className={styles.footer}>
             <div className={styles.footerContent}>
                 <div className={styles.footerGrid}>
-                    {/* Company Info */}
-                    <div className={styles.footerSection}>
-                        <h3 className={styles.footerTitle}>Goa Football Festival</h3>
-                        <p className={styles.footerText}>
-                            Your premier destination for football registration and community events in Goa.
-                        </p>
-                        <p className={styles.footerText}>
-                            Register today, play your passion.
-                        </p>
-                    </div>
 
                     {/* Quick Links */}
                     <div className={styles.footerSection}>

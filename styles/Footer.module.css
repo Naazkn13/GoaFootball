@@ -63,10 +63,6 @@
     animation-delay: 0.3s;
 }
 
-.footerSection:nth-child(4) {
-    animation-delay: 0.4s;
-}
-
 @keyframes fadeInUp {
     from {
         opacity: 0;
