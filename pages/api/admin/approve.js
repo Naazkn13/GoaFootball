@@ -1,14 +1,6 @@
 import database from '../../../services/database';
-import crypto from 'crypto';
+import uuidService from '../../../services/uuid.service';
 import { requireAdmin } from '../../../services/session.service';
-
-// Generate football UID — must fit varchar(20) column
-function generateFootballId() {
-    const prefix = 'FT';
-    const timestamp = Date.now().toString(36).slice(-6).toUpperCase();
-    const random = crypto.randomInt(1000, 10000).toString();
-    return `${prefix}-${timestamp}-${random}`;
-}
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -56,9 +48,14 @@ export default async function handler(req, res) {
             updated_at: new Date().toISOString(),
         };
 
-        // If approving, generate football ID
+        // If approving, generate GFF football ID based on the user's role
         if (action === 'approve') {
-            updates.football_id = generateFootballId();
+            // Fetch the user to get their role
+            const user = await database.getUserById(userId);
+            if (user && user.role) {
+                updates.football_id = await uuidService.generateGFFId(user.role, database);
+            }
+            // If no role (e.g., super admin), skip UID assignment
         }
 
         const updatedUser = await database.updateUser(userId, updates);

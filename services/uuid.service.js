@@ -1,63 +1,64 @@
-// UUID Generator Service for Football IDs (FB20261234 format)
-import crypto from 'crypto';
+// UUID Generator Service for Football IDs (GFF26C001 format)
+
+const ROLE_PREFIX_MAP = {
+  coach: 'C',
+  referee: 'R',
+  athlete: 'A',
+  manager: 'M',
+};
+
 class UUIDService {
-  // Generate Football ID: FB + Year + Sequential Number
-  // Format: FB20261234
-  generateFootballID() {
-    const year = new Date().getFullYear();
-    const randomNum = crypto.randomInt(1000, 10000); // 4 digit cryptographically secure random number
-    return `FB${year}${randomNum}`;
+  // Generate GFF Football ID: GFF + YY + RolePrefix + SeqNumber
+  // Format: GFF26C001
+  // Requires database access to get the next sequence number
+  async generateGFFId(role, database) {
+    const rolePrefix = ROLE_PREFIX_MAP[role];
+    if (!rolePrefix) {
+      throw new Error(`Unknown role: ${role}. Valid roles: ${Object.keys(ROLE_PREFIX_MAP).join(', ')}`);
+    }
+
+    const yearSuffix = String(new Date().getFullYear()).slice(-2); // '26' for 2026
+    const yearPrefix = `GFF${yearSuffix}`;
+
+    // Query the database for the last GFF ID this year (global across all roles)
+    const lastId = await database.getLastGFFSequence(yearPrefix);
+
+    let nextSeq = 1;
+    if (lastId) {
+      // Extract the sequence number from the last ID
+      // e.g., 'GFF26C001' → '001' → 1, then increment to 2
+      const seqStr = lastId.slice(yearPrefix.length + 1); // skip 'GFF26' + role letter
+      const parsed = parseInt(seqStr, 10);
+      if (!isNaN(parsed)) {
+        nextSeq = parsed + 1;
+      }
+    }
+
+    // Zero-pad to 3 digits
+    const seqPadded = String(nextSeq).padStart(3, '0');
+    return `${yearPrefix}${rolePrefix}${seqPadded}`;
   }
 
-  // Generate unique Football ID with database check
-  async generateUniqueFootballID() {
-    // SQL Query to generate unique ID
-    const footballId = this.generateFootballID();
-
-    // Check if ID already exists
-    const checkQuery = `
-      SELECT id FROM users WHERE football_id = $1;
-    `;
-
-    // If exists, generate new one (handled in API route)
-    return { footballId, checkQuery, params: [footballId] };
-  }
-
-  // Get next sequential Football ID from database
-  async getNextFootballID() {
-    const year = new Date().getFullYear();
-    const prefix = `FB${year}`;
-
-    // Get the last ID for current year
-    const query = `
-      SELECT football_id 
-      FROM users 
-      WHERE football_id LIKE $1 
-      ORDER BY football_id DESC 
-      LIMIT 1;
-    `;
-
-    return { query, params: [`${prefix}%`], prefix };
-  }
-
-  // Parse Football ID
+  // Parse GFF Football ID
   parseFootballID(footballId) {
-    // FB20261234 -> { prefix: 'FB', year: '2026', number: '1234' }
-    if (!footballId || footballId.length < 8) {
+    // GFF26C001 -> { prefix: 'GFF', year: '26', role: 'C', number: '001' }
+    if (!footballId || footballId.length < 9) {
       return null;
     }
 
     return {
-      prefix: footballId.substring(0, 2),
-      year: footballId.substring(2, 6),
+      prefix: footballId.substring(0, 3),
+      year: footballId.substring(3, 5),
+      role: footballId.substring(5, 6),
       number: footballId.substring(6),
       full: footballId,
     };
   }
 
-  // Validate Football ID format
+  // Validate GFF Football ID format
   validateFootballID(footballId) {
-    const pattern = /^FB\d{8}$/; // FB + 8 digits (4 year + 4 sequential)
+    // GFF + 2-digit year + role letter + 3+ digit sequence
+    const pattern = /^GFF\d{2}[ACMR]\d{3,}$/;
     return pattern.test(footballId);
   }
 }

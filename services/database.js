@@ -84,6 +84,19 @@ class Database {
     return data;
   }
 
+  // Get the last GFF sequence number for the given year prefix (e.g., 'GFF26')
+  async getLastGFFSequence(yearPrefix) {
+    const { data, error } = await this.client
+      .from('users')
+      .select('football_id')
+      .like('football_id', `${yearPrefix}%`)
+      .order('football_id', { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+    return data && data.length > 0 ? data[0].football_id : null;
+  }
+
   // ==========================================
   // OTP operations
   // ==========================================

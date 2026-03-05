@@ -1,6 +1,5 @@
 import database from '../../../services/database';
 import otpService from '../../../services/otp.service';
-import uuidService from '../../../services/uuid.service';
 import bcrypt from 'bcryptjs';
 
 export default async function handler(req, res) {
@@ -65,29 +64,6 @@ export default async function handler(req, res) {
         });
       }
 
-      // Generate unique Football ID
-      let footballId = uuidService.generateFootballID();
-      let isUnique = false;
-      let attempts = 0;
-
-      // Ensure unique Football ID
-      while (!isUnique && attempts < 10) {
-        const existingFootballId = await database.getUserByFootballId(footballId);
-        if (!existingFootballId) {
-          isUnique = true;
-        } else {
-          footballId = uuidService.generateFootballID();
-          attempts++;
-        }
-      }
-
-      if (!isUnique) {
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to generate unique ID. Please try again.'
-        });
-      }
-
       // Hash password
       const passwordHash = await bcrypt.hash(password, 10);
 
@@ -102,9 +78,7 @@ export default async function handler(req, res) {
         expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
       });
 
-      // Store user data temporarily (will be activated after OTP verification)
-      // For now, create the user but mark as not verified
-      // Clean Aadhaar: remove hyphens before storing
+      // Store user data — football_id is null at signup, assigned on admin approval
       const cleanAadhaar = aadhaar ? aadhaar.replace(/\D/g, '') : null;
 
       await database.createUser({
@@ -113,7 +87,7 @@ export default async function handler(req, res) {
         password_hash: passwordHash,
         phone: phone,
         aadhaar: cleanAadhaar,
-        football_id: footballId,
+        football_id: null,
         email_verified: false,
         is_paid: false,
       });
@@ -125,7 +99,6 @@ export default async function handler(req, res) {
         success: true,
         message: 'Verification OTP sent to your email',
         email: email,
-        footballId: footballId,
         requiresOTP: true,
       });
     } catch (error) {
@@ -139,3 +112,4 @@ export default async function handler(req, res) {
     res.status(405).json({ message: 'Method not allowed' });
   }
 }
+
