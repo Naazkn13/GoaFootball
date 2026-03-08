@@ -340,11 +340,39 @@ export default function AdminDashboard() {
                                                 {reg.documents && reg.documents.length > 0 && (
                                                     <div className={styles.regDetail}>
                                                         <strong>Documents:</strong>
-                                                        {reg.documents.map((doc, i) => (
-                                                            <a key={i} href={doc.url} target="_blank" rel="noreferrer" className={styles.docLink}>
-                                                                📄 {doc.type === 'id_proof' ? 'id_proof1' : doc.type === 'birth_certificate' ? 'id_proof2' : doc.type}
-                                                            </a>
-                                                        ))}
+                                                        <div className={styles.docList}>
+                                                            {(() => {
+                                                                // Group documents by type to show history
+                                                                const groupedDocs = {};
+                                                                reg.documents.forEach(doc => {
+                                                                    if (!groupedDocs[doc.type]) groupedDocs[doc.type] = [];
+                                                                    groupedDocs[doc.type].push(doc);
+                                                                });
+
+                                                                return Object.keys(groupedDocs).map(type => (
+                                                                    <div key={type} className={styles.docGroup}>
+                                                                        <span className={styles.docTypeLabel}>
+                                                                            {type === 'id_proof' ? 'ID Proof' :
+                                                                                type === 'birth_certificate' ? 'Birth Cert.' :
+                                                                                    type === 'photo' ? 'Photo' :
+                                                                                        type === 'gff_consent_form' ? 'Consent' : type}:
+                                                                        </span>
+                                                                        {groupedDocs[type].map((doc, i) => (
+                                                                            <a
+                                                                                key={i}
+                                                                                href={doc.url}
+                                                                                target="_blank"
+                                                                                rel="noreferrer"
+                                                                                className={`${styles.docLink} ${i === groupedDocs[type].length - 1 && groupedDocs[type].length > 1 ? styles.docLinkNew : ''}`}
+                                                                            >
+                                                                                📄 View {i > 0 ? `(V${i + 1})` : ''}
+                                                                                {i === groupedDocs[type].length - 1 && groupedDocs[type].length > 1 && <span className={styles.newBadge}>NEW</span>}
+                                                                            </a>
+                                                                        ))}
+                                                                    </div>
+                                                                ));
+                                                            })()}
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>

@@ -504,6 +504,43 @@
     cursor: not-allowed;
 }
 
+.docGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.docTypeLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4b5563;
+    min-width: 80px;
+}
+
+.docLinkNew {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #16a34a;
+}
+
+.docLinkNew:hover {
+    background: #dcfce7;
+    border-color: #4ade80;
+}
+
+.newBadge {
+    background: #ef4444;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 4px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
 /* ---- Messages ---- */
 .errorMsg {
     background: rgba(239, 68, 68, 0.1);

@@ -70,11 +70,16 @@ export default async function handler(req, res) {
         user: safeProfile,
       });
     } else if (req.method === 'PUT') {
-      // Update user profile
-      const { name, phone, aadhaar } = req.body;
+      // Update user profile or upload new document to fix rejected status
+      const { name, phone, aadhaar, newDocument } = req.body;
 
       // Input validation
       const updates = {};
+
+      // Auto-Pending feature: Any user edit resets status back to pending
+      updates.approval_status = 'pending';
+      updates.approval_reason = null;
+
       if (name) {
         if (typeof name !== 'string' || name.length < 2 || name.length > 100) {
           return res.status(400).json({ success: false, message: 'Name must be 2-100 characters' });
@@ -93,6 +98,16 @@ export default async function handler(req, res) {
         }
         updates.aadhaar = aadhaar;
       }
+
+      if (newDocument) {
+        // Get current user to append document
+        const currentUser = await database.getUserByEmail(session.email);
+        if (!currentUser) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const currentDocuments = currentUser.documents || [];
+        updates.documents = [...currentDocuments, newDocument];
+      }
+
       updates.updated_at = new Date().toISOString();
 
       const updatedUser = await database.updateUser(session.id, updates);

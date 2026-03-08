@@ -21,6 +21,12 @@ export default function ProfilePage() {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // Re-upload state
+  const [reuploadType, setReuploadType] = useState('');
+  const [reuploadFile, setReuploadFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadMsg, setUploadMsg] = useState({ type: '', text: '' });
+
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     name: "",
@@ -100,6 +106,51 @@ export default function ProfilePage() {
       setError("");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update profile");
+    }
+  };
+
+  const handleReuploadDocument = async (e) => {
+    e.preventDefault();
+    if (!reuploadType || !reuploadFile) {
+      setUploadMsg({ type: 'error', text: 'Please select a document type and file.' });
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadMsg({ type: '', text: '' });
+
+    try {
+      // 1. Upload to storage
+      const formData = new FormData();
+      formData.append('file', reuploadFile);
+      formData.append('documentType', reuploadType);
+
+      const uploadRes = await axiosInstance.post('/api/user/upload-document', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      const newDocUrl = uploadRes.data.url;
+
+      // 2. Update user profile (append document + auto-pending)
+      await axiosInstance.put('/api/user/profile', {
+        newDocument: {
+          type: reuploadType,
+          url: newDocUrl,
+          uploaded_at: new Date().toISOString()
+        }
+      });
+
+      setUploadMsg({ type: 'success', text: 'Document uploaded successfully! Your profile is back to Pending.' });
+      setReuploadType('');
+      setReuploadFile(null);
+
+      // refresh profile to show pending status
+      fetchUserProfile();
+    } catch (err) {
+      console.error(err);
+      setUploadMsg({ type: 'error', text: err.response?.data?.message || 'Failed to re-upload document.' });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -242,6 +293,72 @@ export default function ProfilePage() {
               reason={user.approval_reason}
               footballId={user.football_id}
             />
+          )}
+
+          {/* Re-upload Document Section (Only for On Hold) */}
+          {user.registration_completed && user.approval_status === 'on_hold' && (
+            <div className={styles.reuploadSection}>
+              <h3 className={styles.sectionTitle} style={{ color: '#d97706', marginBottom: '12px' }}>⚠️ Action Required</h3>
+              <p style={{ fontSize: '14px', color: '#4b5563', marginBottom: '16px' }}>
+                Your profile is on hold. Please re-upload the requested document to fix the issue. Submitting a new document will automatically send your profile back for review.
+              </p>
+
+              <form onSubmit={handleReuploadDocument} className={styles.reuploadForm}>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <select
+                    className={styles.fieldInput}
+                    style={{ flex: 1, minWidth: '150px' }}
+                    value={reuploadType}
+                    onChange={(e) => setReuploadType(e.target.value)}
+                  >
+                    <option value="">Select Document Type...</option>
+                    <option value="photo">Passport-size Photo</option>
+                    <option value="id_proof">ID Proof (Aadhaar/PAN)</option>
+                    <option value="birth_certificate">Birth Certificate</option>
+                    <option value="gff_consent_form">GFF Consent Form</option>
+                  </select>
+
+                  <input
+                    type="file"
+                    className={styles.fieldInput}
+                    style={{ flex: 1, minWidth: '200px' }}
+                    accept="image/jpeg,image/png,application/pdf"
+                    onChange={(e) => setReuploadFile(e.target.files[0])}
+                  />
+
+                  <button
+                    type="submit"
+                    className={styles.paymentBtn}
+                    disabled={isUploading || !reuploadType || !reuploadFile}
+                  >
+                    {isUploading ? 'Uploading...' : 'Upload & Submit'}
+                  </button>
+                </div>
+
+                {uploadMsg.text && (
+                  <div className={uploadMsg.type === 'success' ? styles.successMsg : styles.errorMsg} style={{ marginTop: '12px' }}>
+                    {uploadMsg.text}
+                  </div>
+                )}
+              </form>
+            </div>
+          )}
+
+          {/* Rejected Section */}
+          {user.registration_completed && user.approval_status === 'rejected' && (
+            <div className={styles.reuploadSection} style={{ background: 'rgba(239, 68, 68, 0.05)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+              <h3 className={styles.sectionTitle} style={{ color: '#dc2626', marginBottom: '12px' }}>❌ Registration Rejected</h3>
+              <p style={{ fontSize: '14px', color: '#4b5563', marginBottom: '16px' }}>
+                Your registration has been rejected due to multiple incorrect documents. Please re-register with correct information to proceed.
+              </p>
+              <button
+                className={styles.paymentBtn}
+                style={{ background: 'linear-gradient(135deg, #dc2626, #b91c1c)' }}
+                onClick={() => router.push('/register')}
+              >
+                Re-Register Now
+              </button>
+            </div>
           )}
 
           {/* Error Message */}
