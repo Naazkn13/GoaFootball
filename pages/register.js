@@ -125,8 +125,13 @@ export default function RegisterPage() {
             newErrors.birth_certificate = 'Birth certificate must be less than 5MB';
         }
         // Validate GFF consent form size (max 5MB)
-        if (formData.gff_consent_form_file && formData.gff_consent_form_file.size > 5 * 1024 * 1024) {
-            newErrors.gff_consent_form = 'GFF consent form must be less than 5MB';
+        if (formData.gff_consent_form_file) {
+            if (formData.gff_consent_form_file.size > 5 * 1024 * 1024) {
+                newErrors.gff_consent_form = 'GFF consent form must be less than 5MB';
+            }
+            if (formData.gff_consent_form_file.type !== 'application/pdf') {
+                newErrors.gff_consent_form = 'GFF consent form must be a PDF file';
+            }
         }
 
         setErrors(newErrors);

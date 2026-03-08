@@ -30,6 +30,7 @@ const ROLE_FIELDS = {
 export default function RegistrationForm({ role, formData, onChange, errors, prefilledClubId, prefilledClubName, isClubRegistration }) {
     const roleFields = ROLE_FIELDS[role] || [];
     const [clubs, setClubs] = useState([]);
+    const [fileError, setFileError] = useState('');
     const addressSameAsProof = formData.address_same_as_proof || false;
 
     // Fetch clubs
@@ -461,7 +462,16 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                         id="reg-consent"
                         type="file"
                         accept="application/pdf"
-                        onChange={(e) => handleChange('gff_consent_form_file', e.target.files[0])}
+                        onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file && file.type !== 'application/pdf') {
+                                setFileError('Please select a valid PDF file for the GFF Consent Form.');
+                                e.target.value = ''; // clear input
+                                handleChange('gff_consent_form_file', null);
+                            } else {
+                                handleChange('gff_consent_form_file', file);
+                            }
+                        }}
                         required
                         className={styles.fileInput}
                     />
@@ -469,6 +479,48 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                     {errors?.gff_consent_form && <span className={styles.fieldError}>{errors.gff_consent_form}</span>}
                 </div>
             </div>
+
+            {/* Custom Error Modal */}
+            {fileError && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)'
+                }}>
+                    <div style={{
+                        background: 'white', padding: '32px 24px', borderRadius: '16px',
+                        maxWidth: '400px', width: '90%', textAlign: 'center',
+                        boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+                    }}>
+                        <div style={{
+                            background: '#fef2f2', color: '#dc2626', width: '64px', height: '64px',
+                            borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 16px', fontSize: '32px'
+                        }}>
+                            ❌
+                        </div>
+                        <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', marginBottom: '8px', margin: 0 }}>
+                            Invalid File Type
+                        </h3>
+                        <p style={{ color: '#4b5563', fontSize: '15px', marginBottom: '24px', marginTop: '12px', lineHeight: '1.5' }}>
+                            {fileError}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => setFileError('')}
+                            style={{
+                                background: '#dc2626', color: 'white', padding: '12px 24px',
+                                borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                fontWeight: '600', width: '100%', fontSize: '15px', transition: 'all 0.2s'
+                            }}
+                            onMouseOver={(e) => e.target.style.background = '#b91c1c'}
+                            onMouseOut={(e) => e.target.style.background = '#dc2626'}
+                        >
+                            Okay, I'll fix it
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

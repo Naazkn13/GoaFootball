@@ -116,6 +116,11 @@ export default function ProfilePage() {
       return;
     }
 
+    if (reuploadType === 'gff_consent_form' && reuploadFile.type !== 'application/pdf') {
+      setUploadMsg({ type: 'error', text: 'GFF Consent Form must be a PDF document.' });
+      return;
+    }
+
     setIsUploading(true);
     setUploadMsg({ type: '', text: '' });
 
@@ -322,7 +327,7 @@ export default function ProfilePage() {
                     type="file"
                     className={styles.fieldInput}
                     style={{ flex: 1, minWidth: '200px' }}
-                    accept="image/jpeg,image/png,application/pdf"
+                    accept={reuploadType === 'gff_consent_form' ? 'application/pdf' : 'image/jpeg,image/png,application/pdf'}
                     onChange={(e) => setReuploadFile(e.target.files[0])}
                   />
 
