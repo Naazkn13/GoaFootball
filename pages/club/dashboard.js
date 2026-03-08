@@ -10,6 +10,7 @@ export default function ClubDashboard() {
     const { user, loading: authLoading } = useAuth();
 
     const [players, setPlayers] = useState([]);
+    const [activeTab, setActiveTab] = useState('players');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -59,8 +60,17 @@ export default function ClubDashboard() {
                         <h2 style={{ fontSize: '1.2rem', textAlign: 'center' }}>{user.name}</h2>
                     </div>
                     <nav className={styles.sidebarNav} style={{ marginTop: '20px' }}>
-                        <button className={`${styles.navBtn} ${styles.navBtnActive}`}>
+                        <button
+                            className={`${styles.navBtn} ${activeTab === 'players' ? styles.navBtnActive : ''}`}
+                            onClick={() => setActiveTab('players')}
+                        >
                             👥 My Players
+                        </button>
+                        <button
+                            className={`${styles.navBtn} ${activeTab === 'profile' ? styles.navBtnActive : ''}`}
+                            onClick={() => setActiveTab('profile')}
+                        >
+                            🏠 My Profile
                         </button>
                     </nav>
                     <button className={styles.backBtn} onClick={async () => {
@@ -73,63 +83,108 @@ export default function ClubDashboard() {
 
                 {/* Main Content */}
                 <main className={styles.mainContent}>
-                    <section>
-                        <div className={styles.sectionHeader}>
-                            <h2>Registered Players</h2>
-                            <button
-                                onClick={() => router.push(`/register?club_id=${user.id}&club_name=${encodeURIComponent(user.name)}`)}
-                                style={{
-                                    backgroundColor: '#10b981', color: '#fff', border: 'none',
-                                    padding: '10px 20px', borderRadius: '5px', cursor: 'pointer',
-                                    fontWeight: 'bold'
-                                }}
-                            >
-                                + Add Entity
-                            </button>
-                        </div>
+                    {/* My Profile Tab */}
+                    {activeTab === 'profile' && (
+                        <section>
+                            <div className={styles.sectionHeader}>
+                                <h2>Club Profile</h2>
+                            </div>
+                            <div className={styles.settingsCard} style={{ padding: '30px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '30px' }}>
+                                    {user.logo_url ? (
+                                        <img src={user.logo_url} alt="Club Logo" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #e5e7eb' }} />
+                                    ) : (
+                                        <div style={{ width: '100px', height: '100px', borderRadius: '50%', backgroundColor: '#1a56db', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', color: '#fff', fontWeight: 'bold' }}>
+                                            {user.name?.charAt(0) || '?'}
+                                        </div>
+                                    )}
+                                    <div>
+                                        <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#1a1a1a' }}>{user.name}</h2>
+                                        <p style={{ margin: '4px 0 0', color: '#666', fontSize: '0.95rem' }}>Club Account</p>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div style={{ padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '10px' }}>
+                                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</p>
+                                        <p style={{ margin: '6px 0 0', fontSize: '1rem', color: '#1a1a1a', fontWeight: '500' }}>{user.email}</p>
+                                    </div>
+                                    <div style={{ padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '10px' }}>
+                                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Location</p>
+                                        <p style={{ margin: '6px 0 0', fontSize: '1rem', color: '#1a1a1a', fontWeight: '500' }}>{user.location || '—'}</p>
+                                    </div>
+                                    <div style={{ padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '10px' }}>
+                                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Players</p>
+                                        <p style={{ margin: '6px 0 0', fontSize: '1.2rem', color: '#1a56db', fontWeight: '700' }}>{players.length}</p>
+                                    </div>
+                                    <div style={{ padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '10px' }}>
+                                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Club ID</p>
+                                        <p style={{ margin: '6px 0 0', fontSize: '0.85rem', color: '#1a1a1a', fontWeight: '500', fontFamily: 'monospace' }}>{user.id}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    )}
 
-                        {error && <div className={styles.errorMsg}>{error}</div>}
+                    {/* Players Tab */}
+                    {activeTab === 'players' && (
+                        <section>
+                            <div className={styles.sectionHeader}>
+                                <h2>Registered Players</h2>
+                                <button
+                                    onClick={() => router.push(`/register?club_id=${user.id}&club_name=${encodeURIComponent(user.name)}`)}
+                                    style={{
+                                        backgroundColor: '#10b981', color: '#fff', border: 'none',
+                                        padding: '10px 20px', borderRadius: '5px', cursor: 'pointer',
+                                        fontWeight: 'bold'
+                                    }}
+                                >
+                                    + Add Entity
+                                </button>
+                            </div>
 
-                        <div className={styles.tableWrapper}>
-                            {loading ? (
-                                <p className={styles.loadingText}>Loading players...</p>
-                            ) : (
-                                <table className={styles.usersTable}>
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Role</th>
-                                            <th>Football ID</th>
-                                            <th>Phone</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {players.map((p) => (
-                                            <tr key={p.id}>
-                                                <td>{p.name || '—'}</td>
-                                                <td style={{ textTransform: 'capitalize' }}>{p.role || '—'}</td>
-                                                <td>{p.football_id || '—'}</td>
-                                                <td>{p.phone || '—'}</td>
-                                                <td>
-                                                    <span className={`${styles.statusBadge} ${styles[`status_${p.approval_status}`]}`}>
-                                                        {p.approval_status || 'Pending'}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {players.length === 0 && (
+                            {error && <div className={styles.errorMsg}>{error}</div>}
+
+                            <div className={styles.tableWrapper}>
+                                {loading ? (
+                                    <p className={styles.loadingText}>Loading players...</p>
+                                ) : (
+                                    <table className={styles.usersTable}>
+                                        <thead>
                                             <tr>
-                                                <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
-                                                    No players registered under your club yet.
-                                                </td>
+                                                <th>Name</th>
+                                                <th>Role</th>
+                                                <th>Football ID</th>
+                                                <th>Phone</th>
+                                                <th>Status</th>
                                             </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
-                    </section>
+                                        </thead>
+                                        <tbody>
+                                            {players.map((p) => (
+                                                <tr key={p.id}>
+                                                    <td>{p.name || '—'}</td>
+                                                    <td style={{ textTransform: 'capitalize' }}>{p.role || '—'}</td>
+                                                    <td>{p.football_id || '—'}</td>
+                                                    <td>{p.phone || '—'}</td>
+                                                    <td>
+                                                        <span className={`${styles.statusBadge} ${styles[`status_${p.approval_status}`]}`}>
+                                                            {p.approval_status || 'Pending'}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {players.length === 0 && (
+                                                <tr>
+                                                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
+                                                        No players registered under your club yet.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+                        </section>
+                    )}
                 </main>
             </div>
         </>

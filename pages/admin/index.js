@@ -438,45 +438,47 @@ export default function AdminDashboard() {
                                 <h2>Manage Clubs</h2>
                             </div>
 
-                            <div className={styles.settingsCard} style={{ marginBottom: '20px' }}>
-                                <h3>Create New Club</h3>
-                                <p>Fill out the details below to add a new club.</p>
-                                <form onSubmit={handleCreateClub} className={styles.adminForm} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                    <input
-                                        type="text"
-                                        placeholder="Club Name"
-                                        value={newClub.name}
-                                        onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
-                                        required
-                                    />
-                                    <input
-                                        type="email"
-                                        placeholder="Club Email (Login ID)"
-                                        value={newClub.email}
-                                        onChange={(e) => setNewClub({ ...newClub, email: e.target.value })}
-                                        required
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Location (City/Area)"
-                                        value={newClub.location}
-                                        onChange={(e) => setNewClub({ ...newClub, location: e.target.value })}
-                                        required
-                                    />
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>Club Logo (Optional)</label>
+                            {user?.is_super_admin && (
+                                <div className={styles.settingsCard} style={{ marginBottom: '20px' }}>
+                                    <h3>Create New Club</h3>
+                                    <p>Fill out the details below to add a new club.</p>
+                                    <form onSubmit={handleCreateClub} className={styles.adminForm} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                         <input
-                                            type="file"
-                                            accept="image/jpeg,image/png"
-                                            onChange={(e) => setClubLogoFile(e.target.files[0])}
-                                            style={{ backgroundColor: 'transparent', padding: '0', border: 'none' }}
+                                            type="text"
+                                            placeholder="Club Name"
+                                            value={newClub.name}
+                                            onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
+                                            required
                                         />
-                                    </div>
-                                    <button type="submit" disabled={loading} style={{ alignSelf: 'flex-start' }}>
-                                        {loading ? 'Creating...' : '+ Add Club'}
-                                    </button>
-                                </form>
-                            </div>
+                                        <input
+                                            type="email"
+                                            placeholder="Club Email (Login ID)"
+                                            value={newClub.email}
+                                            onChange={(e) => setNewClub({ ...newClub, email: e.target.value })}
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Location (City/Area)"
+                                            value={newClub.location}
+                                            onChange={(e) => setNewClub({ ...newClub, location: e.target.value })}
+                                            required
+                                        />
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>Club Logo (Optional)</label>
+                                            <input
+                                                type="file"
+                                                accept="image/jpeg,image/png"
+                                                onChange={(e) => setClubLogoFile(e.target.files[0])}
+                                                style={{ backgroundColor: 'transparent', padding: '0', border: 'none' }}
+                                            />
+                                        </div>
+                                        <button type="submit" disabled={loading} style={{ alignSelf: 'flex-start' }}>
+                                            {loading ? 'Creating...' : '+ Add Club'}
+                                        </button>
+                                    </form>
+                                </div>
+                            )}
 
                             <div className={styles.tableWrapper}>
                                 {loading && !clubs.length ? (
