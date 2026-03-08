@@ -15,9 +15,9 @@ class OTPService {
 
     const emailTemplates = {
       signup: {
-        subject: 'Football App - Verify Your Email',
+        subject: 'Goa Football Festival - Verify Your Email',
         body: `
-          <h2>Welcome to Football App!</h2>
+          <h2>Welcome to Goa Football Festival!</h2>
           <p>Your OTP for email verification is:</p>
           <h1 style="color: #4CAF50; font-size: 32px; letter-spacing: 5px;">${otp}</h1>
           <p>This OTP will expire in 5 minutes.</p>
@@ -25,9 +25,9 @@ class OTPService {
         `,
       },
       login: {
-        subject: 'Football App - Login OTP',
+        subject: 'Goa Football Festival - Login OTP',
         body: `
-          <h2>Login Verification</h2>
+          <h2>Goa Football Login Verification</h2>
           <p>Your OTP for login is:</p>
           <h1 style="color: #2196F3; font-size: 32px; letter-spacing: 5px;">${otp}</h1>
           <p>This OTP will expire in 5 minutes.</p>
