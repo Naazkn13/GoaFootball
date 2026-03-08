@@ -27,7 +27,7 @@ const ROLE_FIELDS = {
     ],
 };
 
-export default function RegistrationForm({ role, formData, onChange, errors, docVerificationStatus, prefilledClubId, prefilledClubName, isClubRegistration }) {
+export default function RegistrationForm({ role, formData, onChange, errors, prefilledClubId, prefilledClubName, isClubRegistration }) {
     const roleFields = ROLE_FIELDS[role] || [];
     const [clubs, setClubs] = useState([]);
     const addressSameAsProof = formData.address_same_as_proof || false;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -33,11 +33,83 @@ function useCountUp(end, duration = 2000) {
   return { count, ref };
 }
 
+// Default content (fallback if no CMS data)
+const DEFAULTS = {
+  hero: {
+    badge_text: 'Registrations Open for 2026',
+    title: 'Your Football\nJourney Starts Here',
+    subtitle: 'Register as a Player, Coach, Referee, or Manager. Get your unique Football UID and become part of the community.',
+    primary_btn: 'Register Now',
+    secondary_btn: 'Learn More ↓',
+  },
+  stats: {
+    items: [
+      { value: 1200, label: 'Registered Players' },
+      { value: 50, label: 'Certified Coaches' },
+      { value: 25, label: 'Active Referees' },
+      { value: 8, label: 'Events Organized' },
+    ],
+  },
+  roles: {
+    title: 'Choose Your Role',
+    subtitle: 'Every role matters in football. Find yours and join the community.',
+    items: [
+      { icon: '🏃', title: 'Athlete', desc: 'Register as a football player and showcase your skills', color: '#3b82f6' },
+      { icon: '🏋️', title: 'Coach', desc: 'Guide and mentor the next generation of footballers', color: '#22c55e' },
+      { icon: '🏁', title: 'Referee', desc: 'Ensure fair play and uphold the spirit of the game', color: '#f59e0b' },
+      { icon: '📋', title: 'Manager', desc: 'Lead teams and manage operations behind the scenes', color: '#a855f7' },
+    ],
+  },
+  how_it_works: {
+    title: 'How It Works',
+    subtitle: 'Get registered in 3 simple steps',
+    steps: [
+      { title: 'Enter Your Email', desc: 'Provide your email to receive a one-time login code. No passwords needed.' },
+      { title: 'Complete Registration', desc: 'Select your role, fill in your details, and upload required documents.' },
+      { title: 'Get Your Football UID', desc: 'After payment and admin approval, receive your unique Football ID.' },
+    ],
+  },
+  about: {
+    title: 'About the Platform',
+    paragraph1: 'Our Football Registration platform provides a seamless, secure way for players, coaches, referees, and managers to register for football events and obtain their unique Football UID.',
+    paragraph2: 'Built with security at its core — email OTP authentication, secure document handling, and admin-verified approval ensures only legitimate registrations are processed. Chat directly with admins for quick resolution of any queries.',
+    features: ['Secure email OTP login', 'Role-based registration', 'Document verification', 'Admin approval system', 'Real-time chat support', 'Secure payment processing'],
+  },
+  cta: {
+    title: 'Ready to Join the Game?',
+    subtitle: 'Register today and get your unique Football UID',
+    button: 'Register Now ⚽',
+  },
+};
+
 export default function HomePage() {
-  const stat1 = useCountUp(1200);
-  const stat2 = useCountUp(50);
-  const stat3 = useCountUp(25);
-  const stat4 = useCountUp(8);
+  const [content, setContent] = useState({});
+
+  useEffect(() => {
+    fetch('/api/site-content/home')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setContent(data.content);
+      })
+      .catch(() => { });
+  }, []);
+
+  // Merge CMS content with defaults
+  const hero = { ...DEFAULTS.hero, ...content.hero };
+  const statsData = content.stats || DEFAULTS.stats;
+  const rolesData = { ...DEFAULTS.roles, ...content.roles };
+  const howData = { ...DEFAULTS.how_it_works, ...content.how_it_works };
+  const aboutData = { ...DEFAULTS.about, ...content.about };
+  const ctaData = { ...DEFAULTS.cta, ...content.cta };
+
+  const statItems = statsData.items || DEFAULTS.stats.items;
+  const stat1 = useCountUp(statItems[0]?.value || 0);
+  const stat2 = useCountUp(statItems[1]?.value || 0);
+  const stat3 = useCountUp(statItems[2]?.value || 0);
+  const stat4 = useCountUp(statItems[3]?.value || 0);
+
+  // Parse hero title for the highlighted word
+  const titleParts = (hero.title || '').split('\n');
 
   return (
     <>
@@ -58,27 +130,25 @@ export default function HomePage() {
           <div className={styles.heroContent}>
             <div className={styles.heroBadge}>
               <span className={styles.badgeDot} />
-              Registrations Open for 2026
+              {hero.badge_text}
             </div>
             <h1 className={styles.heroTitle}>
-              Your Football<br />
-              Journey Starts <span className={styles.highlight}>Here</span>
+              {titleParts.map((part, i) => (
+                <span key={i}>{i > 0 && <br />}{part}</span>
+              ))}
             </h1>
             <p className={styles.heroSubtitle}>
-              Register as a Player, Coach, Referee, or Manager.
-              Get your unique Football UID and become part of the community.
+              {hero.subtitle}
             </p>
             <div className={styles.heroActions}>
               <Link href="/login" className={styles.heroPrimaryBtn}>
-                Register Now
+                {hero.primary_btn}
               </Link>
               <a href="#how-it-works" className={styles.heroSecondaryBtn}>
-                Learn More ↓
+                {hero.secondary_btn}
               </a>
             </div>
           </div>
-
-
         </section>
 
         {/* ===== STATS COUNTER ===== */}
@@ -86,19 +156,19 @@ export default function HomePage() {
           <div className={styles.statsGrid}>
             <div className={styles.statItem} ref={stat1.ref}>
               <span className={styles.statValue}>{stat1.count}+</span>
-              <span className={styles.statLabel}>Registered Players</span>
+              <span className={styles.statLabel}>{statItems[0]?.label}</span>
             </div>
             <div className={styles.statItem} ref={stat2.ref}>
               <span className={styles.statValue}>{stat2.count}+</span>
-              <span className={styles.statLabel}>Certified Coaches</span>
+              <span className={styles.statLabel}>{statItems[1]?.label}</span>
             </div>
             <div className={styles.statItem} ref={stat3.ref}>
               <span className={styles.statValue}>{stat3.count}+</span>
-              <span className={styles.statLabel}>Active Referees</span>
+              <span className={styles.statLabel}>{statItems[2]?.label}</span>
             </div>
             <div className={styles.statItem} ref={stat4.ref}>
               <span className={styles.statValue}>{stat4.count}+</span>
-              <span className={styles.statLabel}>Events Organized</span>
+              <span className={styles.statLabel}>{statItems[3]?.label}</span>
             </div>
           </div>
         </section>
@@ -106,18 +176,13 @@ export default function HomePage() {
         {/* ===== ROLE CTAs ===== */}
         <section className={styles.rolesSection} id="roles">
           <div className={styles.sectionContainer}>
-            <h2 className={styles.sectionTitle}>Choose Your Role</h2>
+            <h2 className={styles.sectionTitle}>{rolesData.title}</h2>
             <p className={styles.sectionSubtitle}>
-              Every role matters in football. Find yours and join the community.
+              {rolesData.subtitle}
             </p>
 
             <div className={styles.rolesGrid}>
-              {[
-                { icon: '🏃', title: 'Athlete', desc: 'Register as a football player and showcase your skills', color: '#3b82f6' },
-                { icon: '🏋️', title: 'Coach', desc: 'Guide and mentor the next generation of footballers', color: '#22c55e' },
-                { icon: '🏁', title: 'Referee', desc: 'Ensure fair play and uphold the spirit of the game', color: '#f59e0b' },
-                { icon: '📋', title: 'Manager', desc: 'Lead teams and manage operations behind the scenes', color: '#a855f7' },
-              ].map((role) => (
+              {(rolesData.items || []).map((role) => (
                 <div key={role.title} className={styles.roleHomeCard} style={{ '--accent': role.color }}>
                   <span className={styles.roleHomeIcon}>{role.icon}</span>
                   <h3>{role.title}</h3>
@@ -134,29 +199,22 @@ export default function HomePage() {
         {/* ===== HOW IT WORKS ===== */}
         <section className={styles.howItWorks} id="how-it-works">
           <div className={styles.sectionContainer}>
-            <h2 className={styles.sectionTitle}>How It Works</h2>
+            <h2 className={styles.sectionTitle}>{howData.title}</h2>
             <p className={styles.sectionSubtitle}>
-              Get registered in 3 simple steps
+              {howData.subtitle}
             </p>
 
             <div className={styles.stepsGrid}>
-              <div className={styles.stepCard}>
-                <div className={styles.stepNumber}>01</div>
-                <h3>Enter Your Email</h3>
-                <p>Provide your email to receive a one-time login code. No passwords needed.</p>
-              </div>
-              <div className={styles.stepConnector}>→</div>
-              <div className={styles.stepCard}>
-                <div className={styles.stepNumber}>02</div>
-                <h3>Complete Registration</h3>
-                <p>Select your role, fill in your details, and upload required documents.</p>
-              </div>
-              <div className={styles.stepConnector}>→</div>
-              <div className={styles.stepCard}>
-                <div className={styles.stepNumber}>03</div>
-                <h3>Get Your Football UID</h3>
-                <p>After payment and admin approval, receive your unique Football ID.</p>
-              </div>
+              {(howData.steps || []).map((step, i) => (
+                <React.Fragment key={step.title}>
+                  {i > 0 && <div className={styles.stepConnector}>→</div>}
+                  <div className={styles.stepCard}>
+                    <div className={styles.stepNumber}>{String(i + 1).padStart(2, '0')}</div>
+                    <h3>{step.title}</h3>
+                    <p>{step.desc}</p>
+                  </div>
+                </React.Fragment>
+              ))}
             </div>
           </div>
         </section>
@@ -166,24 +224,13 @@ export default function HomePage() {
           <div className={styles.sectionContainer}>
             <div className={styles.aboutGrid}>
               <div className={styles.aboutContent}>
-                <h2 className={styles.sectionTitle}>About the Platform</h2>
-                <p>
-                  Our Football Registration platform provides a seamless, secure way for
-                  players, coaches, referees, and managers to register for football events
-                  and obtain their unique Football UID.
-                </p>
-                <p>
-                  Built with security at its core — email OTP authentication, secure document
-                  handling, and admin-verified approval ensures only legitimate registrations
-                  are processed. Chat directly with admins for quick resolution of any queries.
-                </p>
+                <h2 className={styles.sectionTitle}>{aboutData.title}</h2>
+                <p>{aboutData.paragraph1}</p>
+                <p>{aboutData.paragraph2}</p>
                 <ul className={styles.featureList}>
-                  <li>✓ Secure email OTP login</li>
-                  <li>✓ Role-based registration</li>
-                  <li>✓ Document verification</li>
-                  <li>✓ Admin approval system</li>
-                  <li>✓ Real-time chat support</li>
-                  <li>✓ Secure payment processing</li>
+                  {(aboutData.features || []).map((feature, i) => (
+                    <li key={i}>✓ {feature}</li>
+                  ))}
                 </ul>
               </div>
               <div className={styles.aboutVisual}>
@@ -200,10 +247,10 @@ export default function HomePage() {
         {/* ===== CTA BANNER ===== */}
         <section className={styles.ctaBanner}>
           <div className={styles.sectionContainer}>
-            <h2>Ready to Join the Game?</h2>
-            <p>Register today and get your unique Football UID</p>
+            <h2>{ctaData.title}</h2>
+            <p>{ctaData.subtitle}</p>
             <Link href="/login" className={styles.ctaBtn}>
-              Register Now ⚽
+              {ctaData.button}
             </Link>
           </div>
         </section>

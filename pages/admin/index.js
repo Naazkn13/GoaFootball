@@ -5,6 +5,7 @@ import styles from '@/styles/Admin.module.css';
 import axiosInstance from '@/services/axios';
 import { useAuth } from '@/store/AuthContext';
 import ChatTab from '@/components/ChatTab';
+import PageDesigner from '@/components/PageDesigner';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -231,6 +232,14 @@ export default function AdminDashboard() {
                                 onClick={() => setActiveTab('settings')}
                             >
                                 ⚙️ Settings
+                            </button>
+                        )}
+                        {user?.is_super_admin && (
+                            <button
+                                className={`${styles.navBtn} ${activeTab === 'designer' ? styles.navBtnActive : ''}`}
+                                onClick={() => setActiveTab('designer')}
+                            >
+                                🎨 Page Designer
                             </button>
                         )}
                     </nav>
@@ -552,6 +561,16 @@ export default function AdminDashboard() {
                                     </button>
                                 </form>
                             </div>
+                        </section>
+                    )}
+
+                    {/* Page Designer Tab - Super Admin Only */}
+                    {activeTab === 'designer' && user?.is_super_admin && (
+                        <section>
+                            <div className={styles.sectionHeader}>
+                                <h2>Page Designer</h2>
+                            </div>
+                            <PageDesigner />
                         </section>
                     )}
                 </main>

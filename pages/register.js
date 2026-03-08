@@ -36,7 +36,6 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [uploadProgress, setUploadProgress] = useState('');
-    const [docVerificationStatus, setDocVerificationStatus] = useState({});
 
     // Check if a club is registering
     useEffect(() => {
@@ -59,45 +58,7 @@ export default function RegisterPage() {
         setStep(2);
     };
 
-    // Verify a single document file via the /api/verify-document endpoint
-    const verifyDocument = async (file, docType) => {
-        if (!file) return { verified: true };
 
-        // Skip verification for PDFs (OCR not applicable)
-        if (file.type === 'application/pdf') {
-            return { verified: true, reason: 'PDF accepted.' };
-        }
-
-        // Update status to loading
-        setDocVerificationStatus(prev => ({
-            ...prev,
-            [docType]: { loading: true },
-        }));
-
-        try {
-            const formDataUpload = new FormData();
-            formDataUpload.append('file', file);
-            formDataUpload.append('documentType', docType);
-
-            const response = await axiosInstance.post('/api/verify-document', formDataUpload, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-
-            const result = response.data;
-            setDocVerificationStatus(prev => ({
-                ...prev,
-                [docType]: { verified: result.verified, reason: result.reason },
-            }));
-            return result;
-        } catch (err) {
-            const reason = err.response?.data?.reason || 'Verification failed. Please try a different image.';
-            setDocVerificationStatus(prev => ({
-                ...prev,
-                [docType]: { verified: false, reason },
-            }));
-            return { verified: false, reason };
-        }
-    };
 
     // Validate form data
     const validateForm = () => {
@@ -190,33 +151,7 @@ export default function RegisterPage() {
         setError('');
 
         try {
-            // 1. Verify documents sequentially (not in parallel, to avoid auth token race conditions)
-            setUploadProgress('Verifying photo...');
-            const photoVerify = await verifyDocument(formData.photo_file, 'photo');
-
-            setUploadProgress('Verifying ID proof...');
-            const idProofVerify = await verifyDocument(formData.id_proof_file, 'id_proof');
-
-            setUploadProgress('Verifying birth certificate...');
-            const birthCertVerify = await verifyDocument(formData.birth_certificate_file, 'birth_certificate');
-
-            setUploadProgress('Verifying GFF consent form...');
-            const consentVerify = await verifyDocument(formData.gff_consent_form_file, 'gff_consent_form');
-
-            // Check if any verification failed
-            const failedDocs = [];
-            if (!idProofVerify.verified) failedDocs.push('ID Proof');
-            if (!birthCertVerify.verified) failedDocs.push('Birth Certificate');
-            if (!consentVerify.verified) failedDocs.push('GFF Consent Form');
-
-            if (failedDocs.length > 0) {
-                setError(`Document verification failed for: ${failedDocs.join(', ')}. Please upload valid documents.`);
-                setLoading(false);
-                setUploadProgress('');
-                return;
-            }
-
-            // 2. Upload documents
+            // 1. Upload documents
             setUploadProgress('Uploading photo...');
             const photoResult = await uploadDocument(formData.photo_file, 'photo');
 
@@ -357,7 +292,6 @@ export default function RegisterPage() {
                                 formData={formData}
                                 onChange={setFormData}
                                 errors={errors}
-                                docVerificationStatus={docVerificationStatus}
                                 prefilledClubId={router.query.club_id}
                                 prefilledClubName={router.query.club_name}
                                 isClubRegistration={isClubRegistration}
