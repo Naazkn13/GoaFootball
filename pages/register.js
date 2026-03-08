@@ -27,6 +27,7 @@ export default function RegisterPage() {
         photo_file: null,
         id_proof_file: null,
         birth_certificate_file: null,
+        club_id: router.query.club_id || '',
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -86,6 +87,11 @@ export default function RegisterPage() {
 
         if (!formData.name || formData.name.length < 2) {
             newErrors.name = 'Full name is required (min 2 characters)';
+        }
+
+        // Ensure club is selected (unless prefilled from Dashbaord, which we init in state)
+        if (!formData.club_id) {
+            newErrors.club_id = 'You must select a club to register under';
         }
         if (!formData.date_of_birth) {
             newErrors.date_of_birth = 'Date of birth is required';
@@ -194,6 +200,7 @@ export default function RegisterPage() {
                 phone: formData.phone,
                 aadhaar: formData.aadhaar,
                 role: selectedRole,
+                club_id: formData.club_id,
                 role_details: formData.role_details,
                 address: {
                     line1: formData.address_line1,
@@ -311,6 +318,8 @@ export default function RegisterPage() {
                                 onChange={setFormData}
                                 errors={errors}
                                 docVerificationStatus={docVerificationStatus}
+                                prefilledClubId={router.query.club_id}
+                                prefilledClubName={router.query.club_name}
                             />
 
                             <div className={styles.formActions}>

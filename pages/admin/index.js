@@ -22,6 +22,9 @@ export default function AdminDashboard() {
     const [actionReason, setActionReason] = useState('');
     const [newAdminEmail, setNewAdminEmail] = useState('');
     const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, on_hold: 0 });
+    const [clubs, setClubs] = useState([]);
+    const [newClub, setNewClub] = useState({ name: '', email: '', location: '', logo_url: '' });
+    const [clubLogoFile, setClubLogoFile] = useState(null);
 
     useEffect(() => {
         if (!authLoading && !isAdmin) {
@@ -35,6 +38,8 @@ export default function AdminDashboard() {
                 fetchRegistrations();
             } else if (activeTab === 'users') {
                 fetchUsers();
+            } else if (activeTab === 'clubs') {
+                fetchClubs();
             }
         }
     }, [isAdmin, activeTab, statusFilter]);
@@ -80,6 +85,52 @@ export default function AdminDashboard() {
             setUsers(response.data.users || []);
         } catch (err) {
             setError('Failed to fetch users');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchClubs = async () => {
+        setLoading(true);
+        try {
+            const response = await axiosInstance.get('/api/admin/clubs');
+            setClubs(response.data.clubs || []);
+        } catch (err) {
+            setError('Failed to fetch clubs');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCreateClub = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        try {
+            let logo_url = '';
+            if (clubLogoFile) {
+                const formDataUpload = new FormData();
+                formDataUpload.append('file', clubLogoFile);
+                formDataUpload.append('documentType', 'photo'); // Reuse generic upload
+                const uploadRes = await axiosInstance.post('/api/user/upload-document', formDataUpload, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+                logo_url = uploadRes.data.url;
+            }
+
+            await axiosInstance.post('/api/admin/clubs', {
+                ...newClub,
+                logo_url
+            });
+
+            setSuccess(`Club ${newClub.name} created successfully`);
+            setNewClub({ name: '', email: '', location: '', logo_url: '' });
+            setClubLogoFile(null);
+            fetchClubs();
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to create club');
         } finally {
             setLoading(false);
         }
@@ -161,6 +212,12 @@ export default function AdminDashboard() {
                             onClick={() => setActiveTab('users')}
                         >
                             👥 Users
+                        </button>
+                        <button
+                            className={`${styles.navBtn} ${activeTab === 'clubs' ? styles.navBtnActive : ''}`}
+                            onClick={() => setActiveTab('clubs')}
+                        >
+                            🛡️ Clubs
                         </button>
                         <button
                             className={`${styles.navBtn} ${activeTab === 'chat' ? styles.navBtnActive : ''}`}
@@ -371,6 +428,97 @@ export default function AdminDashboard() {
                                     </table>
                                 </div>
                             )}
+                        </section>
+                    )}
+
+                    {/* Clubs Tab */}
+                    {activeTab === 'clubs' && (
+                        <section>
+                            <div className={styles.sectionHeader}>
+                                <h2>Manage Clubs</h2>
+                            </div>
+
+                            <div className={styles.settingsCard} style={{ marginBottom: '20px' }}>
+                                <h3>Create New Club</h3>
+                                <p>Fill out the details below to add a new club.</p>
+                                <form onSubmit={handleCreateClub} className={styles.adminForm} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                    <input
+                                        type="text"
+                                        placeholder="Club Name"
+                                        value={newClub.name}
+                                        onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
+                                        required
+                                    />
+                                    <input
+                                        type="email"
+                                        placeholder="Club Email (Login ID)"
+                                        value={newClub.email}
+                                        onChange={(e) => setNewClub({ ...newClub, email: e.target.value })}
+                                        required
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Location (City/Area)"
+                                        value={newClub.location}
+                                        onChange={(e) => setNewClub({ ...newClub, location: e.target.value })}
+                                        required
+                                    />
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>Club Logo (Optional)</label>
+                                        <input
+                                            type="file"
+                                            accept="image/jpeg,image/png"
+                                            onChange={(e) => setClubLogoFile(e.target.files[0])}
+                                            style={{ backgroundColor: 'transparent', padding: '0', border: 'none' }}
+                                        />
+                                    </div>
+                                    <button type="submit" disabled={loading} style={{ alignSelf: 'flex-start' }}>
+                                        {loading ? 'Creating...' : '+ Add Club'}
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div className={styles.tableWrapper}>
+                                {loading && !clubs.length ? (
+                                    <p className={styles.loadingText}>Loading clubs...</p>
+                                ) : (
+                                    <table className={styles.usersTable}>
+                                        <thead>
+                                            <tr>
+                                                <th>Logo</th>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Location</th>
+                                                <th>Created At</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {clubs.map((c) => (
+                                                <tr key={c.id}>
+                                                    <td>
+                                                        {c.logo_url ? (
+                                                            <img src={c.logo_url} alt="logo" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                        ) : (
+                                                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {c.name.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td>{c.name}</td>
+                                                    <td>{c.email}</td>
+                                                    <td>{c.location}</td>
+                                                    <td>{new Date(c.created_at).toLocaleDateString()}</td>
+                                                </tr>
+                                            ))}
+                                            {clubs.length === 0 && (
+                                                <tr>
+                                                    <td colSpan="5" style={{ textAlign: 'center' }}>No clubs found.</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
                         </section>
                     )}
 

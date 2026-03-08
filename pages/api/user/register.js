@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     try {
         const {
             name, date_of_birth, gender, phone, aadhaar,
-            role, role_details, address, documents, profile_photo_url,
+            role, club_id, role_details, address, documents, profile_photo_url,
         } = req.body;
 
         // Validation
@@ -24,6 +24,11 @@ export default async function handler(req, res) {
             });
         }
 
+        // Require club_id for athletes, coaches, and managers
+        if (['athlete', 'coach', 'manager'].includes(role) && !club_id) {
+            return res.status(400).json({ success: false, message: 'Club selection is mandatory' });
+        }
+
         // Update user record with registration data
         const updates = {
             name,
@@ -32,6 +37,7 @@ export default async function handler(req, res) {
             phone,
             aadhaar,
             role,
+            club_id: club_id || null,
             role_details: role_details || {},
             address: address || {},
             documents: documents || [],

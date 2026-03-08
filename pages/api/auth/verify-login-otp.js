@@ -42,19 +42,39 @@ export default async function handler(req, res) {
       }
 
       // Get user details
-      const user = await database.getUserByEmail(email);
+      let user = await database.getUserByEmail(email);
+      let isClub = false;
 
       if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: 'User not found'
+        // Check if it's a club logging in
+        const club = await database.getClubByEmail(email);
+        if (club) {
+          isClub = true;
+          // Format club as a pseudo-user for the session
+          user = {
+            id: club.id,
+            name: club.name,
+            email: club.email,
+            role: 'club', // important for permissions
+            is_admin: false,
+            is_super_admin: false,
+            registration_completed: true, // Bypass reg check
+            approval_status: 'approved'
+          };
+
+          await database.client.from('clubs').update({ updated_at: new Date().toISOString() }).eq('id', club.id);
+        } else {
+          return res.status(404).json({
+            success: false,
+            message: 'User/Club not found'
+          });
+        }
+      } else {
+        // Update last login
+        await database.updateUser(user.id, {
+          last_login: new Date().toISOString(),
         });
       }
-
-      // Update last login
-      await database.updateUser(user.id, {
-        last_login: new Date().toISOString(),
-      });
 
       // Create session (access JWT + refresh token + DB record)
       await createSession(res, user, req);
@@ -65,6 +85,9 @@ export default async function handler(req, res) {
 
       if (user.is_admin || user.is_super_admin || isSuperAdminEmail) {
         redirectTo = '/admin';
+      } else if (isClub) {
+        redirectTo = '/club/dashboard';
+      } else if (!user.registration_completed) {
       } else if (!user.registration_completed) {
         redirectTo = '/register';
       }
@@ -77,13 +100,13 @@ export default async function handler(req, res) {
           id: user.id,
           name: user.name,
           email: user.email,
-          phone: user.phone,
-          football_id: user.football_id,
-          is_paid: user.is_paid,
+          phone: user.phone || null,
+          football_id: user.football_id || null,
+          is_paid: user.is_paid || false,
           is_admin: user.is_admin || false,
           is_super_admin: user.is_super_admin || isSuperAdminEmail || false,
           registration_completed: user.registration_completed || false,
-          approval_status: user.approval_status,
+          approval_status: user.approval_status || 'approved',
         },
       });
     } catch (error) {

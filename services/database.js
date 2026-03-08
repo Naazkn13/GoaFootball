@@ -31,7 +31,10 @@ class Database {
   async createUser(userData) {
     const { data, error } = await this.client
       .from('users')
-      .insert([userData])
+      .insert([{
+        ...userData,
+        club_id: userData.club_id || null, // Ensure club_id is supported
+      }])
       .select()
       .single();
 
@@ -95,6 +98,64 @@ class Database {
 
     if (error) throw error;
     return data && data.length > 0 ? data[0].football_id : null;
+  }
+
+  // ==========================================
+  // Club operations
+  // ==========================================
+
+  async createClub(clubData) {
+    const { data, error } = await this.client
+      .from('clubs')
+      .insert([clubData])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getClubs() {
+    const { data, error } = await this.client
+      .from('clubs')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getClubByEmail(email) {
+    const { data, error } = await this.client
+      .from('clubs')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  }
+
+  async getClubById(id) {
+    const { data, error } = await this.client
+      .from('clubs')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  }
+
+  async getUsersByClub(clubId) {
+    const { data, error } = await this.client
+      .from('users')
+      .select('*')
+      .eq('club_id', clubId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
   }
 
   // ==========================================

@@ -27,8 +27,23 @@ const ROLE_FIELDS = {
     ],
 };
 
-export default function RegistrationForm({ role, formData, onChange, errors, docVerificationStatus }) {
+export default function RegistrationForm({ role, formData, onChange, errors, docVerificationStatus, prefilledClubId, prefilledClubName }) {
     const roleFields = ROLE_FIELDS[role] || [];
+    const [clubs, setClubs] = useState([]);
+
+    // Fetch clubs
+    import('react').then(({ useEffect }) => {
+        useEffect(() => {
+            fetch('/api/clubs')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        setClubs(data.clubs);
+                    }
+                })
+                .catch(err => console.error("Error fetching clubs:", err));
+        }, []);
+    });
 
     // --- Date of Birth dropdown helpers ---
     const currentYear = new Date().getFullYear();
@@ -109,6 +124,32 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
             <h3 className={styles.stepTitle}>Personal Information</h3>
 
             <div className={styles.formGrid}>
+                {/* Select Club (Mandatory) */}
+                <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
+                    <label htmlFor="reg-club">Select Club *</label>
+                    {prefilledClubId ? (
+                        <input
+                            type="text"
+                            value={prefilledClubName || 'Registered via Club Dashboard'}
+                            disabled
+                            style={{ backgroundColor: '#e5e7eb', color: '#6b7280', cursor: 'not-allowed' }}
+                        />
+                    ) : (
+                        <select
+                            id="reg-club"
+                            value={formData.club_id || ''}
+                            onChange={(e) => handleChange('club_id', e.target.value)}
+                            required
+                        >
+                            <option value="">Select a Club</option>
+                            {clubs.map((club) => (
+                                <option key={club.id} value={club.id}>{club.name}</option>
+                            ))}
+                        </select>
+                    )}
+                    {errors?.club_id && <span className={styles.fieldError}>{errors.club_id}</span>}
+                </div>
+
                 <div className={styles.inputGroup}>
                     <label htmlFor="reg-name">Full Name *</label>
                     <input

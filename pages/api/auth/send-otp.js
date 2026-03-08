@@ -1,78 +1,54 @@
 import database from '../../../services/database';
 import otpService from '../../../services/otp.service';
 
-// Super admin emails — these users get is_super_admin: true automatically
-const SUPER_ADMIN_EMAILS = [
-    'knuzhat137@gmail.com',
-    'goafootballfestival.info@gmail.com',
-];
-
 export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method not allowed' });
-    }
+    if (req.method === 'POST') {
+        try {
+            const { email, purpose } = req.body;
 
-    try {
-        const { email } = req.body;
+            if (!email || !purpose) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Email and purpose are required'
+                });
+            }
 
-        // Validation
-        if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email is required'
-            });
-        }
+            if (purpose === 'login') {
+                const user = await database.getUserByEmail(email);
+                const club = await database.getClubByEmail(email);
 
-        // Check if user exists
-        let user = await database.getUserByEmail(email);
-        let isNewUser = false;
+                if (!user && !club) {
+                    // Send success anyway to prevent email enumeration attacks
+                    return res.status(200).json({
+                        success: true,
+                        message: 'If an account exists, an OTP has been sent'
+                    });
+                }
+            }
 
-        const isSuperAdmin = SUPER_ADMIN_EMAILS.includes(email.toLowerCase());
+            const otp = otpService.generateOTP();
 
-        // If user doesn't exist, create a minimal record
-        if (!user) {
-            isNewUser = true;
-            user = await database.createUser({
+            await database.storeOTP({
                 email: email,
-                name: '',
-                phone: '',
-                aadhaar: '',
-                registration_completed: false,
-                approval_status: isSuperAdmin ? 'approved' : 'pending',
-                is_admin: isSuperAdmin,
-                is_super_admin: isSuperAdmin,
+                otp: otp,
+                purpose: purpose,
+                expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
             });
-        } else {
-            isNewUser = !user.registration_completed;
+
+            await otpService.sendOTPEmail(email, otp, purpose);
+
+            res.status(200).json({
+                success: true,
+                message: 'OTP sent successfully'
+            });
+        } catch (error) {
+            console.error('Send OTP error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to send OTP'
+            });
         }
-
-        // Generate OTP
-        const otp = otpService.generateOTP();
-
-        // Store OTP in database
-        await database.storeOTP({
-            email: email,
-            otp: otp,
-            purpose: 'login',
-            expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-            is_verified: false,
-            attempts: 0,
-        });
-
-        // Send OTP via email
-        await otpService.sendOTPEmail(email, otp, 'login');
-
-        res.status(200).json({
-            success: true,
-            message: 'OTP sent to your email',
-            email: email,
-            isNewUser: isNewUser,
-        });
-    } catch (error) {
-        console.error('Send OTP error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to send OTP. Please try again.'
-        });
+    } else {
+        res.status(405).json({ message: 'Method not allowed' });
     }
 }
