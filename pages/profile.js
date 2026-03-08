@@ -268,7 +268,11 @@ export default function ProfilePage() {
           {/* Top header with gradient */}
           <div className={styles.profileHeader}>
             <div className={styles.profileAvatar}>
-              {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+              {user.profile_photo_url ? (
+                <img src={user.profile_photo_url} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()
+              )}
             </div>
             <div>
               <h2 className={styles.profileName}>{user.name || 'New User'}</h2>

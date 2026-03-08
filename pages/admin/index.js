@@ -214,12 +214,14 @@ export default function AdminDashboard() {
                         >
                             👥 Users
                         </button>
-                        <button
-                            className={`${styles.navBtn} ${activeTab === 'clubs' ? styles.navBtnActive : ''}`}
-                            onClick={() => setActiveTab('clubs')}
-                        >
-                            🛡️ Clubs
-                        </button>
+                        {user?.is_super_admin && (
+                            <button
+                                className={`${styles.navBtn} ${activeTab === 'clubs' ? styles.navBtnActive : ''}`}
+                                onClick={() => setActiveTab('clubs')}
+                            >
+                                🛡️ Clubs
+                            </button>
+                        )}
                         <button
                             className={`${styles.navBtn} ${activeTab === 'chat' ? styles.navBtnActive : ''}`}
                             onClick={() => setActiveTab('chat')}
