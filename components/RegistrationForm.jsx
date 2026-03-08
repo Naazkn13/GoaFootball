@@ -184,7 +184,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
                         <input
                             id="reg-email"
                             type="email"
-                            placeholder="Player's email address"
+                            placeholder={`${role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Player'}'s email address`}
                             value={formData.email || ''}
                             onChange={(e) => handleChange('email', e.target.value)}
                             required
