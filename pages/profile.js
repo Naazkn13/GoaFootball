@@ -24,8 +24,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     name: "",
-    phone: "",
-    aadhaar: ""
+    phone: ""
   });
 
   // Chat parameters
@@ -47,8 +46,7 @@ export default function ProfilePage() {
       setUser(response.user);
       setEditData({
         name: response.user.name,
-        phone: response.user.phone,
-        aadhaar: response.user.aadhaar
+        phone: response.user.phone
       });
     } catch (err) {
       setError("Failed to load profile. Please login again.");
@@ -292,21 +290,7 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              <div className={styles.profileField}>
-                <span className={styles.fieldLabel}>Aadhaar Number</span>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    className={styles.fieldInput}
-                    value={editData.aadhaar}
-                    onChange={(e) => setEditData({ ...editData, aadhaar: e.target.value })}
-                    maxLength="12"
-                    pattern="[0-9]{12}"
-                  />
-                ) : (
-                  <span className={styles.fieldValue}>{user.aadhaar || '—'}</span>
-                )}
-              </div>
+
 
               {user.role && (
                 <div className={styles.profileField}>
@@ -340,8 +324,7 @@ export default function ProfilePage() {
                   setIsEditing(false);
                   setEditData({
                     name: user.name,
-                    phone: user.phone,
-                    aadhaar: user.aadhaar
+                    phone: user.phone
                   });
                 }}
               >
