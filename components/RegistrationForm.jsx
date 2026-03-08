@@ -516,12 +516,13 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                             onMouseOver={(e) => e.target.style.background = '#b91c1c'}
                             onMouseOut={(e) => e.target.style.background = '#dc2626'}
                         >
-                            Okay, I'll fix it
+                            Okay
                         </button>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }
 
