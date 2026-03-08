@@ -33,7 +33,7 @@ class OTPService {
       },
       login: {
         subject: 'Goa Football Festival - Login Verification',
-        body: baseTemplate('Login Verification', 'Welcome back! Please enter the code below to securely log into your account:', '#3b82f6')
+        body: baseTemplate('Login Verification', 'Please enter the code below to securely access your account:', '#3b82f6')
       },
     };
 

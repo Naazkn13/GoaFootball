@@ -79,8 +79,8 @@ export default function LoginPage() {
         <div className={styles.formsWrapper}>
           <div className={styles.formsInner}>
             <form className={`${styles.form} ${styles.loginForm}`} onSubmit={handleSendOTP}>
-              <h2>Welcome Back 👋</h2>
-              <p className={styles.subtitle}>Enter your email to receive a login OTP</p>
+              <h2>Greetings! 🏟️</h2>
+              <p className={styles.subtitle}>Enter your email to receive an OTP</p>
 
               <div className={styles.inputGroup}>
                 <label htmlFor="login-email">Email</label>
