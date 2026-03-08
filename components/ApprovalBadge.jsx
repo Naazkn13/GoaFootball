@@ -37,7 +37,7 @@ export default function ApprovalBadge({ status, reason, footballId }) {
                 <div className={styles.badgeInfo}>
                     <span className={styles.badgeLabel}>{config.label}</span>
                     {status === 'approved' && footballId && (
-                        <span className={styles.footballIdBadge}>UID: {footballId}</span>
+                        <span className={styles.footballIdBadge}>Active ID: <span style={{ letterSpacing: '0.5px' }}>{footballId}</span></span>
                     )}
                     {reason && (status === 'rejected' || status === 'on_hold') && (
                         <span className={styles.badgeReason}>Reason: {reason}</span>
