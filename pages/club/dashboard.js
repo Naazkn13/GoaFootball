@@ -84,7 +84,7 @@ export default function ClubDashboard() {
                                     fontWeight: 'bold'
                                 }}
                             >
-                                + Add Player
+                                + Add Entity
                             </button>
                         </div>
 

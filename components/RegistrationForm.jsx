@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '@/styles/Register.module.css';
 
 // Indian states list
@@ -32,18 +32,16 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
     const [clubs, setClubs] = useState([]);
 
     // Fetch clubs
-    import('react').then(({ useEffect }) => {
-        useEffect(() => {
-            fetch('/api/clubs')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        setClubs(data.clubs);
-                    }
-                })
-                .catch(err => console.error("Error fetching clubs:", err));
-        }, []);
-    });
+    useEffect(() => {
+        fetch('/api/clubs')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setClubs(data.clubs);
+                }
+            })
+            .catch(err => console.error("Error fetching clubs:", err));
+    }, []);
 
     // --- Date of Birth dropdown helpers ---
     const currentYear = new Date().getFullYear();
