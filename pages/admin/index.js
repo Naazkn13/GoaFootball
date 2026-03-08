@@ -305,13 +305,26 @@ export default function AdminDashboard() {
                                     {registrations.map((reg) => (
                                         <div key={reg.id} className={styles.regCard}>
                                             <div className={styles.regCardHeader}>
-                                                <div className={styles.regAvatar}>
-                                                    {reg.name ? reg.name.charAt(0).toUpperCase() : '?'}
+                                                <div className={styles.regAvatar} style={{ padding: reg.profile_photo_url ? 0 : '', overflow: 'hidden' }}>
+                                                    {reg.profile_photo_url ? (
+                                                        <img src={reg.profile_photo_url} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    ) : (
+                                                        reg.name ? reg.name.charAt(0).toUpperCase() : '?'
+                                                    )}
                                                 </div>
                                                 <div className={styles.regInfo}>
-                                                    <h3>{reg.name || 'No Name'}</h3>
+                                                    <h3>
+                                                        {reg.name || 'No Name'}
+                                                        {reg.club_flag_reason && (
+                                                            <div style={{ color: '#dc2626', fontSize: '0.8rem', marginTop: '4px', fontWeight: 'bold' }}>
+                                                                🚩 Flagged by Club: {reg.club_flag_reason}
+                                                            </div>
+                                                        )}
+                                                    </h3>
                                                     <p>{reg.email}</p>
-                                                    <p className={styles.regRole}>{reg.role || 'N/A'}</p>
+                                                    <p className={styles.regRole}>
+                                                        {reg.role || 'N/A'} {reg.clubs?.name && <span style={{ color: '#666', fontSize: '0.9em', marginLeft: '6px' }}>(Club: {reg.clubs.name})</span>}
+                                                    </p>
                                                 </div>
                                                 <div className={styles.regMeta}>
                                                     <span>Registered: {new Date(reg.created_at).toLocaleDateString()}</span>
@@ -438,7 +451,8 @@ export default function AdminDashboard() {
                                     <table className={styles.usersTable}>
                                         <thead>
                                             <tr>
-                                                <th>Name</th>
+                                                <th>Photo</th>
+                                                <th>Name / Club</th>
                                                 <th>Email</th>
                                                 <th>Role</th>
                                                 <th>Status</th>
@@ -449,8 +463,25 @@ export default function AdminDashboard() {
                                         </thead>
                                         <tbody>
                                             {users.map((u) => (
-                                                <tr key={u.id}>
-                                                    <td>{u.name || '—'}</td>
+                                                <tr key={u.id} style={{ backgroundColor: u.club_flag_reason ? '#fef2f2' : 'transparent' }}>
+                                                    <td>
+                                                        {u.profile_photo_url ? (
+                                                            <img src={u.profile_photo_url} alt="Photo" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                        ) : (
+                                                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {u.name ? u.name.charAt(0).toUpperCase() : '?'}
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        {u.name || '—'}
+                                                        {u.clubs?.name && <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{u.clubs.name}</div>}
+                                                        {u.club_flag_reason && (
+                                                            <div style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '4px', fontWeight: 'bold' }}>
+                                                                🚩 Flagged: {u.club_flag_reason}
+                                                            </div>
+                                                        )}
+                                                    </td>
                                                     <td>{u.email}</td>
                                                     <td>{u.role || '—'}</td>
                                                     <td>

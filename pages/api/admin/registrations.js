@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         // Fetch registrations by approval status
         const { data, error } = await database.client
             .from('users')
-            .select('id, email, name, phone, role, role_details, registration_completed, approval_status, approval_reason, date_of_birth, gender, address, documents, profile_photo_url, football_id, is_paid, created_at, updated_at')
+            .select('id, email, name, phone, role, role_details, registration_completed, approval_status, approval_reason, date_of_birth, gender, address, documents, profile_photo_url, football_id, is_paid, created_at, updated_at, club_flag_reason, clubs(name)')
             .eq('registration_completed', true)
             .eq('approval_status', status)
             .order('created_at', { ascending: false });
