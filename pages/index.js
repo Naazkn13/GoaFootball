@@ -154,6 +154,18 @@ export default function HomePage() {
                 {hero.secondary_btn}
               </a>
             </div>
+
+            {/* Hero Images */}
+            {(hero.images || []).length > 0 && (
+              <div className={styles.heroImages}>
+                {hero.images.map((img, i) => (
+                  <div key={img.url || `hero-img-${i}`} className={styles.heroImageCard}>
+                    <img src={img.url} alt={img.caption || 'Football event'} />
+                    {img.caption && <span className={styles.heroImageCaption}>{img.caption}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

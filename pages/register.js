@@ -13,7 +13,9 @@ export default function RegisterPage() {
     const [step, setStep] = useState(1); // 1: Role, 2: Form, 3: Payment
     const [selectedRole, setSelectedRole] = useState('');
     const [formData, setFormData] = useState({
-        name: '',
+        first_name: '',
+        middle_name: '',
+        last_name: '',
         date_of_birth: '',
         gender: '',
         email: '',
@@ -167,7 +169,10 @@ export default function RegisterPage() {
             // 3. Submit registration data
             setUploadProgress('Saving registration...');
             const registrationPayload = {
-                name: formData.name,
+                first_name: formData.first_name,
+                middle_name: formData.middle_name || '',
+                last_name: formData.last_name || '',
+                name: [formData.first_name, formData.middle_name, formData.last_name].filter(Boolean).join(' '),
                 email: isClubRegistration ? formData.email : undefined,
                 date_of_birth: formData.date_of_birth,
                 gender: formData.gender,
@@ -223,7 +228,7 @@ export default function RegisterPage() {
                     }
                 },
                 prefill: {
-                    name: formData.name,
+                    name: [formData.first_name, formData.middle_name, formData.last_name].filter(Boolean).join(' '),
                     contact: formData.phone,
                 },
                 theme: { color: '#1a56db' },

@@ -171,16 +171,38 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                 </div>
 
                 <div className={styles.inputGroup}>
-                    <label htmlFor="reg-name">Full Name *</label>
+                    <label htmlFor="reg-first-name">First Name *</label>
                     <input
-                        id="reg-name"
+                        id="reg-first-name"
                         type="text"
-                        placeholder="Your full name"
-                        value={formData.name || ''}
-                        onChange={(e) => handleChange('name', e.target.value)}
+                        placeholder="First name"
+                        value={formData.first_name || ''}
+                        onChange={(e) => handleChange('first_name', e.target.value)}
                         required
                     />
-                    {errors?.name && <span className={styles.fieldError}>{errors.name}</span>}
+                    {errors?.first_name && <span className={styles.fieldError}>{errors.first_name}</span>}
+                </div>
+
+                <div className={styles.inputGroup}>
+                    <label htmlFor="reg-middle-name">Middle Name</label>
+                    <input
+                        id="reg-middle-name"
+                        type="text"
+                        placeholder="Middle name (optional)"
+                        value={formData.middle_name || ''}
+                        onChange={(e) => handleChange('middle_name', e.target.value)}
+                    />
+                </div>
+
+                <div className={styles.inputGroup}>
+                    <label htmlFor="reg-last-name">Last Name</label>
+                    <input
+                        id="reg-last-name"
+                        type="text"
+                        placeholder="Last name (optional)"
+                        value={formData.last_name || ''}
+                        onChange={(e) => handleChange('last_name', e.target.value)}
+                    />
                 </div>
 
                 {isClubRegistration && (

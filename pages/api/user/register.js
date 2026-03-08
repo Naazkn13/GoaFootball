@@ -13,12 +13,16 @@ export default async function handler(req, res) {
 
     try {
         const {
-            name, email, date_of_birth, gender, phone,
+            name, first_name, middle_name, last_name,
+            email, date_of_birth, gender, phone,
             role, club_id, role_details, address, documents, profile_photo_url,
         } = req.body;
 
-        // Base Validation (Aadhaar removed)
-        if (!name || !date_of_birth || !gender || !phone || !role) {
+        // Build combined name from parts (backward compatibility)
+        const fullName = name || [first_name, middle_name, last_name].filter(Boolean).join(' ');
+
+        // Base Validation
+        if ((!name && !first_name) || !date_of_birth || !gender || !phone || !role) {
             return res.status(400).json({
                 success: false,
                 message: 'All required fields must be filled',
@@ -50,7 +54,7 @@ export default async function handler(req, res) {
 
             // Create new user and populate registration details immediately
             const newUser = await database.createUser({
-                name: name,
+                name: fullName,
                 email: email,
                 password_hash: passwordHash,
                 phone: phone,
@@ -81,7 +85,10 @@ export default async function handler(req, res) {
         } else {
             // STANDARD individual user registration (they already signed up and are completing their profile)
             const updates = {
-                name,
+                name: fullName,
+                first_name: first_name || '',
+                middle_name: middle_name || '',
+                last_name: last_name || '',
                 date_of_birth,
                 gender,
                 phone,
