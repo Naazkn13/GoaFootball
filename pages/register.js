@@ -66,8 +66,8 @@ export default function RegisterPage() {
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.name || formData.name.length < 2) {
-            newErrors.name = 'Full name is required (min 2 characters)';
+        if (!formData.first_name || formData.first_name.trim().length < 2) {
+            newErrors.first_name = 'First name is required (min 2 characters)';
         }
 
         // Ensure club is selected (unless prefilled from Dashbaord, which we init in state)

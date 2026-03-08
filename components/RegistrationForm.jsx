@@ -122,22 +122,6 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
         }
     };
 
-    // Helper to render verification status badge
-    const renderVerifyStatus = (docType) => {
-        const status = docVerificationStatus?.[docType];
-        if (!status) return null;
-        if (status.loading) {
-            return <span className={styles.verifyBadge + ' ' + styles.verifyLoading}>⏳ Verifying...</span>;
-        }
-        if (status.verified === true) {
-            return <span className={styles.verifyBadge + ' ' + styles.verifySuccess}>✅ Verified</span>;
-        }
-        if (status.verified === false) {
-            return <span className={styles.verifyBadge + ' ' + styles.verifyError}>❌ {status.reason}</span>;
-        }
-        return null;
-    };
-
     return (
         <div className={styles.formSection}>
             {/* Common Fields */}
@@ -439,7 +423,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                         required
                         className={styles.fileInput}
                     />
-                    {renderVerifyStatus('photo')}
+
                     {errors?.photo && <span className={styles.fieldError}>{errors.photo}</span>}
                 </div>
 
@@ -453,7 +437,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                         required
                         className={styles.fileInput}
                     />
-                    {renderVerifyStatus('id_proof')}
+
                     {errors?.id_proof && <span className={styles.fieldError}>{errors.id_proof}</span>}
                 </div>
 
@@ -467,7 +451,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                         required
                         className={styles.fileInput}
                     />
-                    {renderVerifyStatus('birth_certificate')}
+
                     {errors?.birth_certificate && <span className={styles.fieldError}>{errors.birth_certificate}</span>}
                 </div>
 
@@ -481,7 +465,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                         required
                         className={styles.fileInput}
                     />
-                    {renderVerifyStatus('gff_consent_form')}
+
                     {errors?.gff_consent_form && <span className={styles.fieldError}>{errors.gff_consent_form}</span>}
                 </div>
             </div>
