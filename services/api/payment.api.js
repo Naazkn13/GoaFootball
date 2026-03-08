@@ -2,8 +2,9 @@ import axiosInstance from '@/services/axios';
 
 const paymentAPI = {
   // Create payment order (amount is server-side, not passed from client)
-  createOrder: async () => {
-    const response = await axiosInstance.post('/api/payment/create-order');
+  createOrder: async (userId) => {
+    const payload = userId ? { userId } : {};
+    const response = await axiosInstance.post('/api/payment/create-order', payload);
     return response.data;
   },
 

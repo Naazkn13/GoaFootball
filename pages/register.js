@@ -256,11 +256,12 @@ export default function RegisterPage() {
                 profile_photo_url: photoResult.url,
             };
 
-            await axiosInstance.post('/api/user/register', registrationPayload);
+            const registerResponse = await axiosInstance.post('/api/user/register', registrationPayload);
+            const registeredUserId = registerResponse.data?.user?.id;
 
             // 4. Proceed to payment
             setUploadProgress('Initiating payment...');
-            const orderResponse = await paymentAPI.createOrder();
+            const orderResponse = await paymentAPI.createOrder(registeredUserId);
 
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,

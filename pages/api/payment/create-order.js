@@ -8,11 +8,19 @@ export default async function handler(req, res) {
     if (!session) return;
 
     try {
+      const { userId } = req.body || {};
+      const targetUserId = userId || session.id;
+
       // Amount is hardcoded server-side — NOT sent from client
       const amount = 500; // ₹500
 
       // Check if user already paid
-      const userProfile = await database.getUserByEmail(session.email);
+      const userProfile = await database.getUserById(targetUserId);
+
+      if (!userProfile) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
       if (userProfile.is_paid) {
         return res.status(400).json({
           success: false,
@@ -22,13 +30,13 @@ export default async function handler(req, res) {
 
       // Create Razorpay order
       // Razorpay limits receipt to 40 chars
-      const shortId = (session.football_id || session.id).slice(-8);
+      const shortId = (userProfile.football_id || userProfile.id).slice(-8);
       const receipt = `rcpt_${shortId}_${Date.now()}`;
       const order = await paymentService.createOrder(amount, 'INR', receipt);
 
       // Store payment record in database
       const payment = await database.createPayment({
-        user_id: session.id,
+        user_id: targetUserId,
         razorpay_order_id: order.orderId,
         amount: amount,
         currency: order.currency,
@@ -37,7 +45,7 @@ export default async function handler(req, res) {
 
       // Create payment history entry
       await database.createPaymentHistory({
-        user_id: session.id,
+        user_id: targetUserId,
         payment_id: payment.id,
         amount: amount,
         status: 'created',

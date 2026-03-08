@@ -58,14 +58,14 @@ export default async function handler(req, res) {
       });
 
       // Update user's payment status
-      await database.updateUser(user.id, {
+      await database.updateUser(payment.user_id, {
         is_paid: true,
         payment_date: new Date().toISOString(),
       });
 
       // Create payment history entry
       await database.createPaymentHistory({
-        user_id: user.id,
+        user_id: payment.user_id,
         payment_id: payment.id,
         amount: payment.amount,
         status: 'success',
