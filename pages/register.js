@@ -23,6 +23,7 @@ export default function RegisterPage() {
         city: '',
         state: '',
         pin_code: '',
+        address_same_as_proof: false,
         role_details: {},
         photo_file: null,
         id_proof_file: null,
@@ -128,11 +129,13 @@ export default function RegisterPage() {
 
         // We check address info only if we don't have "Address same as proofs" active
         // (If it was checked, the component cleared these fields, but we should just ensure they are non-empty if required)
-        if (!formData.address_line1) newErrors.address_line1 = 'Address is required';
-        if (!formData.city) newErrors.city = 'City is required';
-        if (!formData.state) newErrors.state = 'State is required';
-        if (!formData.pin_code || !/^[0-9]{1,10}$/.test(formData.pin_code)) {
-            newErrors.pin_code = 'Valid PIN code is required (up to 10 digits)';
+        if (!formData.address_same_as_proof) {
+            if (!formData.address_line1) newErrors.address_line1 = 'Address is required';
+            if (!formData.city) newErrors.city = 'City is required';
+            if (!formData.state) newErrors.state = 'State is required';
+            if (!formData.pin_code || !/^[0-9]{1,10}$/.test(formData.pin_code)) {
+                newErrors.pin_code = 'Valid PIN code is required (up to 10 digits)';
+            }
         }
 
         if (!formData.photo_file) newErrors.photo = 'Passport-size photo is required';

@@ -30,7 +30,7 @@ const ROLE_FIELDS = {
 export default function RegistrationForm({ role, formData, onChange, errors, docVerificationStatus, prefilledClubId, prefilledClubName, isClubRegistration }) {
     const roleFields = ROLE_FIELDS[role] || [];
     const [clubs, setClubs] = useState([]);
-    const [addressSameAsProof, setAddressSameAsProof] = useState(false);
+    const addressSameAsProof = formData.address_same_as_proof || false;
 
     // Fetch clubs
     useEffect(() => {
@@ -103,16 +103,21 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
 
     const handleAddressSameAsProofChange = (e) => {
         const checked = e.target.checked;
-        setAddressSameAsProof(checked);
         // Clear address fields if checked
         if (checked) {
             onChange({
                 ...formData,
+                address_same_as_proof: true,
                 address_line1: '',
                 address_line2: '',
                 city: '',
                 state: '',
                 pin_code: '',
+            });
+        } else {
+            onChange({
+                ...formData,
+                address_same_as_proof: false,
             });
         }
     };
