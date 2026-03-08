@@ -38,14 +38,20 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [uploadProgress, setUploadProgress] = useState('');
+    const [isAlreadyPaid, setIsAlreadyPaid] = useState(false);
 
     // Check if a club is registering
     useEffect(() => {
         const fetchProfile = async () => {
             try {
                 const res = await axiosInstance.get('/api/user/profile');
-                if (res.data?.user?.role === 'club') {
-                    setIsClubRegistration(true);
+                if (res.data?.user) {
+                    if (res.data.user.role === 'club') {
+                        setIsClubRegistration(true);
+                    }
+                    if (res.data.user.is_paid) {
+                        setIsAlreadyPaid(true);
+                    }
                 }
             } catch (err) {
                 // Not logged in or not a club
@@ -199,7 +205,13 @@ export default function RegisterPage() {
             const registerResponse = await axiosInstance.post('/api/user/register', registrationPayload);
             const registeredUserId = registerResponse.data?.user?.id;
 
-            // 4. Proceed to payment
+            // 4. Proceed to payment OR skip if already paid
+            if (isAlreadyPaid) {
+                setUploadProgress('Re-registration complete!');
+                router.push('/profile');
+                return;
+            }
+
             setUploadProgress('Initiating payment...');
             const orderResponse = await paymentAPI.createOrder(registeredUserId);
 
@@ -322,7 +334,7 @@ export default function RegisterPage() {
                                             Processing...
                                         </>
                                     ) : (
-                                        'Proceed to Pay →'
+                                        isAlreadyPaid ? 'Submit Re-Registration' : 'Proceed to Pay →'
                                     )}
                                 </button>
                             </div>
