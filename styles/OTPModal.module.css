@@ -5,8 +5,8 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: #f0f2f5;
-  backdrop-filter: none;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
