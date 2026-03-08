@@ -1,13 +1,9 @@
 import database from '../../../services/database';
 import paymentService from '../../../services/payment.service';
-import { requireSession } from '../../../services/session.service';
-
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    // Verify authentication using secure cookies
-    const user = requireSession(req, res);
-    if (!user) return; // requireSession sends the 401 response
-
+    // Payment verification relies on Razorpay signature rather than user session,
+    // which prevents 401 errors if the user's token expires during checkout.
     try {
       const {
         razorpay_order_id,
