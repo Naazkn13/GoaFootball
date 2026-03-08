@@ -2,15 +2,13 @@
 import { supabaseAdmin } from '@/services/database';
 import { requireSession } from '../../../services/session.service';
 
-const SUPER_ADMIN_EMAILS = (process.env.SUPER_ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
-
 export default async function handler(req, res) {
     try {
-        const session = await requireSession(req, res);
+        const session = requireSession(req, res);
         if (!session) return;
 
-        // Check super admin
-        if (!SUPER_ADMIN_EMAILS.includes(session.email?.toLowerCase())) {
+        // Check super admin from JWT session
+        if (!session.is_super_admin) {
             return res.status(403).json({ message: 'Super admin access required' });
         }
 
@@ -22,7 +20,11 @@ export default async function handler(req, res) {
                 .eq('page', page || 'home')
                 .order('section');
 
-            if (error) throw error;
+            if (error) {
+                // If table doesn't exist yet, return empty
+                console.error('Fetch error:', error.message);
+                return res.status(200).json({ success: true, sections: [] });
+            }
             return res.status(200).json({ success: true, sections: data || [] });
         }
 

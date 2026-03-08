@@ -11,6 +11,12 @@ const DEFAULTS = {
             subtitle: 'Register as a Player, Coach, Referee, or Manager. Get your unique Football UID and become part of the community.',
             primary_btn: 'Register Now',
             secondary_btn: 'Learn More ↓',
+            images: [],
+        },
+        gallery: {
+            title: 'Our Gallery',
+            subtitle: 'Moments from the Goa Football Festival',
+            images: [],
         },
         stats: {
             items: [
@@ -78,6 +84,7 @@ const SECTION_LABELS = {
     how_it_works: '📝 How It Works',
     about: '📖 About Section',
     cta: '📢 CTA Banner',
+    gallery: '🖼️ Image Gallery',
     main: '📄 About Page Content',
     contact: '📞 Footer Contact Info',
 };
@@ -88,7 +95,29 @@ export default function PageDesigner() {
     const [editingSection, setEditingSection] = useState(null);
     const [editData, setEditData] = useState(null);
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+
+    // Image upload handler
+    const handleImageUpload = async (file, section, onSuccess) => {
+        setUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('section', section);
+            const res = await axiosInstance.post('/api/admin/upload-site-image', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            if (res.data.success) {
+                onSuccess(res.data.url);
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Image upload failed: ' + (err.response?.data?.message || err.message) });
+            setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+        } finally {
+            setUploading(false);
+        }
+    };
 
     // Fetch content for active page
     useEffect(() => {
@@ -185,9 +214,9 @@ export default function PageDesigner() {
 
                             {isEditing ? (
                                 <div className={styles.editForm}>
-                                    {renderSectionEditor(activePage, section, editData, setEditData)}
+                                    {renderSectionEditor(activePage, section, editData, setEditData, handleImageUpload, uploading)}
                                     <div className={styles.editActions}>
-                                        <button className={styles.saveBtn} onClick={saveSection} disabled={saving}>
+                                        <button className={styles.saveBtn} onClick={saveSection} disabled={saving || uploading}>
                                             {saving ? 'Saving...' : '💾 Save'}
                                         </button>
                                         <button className={styles.cancelBtn} onClick={cancelEditing}>Cancel</button>
@@ -207,7 +236,7 @@ export default function PageDesigner() {
 }
 
 // ===== Section Editor Renderers =====
-function renderSectionEditor(page, section, data, setData) {
+function renderSectionEditor(page, section, data, setData, handleImageUpload, uploading) {
     const update = (key, val) => setData(prev => ({ ...prev, [key]: val }));
     const updateNested = (key, index, field, val) => {
         setData(prev => {
@@ -215,6 +244,57 @@ function renderSectionEditor(page, section, data, setData) {
             arr[index] = { ...arr[index], [field]: val };
             return { ...prev, [key]: arr };
         });
+    };
+
+    // Shared image upload UI component
+    const ImageUploader = ({ images, onImagesChange, maxImages = 5, sectionName }) => {
+        const addImage = (file) => {
+            if ((images || []).length >= maxImages) return;
+            handleImageUpload(file, sectionName, (url) => {
+                onImagesChange([...(images || []), { url, caption: '' }]);
+            });
+        };
+        const removeImage = (index) => {
+            onImagesChange((images || []).filter((_, i) => i !== index));
+        };
+        const updateCaption = (index, caption) => {
+            const updated = [...(images || [])];
+            updated[index] = { ...updated[index], caption };
+            onImagesChange(updated);
+        };
+        return (
+            <div style={{ marginTop: '12px' }}>
+                <p style={{ fontSize: '0.85rem', color: '#555', fontWeight: '600', marginBottom: '8px' }}>
+                    📸 Images ({(images || []).length}/{maxImages}) — Optional captions
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px', marginBottom: '10px' }}>
+                    {(images || []).map((img, i) => (
+                        <div key={img.url || i} style={{ position: 'relative', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', background: '#f9fafb' }}>
+                            <img src={img.url} alt={img.caption || ''} style={{ width: '100%', height: '100px', objectFit: 'cover' }} />
+                            <button onClick={() => removeImage(i)} style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(239,68,68,0.9)', color: '#fff', border: 'none', borderRadius: '50%', width: '22px', height: '22px', cursor: 'pointer', fontSize: '0.7rem', lineHeight: '22px' }}>✕</button>
+                            <input
+                                placeholder="Caption (optional)"
+                                value={img.caption || ''}
+                                onChange={e => updateCaption(i, e.target.value)}
+                                style={{ width: '100%', border: 'none', borderTop: '1px solid #e5e7eb', padding: '4px 6px', fontSize: '0.75rem', boxSizing: 'border-box' }}
+                            />
+                        </div>
+                    ))}
+                </div>
+                {(images || []).length < maxImages && (
+                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', background: '#eff6ff', border: '1px dashed #3b82f6', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', color: '#1d4ed8' }}>
+                        {uploading ? '⏳ Uploading...' : '+ Add Image'}
+                        <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            style={{ display: 'none' }}
+                            disabled={uploading}
+                            onChange={e => { if (e.target.files[0]) addImage(e.target.files[0]); e.target.value = ''; }}
+                        />
+                    </label>
+                )}
+            </div>
+        );
     };
 
     if (page === 'home' && section === 'hero') {
@@ -225,6 +305,17 @@ function renderSectionEditor(page, section, data, setData) {
                 <label>Subtitle<textarea rows={3} value={data.subtitle || ''} onChange={e => update('subtitle', e.target.value)} /></label>
                 <label>Primary Button Text<input value={data.primary_btn || ''} onChange={e => update('primary_btn', e.target.value)} /></label>
                 <label>Secondary Button Text<input value={data.secondary_btn || ''} onChange={e => update('secondary_btn', e.target.value)} /></label>
+                <ImageUploader images={data.images} onImagesChange={imgs => update('images', imgs)} sectionName="hero" />
+            </>
+        );
+    }
+
+    if (page === 'home' && section === 'gallery') {
+        return (
+            <>
+                <label>Section Title<input value={data.title || ''} onChange={e => update('title', e.target.value)} /></label>
+                <label>Section Subtitle<input value={data.subtitle || ''} onChange={e => update('subtitle', e.target.value)} /></label>
+                <ImageUploader images={data.images} onImagesChange={imgs => update('images', imgs)} sectionName="gallery" />
             </>
         );
     }
@@ -355,8 +446,24 @@ function renderSectionPreview(page, section, content) {
         return (
             <div>
                 <span style={{ fontSize: '0.75rem', backgroundColor: '#e0f2fe', borderRadius: '12px', padding: '2px 8px', color: '#0369a1' }}>{content.badge_text}</span>
-                <p style={{ fontWeight: 'bold', fontSize: '1.1rem', margin: '6px 0 4px' }}>{(content.title || '').replace(/\n/g, ' ')}</p>
+                <p style={{ fontWeight: 'bold', fontSize: '1.1rem', margin: '6px 0 4px' }}>{(content.title || '').replaceAll('\n', ' ')}</p>
                 <p style={{ color: '#666', fontSize: '0.85rem' }}>{content.subtitle}</p>
+                {(content.images || []).length > 0 && (
+                    <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
+                        {content.images.map((img, i) => (
+                            <img key={img.url || i} src={img.url} alt="" style={{ width: '40px', height: '30px', objectFit: 'cover', borderRadius: '4px' }} />
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    if (page === 'home' && section === 'gallery') {
+        return (
+            <div>
+                <p style={{ fontWeight: '600', marginBottom: '4px' }}>{content.title}</p>
+                <p style={{ fontSize: '0.8rem', color: '#666' }}>{(content.images || []).length} images</p>
             </div>
         );
     }

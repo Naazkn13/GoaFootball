@@ -75,6 +75,11 @@ const DEFAULTS = {
     paragraph2: 'Built with security at its core — email OTP authentication, secure document handling, and admin-verified approval ensures only legitimate registrations are processed. Chat directly with admins for quick resolution of any queries.',
     features: ['Secure email OTP login', 'Role-based registration', 'Document verification', 'Admin approval system', 'Real-time chat support', 'Secure payment processing'],
   },
+  gallery: {
+    title: 'Our Gallery',
+    subtitle: 'Moments from the Goa Football Festival',
+    images: [],
+  },
   cta: {
     title: 'Ready to Join the Game?',
     subtitle: 'Register today and get your unique Football UID',
@@ -100,6 +105,7 @@ export default function HomePage() {
   const rolesData = { ...DEFAULTS.roles, ...content.roles };
   const howData = { ...DEFAULTS.how_it_works, ...content.how_it_works };
   const aboutData = { ...DEFAULTS.about, ...content.about };
+  const galleryData = { ...DEFAULTS.gallery, ...content.gallery };
   const ctaData = { ...DEFAULTS.cta, ...content.cta };
 
   const statItems = statsData.items || DEFAULTS.stats.items;
@@ -243,6 +249,24 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ===== GALLERY SECTION ===== */}
+        {(galleryData.images || []).length > 0 && (
+          <section className={styles.gallerySection} id="gallery">
+            <div className={styles.sectionContainer}>
+              <h2 className={styles.sectionTitle}>{galleryData.title}</h2>
+              <p className={styles.sectionSubtitle}>{galleryData.subtitle}</p>
+              <div className={styles.galleryGrid}>
+                {galleryData.images.map((img, i) => (
+                  <div key={img.url || i} className={styles.galleryItem}>
+                    <img src={img.url} alt={img.caption || 'Gallery image'} />
+                    {img.caption && <p className={styles.galleryCaption}>{img.caption}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ===== CTA BANNER ===== */}
         <section className={styles.ctaBanner}>
