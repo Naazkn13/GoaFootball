@@ -2,14 +2,14 @@ import axiosInstance from '@/services/axios';
 
 export const authAPI = {
   // Send OTP to email (email-only login, no password)
-  sendOTP: async (email) => {
-    const response = await axiosInstance.post('/api/auth/send-otp', { email });
+  sendOTP: async (email, purpose = 'login') => {
+    const response = await axiosInstance.post('/api/auth/send-otp', { email, purpose });
     return response.data;
   },
 
   // Verify OTP and create session
   verifyOTP: async (email, otp) => {
-    const response = await axiosInstance.post('/api/auth/verify-otp', { email, otp });
+    const response = await axiosInstance.post('/api/auth/verify-login-otp', { email, otp });
     return response.data;
   },
 
@@ -20,8 +20,8 @@ export const authAPI = {
   },
 
   // Resend OTP
-  resendOTP: async (email) => {
-    const response = await axiosInstance.post('/api/auth/send-otp', { email });
+  resendOTP: async (email, purpose = 'login') => {
+    const response = await axiosInstance.post('/api/auth/send-otp', { email, purpose });
     return response.data;
   },
 };

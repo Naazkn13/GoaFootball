@@ -31,11 +31,25 @@ export default async function handler(req, res) {
         console.log('✅ Razorpay test account - using hardcoded OTP');
         otpRecord = { verified: true };
       } else {
-        otpRecord = await database.verifyOTP(email, otp, 'login');
+        try {
+          otpRecord = await database.verifyOTP(email, otp, 'login');
+        } catch (error) {
+          console.error('❌ verifyOTP failed:', error.message, error.code, error.details);
+          // Increment failed attempts
+          try {
+            await database.incrementOTPAttempts(email, 'login');
+          } catch (e) {
+            // Ignore increment errors
+          }
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid or expired OTP'
+          });
+        }
       }
 
       if (!otpRecord) {
-        return res.status(401).json({
+        return res.status(400).json({
           success: false,
           message: 'Invalid or expired OTP'
         });
@@ -56,6 +70,8 @@ export default async function handler(req, res) {
             name: club.name,
             email: club.email,
             role: 'club', // important for permissions
+            logo_url: club.logo_url || null,
+            location: club.location || null,
             is_admin: false,
             is_super_admin: false,
             registration_completed: true, // Bypass reg check
@@ -88,7 +104,6 @@ export default async function handler(req, res) {
       } else if (isClub) {
         redirectTo = '/club/dashboard';
       } else if (!user.registration_completed) {
-      } else if (!user.registration_completed) {
         redirectTo = '/register';
       }
 
@@ -100,6 +115,9 @@ export default async function handler(req, res) {
           id: user.id,
           name: user.name,
           email: user.email,
+          role: user.role || 'athlete',
+          logo_url: user.logo_url || null,
+          location: user.location || null,
           phone: user.phone || null,
           football_id: user.football_id || null,
           is_paid: user.is_paid || false,

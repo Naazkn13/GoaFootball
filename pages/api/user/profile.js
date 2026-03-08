@@ -8,40 +8,62 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      // Get user profile
-      const profile = await database.getUserByEmail(session.email);
+      let safeProfile;
 
-      if (!profile) {
-        return res.status(404).json({
-          success: false,
-          message: 'User not found'
-        });
+      if (session.role === 'club') {
+        const club = await database.getClubByEmail(session.email);
+        if (!club) {
+          return res.status(404).json({ success: false, message: 'Club not found' });
+        }
+
+        safeProfile = {
+          id: club.id,
+          email: club.email,
+          name: club.name,
+          location: club.location,
+          logo_url: club.logo_url,
+          role: 'club',
+          is_admin: false,
+          is_super_admin: false,
+          registration_completed: true,
+          approval_status: 'approved',
+        };
+      } else {
+        // Get user profile
+        const profile = await database.getUserByEmail(session.email);
+
+        if (!profile) {
+          return res.status(404).json({
+            success: false,
+            message: 'User not found'
+          });
+        }
+
+        // Whitelist response fields — never send raw DB objects to client
+        safeProfile = {
+          id: profile.id,
+          email: profile.email,
+          name: profile.name,
+          phone: profile.phone,
+          aadhaar: profile.aadhaar,
+          role: profile.role,
+          role_details: profile.role_details,
+          date_of_birth: profile.date_of_birth,
+          gender: profile.gender,
+          address: profile.address,
+          documents: profile.documents,
+          profile_photo_url: profile.profile_photo_url,
+          football_id: profile.football_id,
+          registration_completed: profile.registration_completed,
+          approval_status: profile.approval_status,
+          approval_reason: profile.approval_reason,
+          is_admin: profile.is_admin,
+          is_super_admin: profile.is_super_admin,
+          is_paid: profile.is_paid,
+          email_verified: profile.email_verified,
+          created_at: profile.created_at,
+        };
       }
-
-      // Whitelist response fields — never send raw DB objects to client
-      const safeProfile = {
-        id: profile.id,
-        email: profile.email,
-        name: profile.name,
-        phone: profile.phone,
-        aadhaar: profile.aadhaar,
-        role: profile.role,
-        role_details: profile.role_details,
-        date_of_birth: profile.date_of_birth,
-        gender: profile.gender,
-        address: profile.address,
-        documents: profile.documents,
-        profile_photo_url: profile.profile_photo_url,
-        football_id: profile.football_id,
-        registration_completed: profile.registration_completed,
-        approval_status: profile.approval_status,
-        approval_reason: profile.approval_reason,
-        is_admin: profile.is_admin,
-        is_super_admin: profile.is_super_admin,
-        is_paid: profile.is_paid,
-        email_verified: profile.email_verified,
-        created_at: profile.created_at,
-      };
 
       res.status(200).json({
         success: true,

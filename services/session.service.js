@@ -100,24 +100,29 @@ export async function createSession(res, user, req) {
   const rawRefreshToken = generateRefreshToken();
   const hashedRefreshToken = hashToken(rawRefreshToken);
 
-  // 3. Store session in DB
+  // 3. Store session in DB (ONLY for regular users, clubs don't have a user_id)
+  let dbSessionId = null;
   const expiresAt = new Date(Date.now() + REFRESH_MAX_AGE * 1000).toISOString();
-  const dbSession = await database.createDBSession({
-    user_id: user.id,
-    refresh_token: hashedRefreshToken,
-    device_info: deviceInfo,
-    ip_address: ipAddress,
-    expires_at: expiresAt,
-  });
 
-  // 4. Log the login action
-  await database.logLoginAction({
-    user_id: user.id,
-    session_id: dbSession.id,
-    action: 'login',
-    ip_address: ipAddress,
-    device_info: deviceInfo,
-  });
+  if (user.role !== 'club') {
+    const dbSession = await database.createDBSession({
+      user_id: user.id,
+      refresh_token: hashedRefreshToken,
+      device_info: deviceInfo,
+      ip_address: ipAddress,
+      expires_at: expiresAt,
+    });
+    dbSessionId = dbSession.id;
+
+    // 4. Log the login action
+    await database.logLoginAction({
+      user_id: user.id,
+      session_id: dbSessionId,
+      action: 'login',
+      ip_address: ipAddress,
+      device_info: deviceInfo,
+    });
+  }
 
   // 5. Set both cookies
   const cookies = [
