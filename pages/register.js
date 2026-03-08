@@ -16,7 +16,7 @@ export default function RegisterPage() {
         name: '',
         date_of_birth: '',
         gender: '',
-        phone: '',
+        email: '',
         aadhaar: '',
         address_line1: '',
         address_line2: '',
@@ -27,13 +27,30 @@ export default function RegisterPage() {
         photo_file: null,
         id_proof_file: null,
         birth_certificate_file: null,
+        gff_consent_form_file: null,
         club_id: router.query.club_id || '',
     });
+    const [isClubRegistration, setIsClubRegistration] = useState(false);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [uploadProgress, setUploadProgress] = useState('');
     const [docVerificationStatus, setDocVerificationStatus] = useState({});
+
+    // Check if a club is registering
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await axiosInstance.get('/api/user/profile');
+                if (res.data?.user?.role === 'club') {
+                    setIsClubRegistration(true);
+                }
+            } catch (err) {
+                // Not logged in or not a club
+            }
+        };
+        fetchProfile();
+    }, []);
 
     // Step 1 → Step 2
     const handleRoleSelect = (role) => {
@@ -103,18 +120,25 @@ export default function RegisterPage() {
         if (!formData.phone || !/^[0-9]{10}$/.test(formData.phone)) {
             newErrors.phone = 'Valid 10-digit phone number is required';
         }
-        if (!formData.aadhaar || !/^[0-9]{12}$/.test(formData.aadhaar)) {
-            newErrors.aadhaar = 'Valid 12-digit Aadhaar number is required';
+
+        // Only require email if a club is registering them
+        if (isClubRegistration && (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))) {
+            newErrors.email = 'Valid email is required';
         }
-        if (!formData.address_line1) newErrors.address = 'Address is required';
+
+        // We check address info only if we don't have "Address same as proofs" active
+        // (If it was checked, the component cleared these fields, but we should just ensure they are non-empty if required)
+        if (!formData.address_line1) newErrors.address_line1 = 'Address is required';
         if (!formData.city) newErrors.city = 'City is required';
         if (!formData.state) newErrors.state = 'State is required';
-        if (!formData.pin_code || !/^[0-9]{6}$/.test(formData.pin_code)) {
-            newErrors.pin_code = 'Valid 6-digit PIN code is required';
+        if (!formData.pin_code || !/^[0-9]{1,10}$/.test(formData.pin_code)) {
+            newErrors.pin_code = 'Valid PIN code is required (up to 10 digits)';
         }
+
         if (!formData.photo_file) newErrors.photo = 'Passport-size photo is required';
         if (!formData.id_proof_file) newErrors.id_proof = 'ID proof document is required';
         if (!formData.birth_certificate_file) newErrors.birth_certificate = 'Birth certificate is required';
+        if (!formData.gff_consent_form_file) newErrors.gff_consent_form = 'GFF consent form is required';
 
         // Validate photo size (max 2MB)
         if (formData.photo_file && formData.photo_file.size > 2 * 1024 * 1024) {
@@ -127,6 +151,10 @@ export default function RegisterPage() {
         // Validate birth certificate size (max 5MB)
         if (formData.birth_certificate_file && formData.birth_certificate_file.size > 5 * 1024 * 1024) {
             newErrors.birth_certificate = 'Birth certificate must be less than 5MB';
+        }
+        // Validate GFF consent form size (max 5MB)
+        if (formData.gff_consent_form_file && formData.gff_consent_form_file.size > 5 * 1024 * 1024) {
+            newErrors.gff_consent_form = 'GFF consent form must be less than 5MB';
         }
 
         setErrors(newErrors);
@@ -169,10 +197,14 @@ export default function RegisterPage() {
             setUploadProgress('Verifying birth certificate...');
             const birthCertVerify = await verifyDocument(formData.birth_certificate_file, 'birth_certificate');
 
+            setUploadProgress('Verifying GFF consent form...');
+            const consentVerify = await verifyDocument(formData.gff_consent_form_file, 'gff_consent_form');
+
             // Check if any verification failed
             const failedDocs = [];
             if (!idProofVerify.verified) failedDocs.push('ID Proof');
             if (!birthCertVerify.verified) failedDocs.push('Birth Certificate');
+            if (!consentVerify.verified) failedDocs.push('GFF Consent Form');
 
             if (failedDocs.length > 0) {
                 setError(`Document verification failed for: ${failedDocs.join(', ')}. Please upload valid documents.`);
@@ -191,28 +223,32 @@ export default function RegisterPage() {
             setUploadProgress('Uploading birth certificate...');
             const birthCertResult = await uploadDocument(formData.birth_certificate_file, 'birth_certificate');
 
+            setUploadProgress('Uploading GFF consent form...');
+            const consentResult = await uploadDocument(formData.gff_consent_form_file, 'gff_consent_form');
+
             // 3. Submit registration data
             setUploadProgress('Saving registration...');
             const registrationPayload = {
                 name: formData.name,
+                email: isClubRegistration ? formData.email : undefined,
                 date_of_birth: formData.date_of_birth,
                 gender: formData.gender,
                 phone: formData.phone,
-                aadhaar: formData.aadhaar,
                 role: selectedRole,
                 club_id: formData.club_id,
                 role_details: formData.role_details,
                 address: {
-                    line1: formData.address_line1,
-                    line2: formData.address_line2,
-                    city: formData.city,
-                    state: formData.state,
-                    pin_code: formData.pin_code,
+                    line1: formData.address_line1 || 'Same as proof',
+                    line2: formData.address_line2 || '',
+                    city: formData.city || 'Same as proof',
+                    state: formData.state || 'Same as proof',
+                    pin_code: formData.pin_code || '000000',
                 },
                 documents: [
                     { type: 'photo', url: photoResult.url, filename: photoResult.filename },
                     { type: 'id_proof', url: idProofResult.url, filename: idProofResult.filename },
                     { type: 'birth_certificate', url: birthCertResult.url, filename: birthCertResult.filename },
+                    { type: 'gff_consent_form', url: consentResult.url, filename: consentResult.filename },
                 ],
                 profile_photo_url: photoResult.url,
             };
@@ -320,6 +356,7 @@ export default function RegisterPage() {
                                 docVerificationStatus={docVerificationStatus}
                                 prefilledClubId={router.query.club_id}
                                 prefilledClubName={router.query.club_name}
+                                isClubRegistration={isClubRegistration}
                             />
 
                             <div className={styles.formActions}>

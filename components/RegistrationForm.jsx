@@ -27,9 +27,10 @@ const ROLE_FIELDS = {
     ],
 };
 
-export default function RegistrationForm({ role, formData, onChange, errors, docVerificationStatus, prefilledClubId, prefilledClubName }) {
+export default function RegistrationForm({ role, formData, onChange, errors, docVerificationStatus, prefilledClubId, prefilledClubName, isClubRegistration }) {
     const roleFields = ROLE_FIELDS[role] || [];
     const [clubs, setClubs] = useState([]);
+    const [addressSameAsProof, setAddressSameAsProof] = useState(false);
 
     // Fetch clubs
     useEffect(() => {
@@ -100,6 +101,22 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
         });
     };
 
+    const handleAddressSameAsProofChange = (e) => {
+        const checked = e.target.checked;
+        setAddressSameAsProof(checked);
+        // Clear address fields if checked
+        if (checked) {
+            onChange({
+                ...formData,
+                address_line1: '',
+                address_line2: '',
+                city: '',
+                state: '',
+                pin_code: '',
+            });
+        }
+    };
+
     // Helper to render verification status badge
     const renderVerifyStatus = (docType) => {
         const status = docVerificationStatus?.[docType];
@@ -160,6 +177,21 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
                     />
                     {errors?.name && <span className={styles.fieldError}>{errors.name}</span>}
                 </div>
+
+                {isClubRegistration && (
+                    <div className={styles.inputGroup}>
+                        <label htmlFor="reg-email">Email Address *</label>
+                        <input
+                            id="reg-email"
+                            type="email"
+                            placeholder="Player's email address"
+                            value={formData.email || ''}
+                            onChange={(e) => handleChange('email', e.target.value)}
+                            required
+                        />
+                        {errors?.email && <span className={styles.fieldError}>{errors.email}</span>}
+                    </div>
+                )}
 
                 <div className={styles.inputGroup}>
                     <label>Date of Birth *</label>
@@ -238,91 +270,91 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
                     />
                     {errors?.phone && <span className={styles.fieldError}>{errors.phone}</span>}
                 </div>
-
-                <div className={styles.inputGroup}>
-                    <label htmlFor="reg-aadhaar">Aadhaar Number *</label>
-                    <input
-                        id="reg-aadhaar"
-                        type="text"
-                        placeholder="12-digit Aadhaar number"
-                        value={formData.aadhaar || ''}
-                        onChange={(e) => handleChange('aadhaar', e.target.value)}
-                        pattern="[0-9]{12}"
-                        maxLength="12"
-                        required
-                    />
-                    {errors?.aadhaar && <span className={styles.fieldError}>{errors.aadhaar}</span>}
-                </div>
             </div>
 
             {/* Address */}
             <h3 className={styles.stepTitle} style={{ marginTop: '2rem' }}>Address</h3>
 
-            <div className={styles.formGrid}>
-                <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
-                    <label htmlFor="reg-address1">Address Line 1 *</label>
-                    <input
-                        id="reg-address1"
-                        type="text"
-                        placeholder="Street address"
-                        value={formData.address_line1 || ''}
-                        onChange={(e) => handleChange('address_line1', e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
-                    <label htmlFor="reg-address2">Address Line 2</label>
-                    <input
-                        id="reg-address2"
-                        type="text"
-                        placeholder="Apartment, suite, etc. (optional)"
-                        value={formData.address_line2 || ''}
-                        onChange={(e) => handleChange('address_line2', e.target.value)}
-                    />
-                </div>
-
-                <div className={styles.inputGroup}>
-                    <label htmlFor="reg-city">City *</label>
-                    <input
-                        id="reg-city"
-                        type="text"
-                        placeholder="City"
-                        value={formData.city || ''}
-                        onChange={(e) => handleChange('city', e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div className={styles.inputGroup}>
-                    <label htmlFor="reg-state">State *</label>
-                    <select
-                        id="reg-state"
-                        value={formData.state || ''}
-                        onChange={(e) => handleChange('state', e.target.value)}
-                        required
-                    >
-                        <option value="">Select State</option>
-                        {INDIAN_STATES.map((state) => (
-                            <option key={state} value={state}>{state}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className={styles.inputGroup}>
-                    <label htmlFor="reg-pin">PIN Code *</label>
-                    <input
-                        id="reg-pin"
-                        type="text"
-                        placeholder="6-digit PIN"
-                        value={formData.pin_code || ''}
-                        onChange={(e) => handleChange('pin_code', e.target.value)}
-                        pattern="[0-9]{6}"
-                        maxLength="6"
-                        required
-                    />
-                </div>
+            <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                    type="checkbox"
+                    id="address-same"
+                    checked={addressSameAsProof}
+                    onChange={handleAddressSameAsProofChange}
+                    style={{ cursor: 'pointer', width: '1rem', height: '1rem' }}
+                />
+                <label htmlFor="address-same" style={{ cursor: 'pointer', margin: 0, fontWeight: 'normal' }}>
+                    Address same as proofs
+                </label>
             </div>
+
+            {!addressSameAsProof && (
+                <div className={styles.formGrid}>
+                    <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
+                        <label htmlFor="reg-address1">Address Line 1 *</label>
+                        <input
+                            id="reg-address1"
+                            type="text"
+                            placeholder="Street address"
+                            value={formData.address_line1 || ''}
+                            onChange={(e) => handleChange('address_line1', e.target.value)}
+                            required={!addressSameAsProof}
+                        />
+                    </div>
+
+                    <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
+                        <label htmlFor="reg-address2">Address Line 2</label>
+                        <input
+                            id="reg-address2"
+                            type="text"
+                            placeholder="Apartment, suite, etc. (optional)"
+                            value={formData.address_line2 || ''}
+                            onChange={(e) => handleChange('address_line2', e.target.value)}
+                        />
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                        <label htmlFor="reg-city">City *</label>
+                        <input
+                            id="reg-city"
+                            type="text"
+                            placeholder="City"
+                            value={formData.city || ''}
+                            onChange={(e) => handleChange('city', e.target.value)}
+                            required={!addressSameAsProof}
+                        />
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                        <label htmlFor="reg-state">State *</label>
+                        <select
+                            id="reg-state"
+                            value={formData.state || ''}
+                            onChange={(e) => handleChange('state', e.target.value)}
+                            required={!addressSameAsProof}
+                        >
+                            <option value="">Select State</option>
+                            {INDIAN_STATES.map((state) => (
+                                <option key={state} value={state}>{state}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                        <label htmlFor="reg-pin">PIN Code *</label>
+                        <input
+                            id="reg-pin"
+                            type="text"
+                            placeholder="Up to 10-digit PIN"
+                            value={formData.pin_code || ''}
+                            onChange={(e) => handleChange('pin_code', e.target.value)}
+                            pattern="[0-9]{1,10}"
+                            maxLength="10"
+                            required={!addressSameAsProof}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Role-Specific Fields (only for coach/referee) */}
             {roleFields.length > 0 && (
@@ -410,6 +442,20 @@ export default function RegistrationForm({ role, formData, onChange, errors, doc
                     />
                     {renderVerifyStatus('birth_certificate')}
                     {errors?.birth_certificate && <span className={styles.fieldError}>{errors.birth_certificate}</span>}
+                </div>
+
+                <div className={styles.inputGroup}>
+                    <label htmlFor="reg-consent">GFF Consent Form * (PDF, max 5MB)</label>
+                    <input
+                        id="reg-consent"
+                        type="file"
+                        accept="application/pdf"
+                        onChange={(e) => handleChange('gff_consent_form_file', e.target.files[0])}
+                        required
+                        className={styles.fileInput}
+                    />
+                    {renderVerifyStatus('gff_consent_form')}
+                    {errors?.gff_consent_form && <span className={styles.fieldError}>{errors.gff_consent_form}</span>}
                 </div>
             </div>
         </div>

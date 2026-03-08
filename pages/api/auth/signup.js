@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      const { name, email, password, phone, aadhaar } = req.body;
+      const { name, email, password, phone } = req.body;
 
       // Validation
       if (!name || !email || !password || !phone) {
@@ -33,27 +33,6 @@ export default async function handler(req, res) {
         });
       }
 
-      // Aadhaar validation
-      if (aadhaar) {
-        const aadhaarDigits = aadhaar.replace(/\D/g, ''); // Remove hyphens and non-digits
-
-        // Must be exactly 12 digits
-        if (aadhaarDigits.length !== 12) {
-          return res.status(400).json({
-            success: false,
-            message: 'Aadhaar must be exactly 12 digits'
-          });
-        }
-
-        // First digit must be 2-9 (per UIDAI standards)
-        if (!/^[2-9]{1}[0-9]{11}$/.test(aadhaarDigits)) {
-          return res.status(400).json({
-            success: false,
-            message: 'Invalid Aadhaar number format'
-          });
-        }
-      }
-
       // Check if user already exists
       const existingUser = await database.getUserByEmail(email);
 
@@ -79,14 +58,12 @@ export default async function handler(req, res) {
       });
 
       // Store user data — football_id is null at signup, assigned on admin approval
-      const cleanAadhaar = aadhaar ? aadhaar.replace(/\D/g, '') : null;
-
       await database.createUser({
         name: name,
         email: email,
         password_hash: passwordHash,
         phone: phone,
-        aadhaar: cleanAadhaar,
+        aadhaar: null,
         football_id: null,
         email_verified: false,
         is_paid: false,
