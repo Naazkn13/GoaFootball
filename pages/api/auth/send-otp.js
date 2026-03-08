@@ -13,19 +13,8 @@ export default async function handler(req, res) {
                 });
             }
 
-            if (purpose === 'login') {
-                const user = await database.getUserByEmail(email);
-                const club = await database.getClubByEmail(email);
-
-                if (!user && !club) {
-                    // Send success anyway to prevent email enumeration attacks
-                    return res.status(200).json({
-                        success: true,
-                        message: 'If an account exists, an OTP has been sent'
-                    });
-                }
-            }
-
+            // Always generate and send OTP regardless of whether the user exists.
+            // New users will be auto-created when they verify the OTP.
             const otp = otpService.generateOTP();
 
             await database.storeOTP({

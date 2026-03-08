@@ -112,7 +112,7 @@ export default function LoginPage() {
 
               <p className={styles.switchText}>
                 New here?{" "}
-                <strong>Just enter your email above</strong> — we&apos;ll create your account
+                <strong>Just enter your email above</strong> &mdash; we&apos;ll create your account
                 and redirect you to complete registration as a{" "}
                 <strong>Player, Coach, Referee, or Manager</strong>.
               </p>

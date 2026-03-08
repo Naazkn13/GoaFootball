@@ -17,33 +17,8 @@ export default function SignupPage() {
     name: "",
     email: "",
     phone: "",
-    aadhaar: "",
     password: ""
   });
-
-  // Aadhaar validation state
-  const [isAadhaarValid, setIsAadhaarValid] = useState(false);
-
-  // Format Aadhaar as XXXX-XXXX-XXXX
-  const formatAadhaar = (value) => {
-    const digits = value.replace(/\D/g, ''); // Remove non-digits
-    if (digits.length <= 4) return digits;
-    if (digits.length <= 8) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
-    return `${digits.slice(0, 4)}-${digits.slice(4, 8)}-${digits.slice(8, 12)}`;
-  };
-
-  // Validate Aadhaar (12 digits, first digit 2-9)
-  const validateAadhaar = (aadhaar) => {
-    const digits = aadhaar.replace(/\D/g, '');
-    return /^[2-9]{1}[0-9]{11}$/.test(digits);
-  };
-
-  // Handle Aadhaar input with formatting and validation
-  const handleAadhaarChange = (e) => {
-    const formatted = formatAadhaar(e.target.value);
-    setSignupData({ ...signupData, aadhaar: formatted });
-    setIsAadhaarValid(validateAadhaar(formatted));
-  };
 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
@@ -138,26 +113,7 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Aadhaar with Real-time Validation */}
-            <div className={styles.inputGroup}>
-              <label>Aadhaar Number</label>
-              <div className={styles.aadhaarWrapper}>
-                <input
-                  type="text"
-                  maxLength="14"
-                  placeholder="XXXX-XXXX-XXXX"
-                  className={styles.aadhaarInput}
-                  value={signupData.aadhaar}
-                  onChange={handleAadhaarChange}
-                  required
-                />
-                {signupData.aadhaar && (
-                  <span className={`${styles.validationIcon} ${isAadhaarValid ? styles.valid : styles.invalid}`}>
-                    {isAadhaarValid ? '✓' : '✗'}
-                  </span>
-                )}
-              </div>
-            </div>
+
 
             <div className={styles.inputGroup}>
               <label>Password</label>

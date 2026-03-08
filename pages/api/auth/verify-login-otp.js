@@ -80,9 +80,20 @@ export default async function handler(req, res) {
 
           await database.client.from('clubs').update({ updated_at: new Date().toISOString() }).eq('id', club.id);
         } else {
-          return res.status(404).json({
-            success: false,
-            message: 'User/Club not found'
+          // New user — auto-create a minimal account so they can proceed to registration
+          const bcrypt = require('bcryptjs');
+          const dummyPassword = Math.random().toString(36).slice(-8);
+          const passwordHash = await bcrypt.hash(dummyPassword, 10);
+
+          user = await database.createUser({
+            name: email.split('@')[0], // temporary name from email
+            email: email,
+            password_hash: passwordHash,
+            phone: '0000000000',
+            aadhaar: null,
+            football_id: null,
+            email_verified: true,
+            is_paid: false,
           });
         }
       } else {

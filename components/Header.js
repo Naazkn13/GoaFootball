@@ -19,7 +19,7 @@ export default function Header() {
         <nav className={`${styles.navbar} ${scrolled ? styles.navScrolled : ''}`}>
             <div className={styles.navInner}>
                 <Link href="/" className={styles.navLogo}>
-                    <Image src="/images/logo.png" alt="Goa Football Festival" width={40} height={40} className={styles.navLogoImg} />
+                    <Image src="/images/logo.png" alt="Goa Football Festival" width={40} height={40} priority className={styles.navLogoImg} />
                     <span>Goa Football Festival</span>
                 </Link>
                 <div className={styles.navLinks}>
