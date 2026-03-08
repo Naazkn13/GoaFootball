@@ -246,50 +246,53 @@ function renderSectionEditor(page, section, data, setData, handleImageUpload, up
         });
     };
 
-    // Shared image upload UI component
-    const ImageUploader = ({ images, onImagesChange, maxImages = 5, sectionName }) => {
-        const addImage = (file) => {
-            if ((images || []).length >= maxImages) return;
-            handleImageUpload(file, sectionName, (url) => {
-                onImagesChange([...(images || []), { url, caption: '' }]);
-            });
-        };
-        const removeImage = (index) => {
-            onImagesChange((images || []).filter((_, i) => i !== index));
-        };
-        const updateCaption = (index, caption) => {
-            const updated = [...(images || [])];
-            updated[index] = { ...updated[index], caption };
-            onImagesChange(updated);
-        };
+    // Helper for image sections
+    const renderImageGrid = (images, sectionName) => {
+        const imgList = images || [];
+        const maxImages = 5;
+        const removeImage = (index) => update('images', imgList.filter((_, i) => i !== index));
         return (
             <div style={{ marginTop: '12px' }}>
                 <p style={{ fontSize: '0.85rem', color: '#555', fontWeight: '600', marginBottom: '8px' }}>
-                    📸 Images ({(images || []).length}/{maxImages}) — Optional captions
+                    📸 Images ({imgList.length}/{maxImages}) — Add caption below each image
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px', marginBottom: '10px' }}>
-                    {(images || []).map((img, i) => (
-                        <div key={img.url || i} style={{ position: 'relative', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', background: '#f9fafb' }}>
-                            <img src={img.url} alt={img.caption || ''} style={{ width: '100%', height: '100px', objectFit: 'cover' }} />
-                            <button onClick={() => removeImage(i)} style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(239,68,68,0.9)', color: '#fff', border: 'none', borderRadius: '50%', width: '22px', height: '22px', cursor: 'pointer', fontSize: '0.7rem', lineHeight: '22px' }}>✕</button>
+                {imgList.map((img, i) => (
+                    <div key={`img-${sectionName}-${i}`} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '12px', padding: '10px', background: '#f9fafb', borderRadius: '10px', border: '1px solid #e5e7eb' }}>
+                        <div style={{ position: 'relative', flexShrink: 0 }}>
+                            <img src={img.url} alt={img.caption || ''} style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '8px', display: 'block' }} />
+                            <button onClick={() => removeImage(i)} style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '0.65rem', lineHeight: '20px' }}>✕</button>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ display: 'block', fontSize: '0.8rem', color: '#555', marginBottom: '4px' }}>Caption (optional)</label>
                             <input
-                                placeholder="Caption (optional)"
+                                placeholder="Enter caption for this image..."
                                 value={img.caption || ''}
-                                onChange={e => updateCaption(i, e.target.value)}
-                                style={{ width: '100%', border: 'none', borderTop: '1px solid #e5e7eb', padding: '4px 6px', fontSize: '0.75rem', boxSizing: 'border-box' }}
+                                onChange={e => {
+                                    const updated = [...imgList];
+                                    updated[i] = { ...updated[i], caption: e.target.value };
+                                    update('images', updated);
+                                }}
+                                style={{ width: '100%', padding: '6px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem', boxSizing: 'border-box' }}
                             />
                         </div>
-                    ))}
-                </div>
-                {(images || []).length < maxImages && (
-                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', background: '#eff6ff', border: '1px dashed #3b82f6', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', color: '#1d4ed8' }}>
+                    </div>
+                ))}
+                {imgList.length < maxImages && (
+                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#eff6ff', border: '1px dashed #3b82f6', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', color: '#1d4ed8', marginTop: '4px' }}>
                         {uploading ? '⏳ Uploading...' : '+ Add Image'}
                         <input
                             type="file"
                             accept="image/jpeg,image/png,image/webp"
                             style={{ display: 'none' }}
                             disabled={uploading}
-                            onChange={e => { if (e.target.files[0]) addImage(e.target.files[0]); e.target.value = ''; }}
+                            onChange={e => {
+                                if (e.target.files[0]) {
+                                    handleImageUpload(e.target.files[0], sectionName, (url) => {
+                                        update('images', [...imgList, { url, caption: '' }]);
+                                    });
+                                }
+                                e.target.value = '';
+                            }}
                         />
                     </label>
                 )}
@@ -305,7 +308,7 @@ function renderSectionEditor(page, section, data, setData, handleImageUpload, up
                 <label>Subtitle<textarea rows={3} value={data.subtitle || ''} onChange={e => update('subtitle', e.target.value)} /></label>
                 <label>Primary Button Text<input value={data.primary_btn || ''} onChange={e => update('primary_btn', e.target.value)} /></label>
                 <label>Secondary Button Text<input value={data.secondary_btn || ''} onChange={e => update('secondary_btn', e.target.value)} /></label>
-                <ImageUploader images={data.images} onImagesChange={imgs => update('images', imgs)} sectionName="hero" />
+                {renderImageGrid(data.images, 'hero')}
             </>
         );
     }
@@ -315,7 +318,7 @@ function renderSectionEditor(page, section, data, setData, handleImageUpload, up
             <>
                 <label>Section Title<input value={data.title || ''} onChange={e => update('title', e.target.value)} /></label>
                 <label>Section Subtitle<input value={data.subtitle || ''} onChange={e => update('subtitle', e.target.value)} /></label>
-                <ImageUploader images={data.images} onImagesChange={imgs => update('images', imgs)} sectionName="gallery" />
+                {renderImageGrid(data.images, 'gallery')}
             </>
         );
     }

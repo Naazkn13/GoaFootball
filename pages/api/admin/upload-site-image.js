@@ -42,13 +42,15 @@ export default async function handler(req, res) {
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabaseAdmin.storage
+        const { data: urlData, error: urlError } = await supabaseAdmin.storage
             .from('documents')
-            .getPublicUrl(fileName);
+            .createSignedUrl(fileName, 60 * 60 * 24 * 365); // 1 year signed URL
+
+        if (urlError) throw urlError;
 
         return res.status(200).json({
             success: true,
-            url: urlData.publicUrl,
+            url: urlData.signedUrl,
         });
     } catch (err) {
         console.error('Image upload error:', err);
