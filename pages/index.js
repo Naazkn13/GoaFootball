@@ -57,7 +57,7 @@ const DEFAULTS = {
       { icon: '🏃', title: 'Athlete', desc: 'Register as a football player and showcase your skills', color: '#3b82f6' },
       { icon: '🏋️', title: 'Coach', desc: 'Guide and mentor the next generation of footballers', color: '#22c55e' },
       { icon: '🏁', title: 'Referee', desc: 'Ensure fair play and uphold the spirit of the game', color: '#f59e0b' },
-      { icon: '📋', title: 'Manager', desc: 'Lead teams and manage operations behind the scenes', color: '#a855f7' },
+      { icon: '📋', title: 'Others', desc: 'Parents, Physio, Support Staff, Etc', color: '#a855f7' },
     ],
   },
   how_it_works: {

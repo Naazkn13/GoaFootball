@@ -87,6 +87,21 @@ class Database {
     return data;
   }
 
+  async deleteUser(id) {
+    // Attempt deleting related payments first to handle potential FK constraints
+    await this.client.from('payments').delete().eq('user_id', id);
+
+    const { data, error } = await this.client
+      .from('users')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
   // Get the last GFF sequence number for the given year prefix (e.g., 'GFF26')
   async getLastGFFSequence(yearPrefix) {
     const { data, error } = await this.client

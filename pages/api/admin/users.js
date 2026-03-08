@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
         let query = supabaseAdmin
             .from('users')
-            .select('id, email, name, phone, role, registration_completed, approval_status, football_id, is_paid, is_admin, created_at, profile_photo_url, club_flag_reason, clubs(name)')
+            .select('id, email, name, phone, role, registration_completed, approval_status, football_id, is_paid, is_admin, is_super_admin, created_at, profile_photo_url, club_flag_reason, clubs(name)')
             .order('created_at', { ascending: false });
 
         // Apply filters

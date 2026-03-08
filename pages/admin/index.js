@@ -137,6 +137,29 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleDeleteUser = async (userId, userName) => {
+        if (!user?.is_super_admin) return;
+
+        if (window.confirm(`⚠️ WARNING ⚠️\nAre you sure you want to completely delete the user: ${userName || 'No Name'}?\nThis action cannot be undone.`)) {
+            setLoading(true);
+            setError('');
+            try {
+                const res = await axiosInstance.delete(`/api/admin/delete-user?id=${userId}`);
+                if (res.data.success) {
+                    setSuccess('User deleted successfully');
+                    setTimeout(() => setSuccess(''), 3000);
+                    // Refresh current active tab
+                    if (activeTab === 'users') fetchUsers();
+                    else if (activeTab === 'registrations') fetchRegistrations();
+                }
+            } catch (err) {
+                setError(err.response?.data?.message || 'Failed to delete user');
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
     const handleAction = async (userId, action) => {
         if ((action === 'reject' || action === 'hold') && !actionReason) {
             setError('Reason is required for rejection/hold');
@@ -459,6 +482,7 @@ export default function AdminDashboard() {
                                                 <th>Football ID</th>
                                                 <th>Paid</th>
                                                 <th>Joined</th>
+                                                {user?.is_super_admin && <th>Actions</th>}
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -492,6 +516,28 @@ export default function AdminDashboard() {
                                                     <td>{u.football_id || '—'}</td>
                                                     <td>{u.is_paid ? '✓' : '✕'}</td>
                                                     <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                                                    {user?.is_super_admin && (
+                                                        <td>
+                                                            <button
+                                                                onClick={() => handleDeleteUser(u.id, u.name)}
+                                                                style={{
+                                                                    backgroundColor: '#dc2626',
+                                                                    color: 'white',
+                                                                    border: 'none',
+                                                                    padding: '4px 8px',
+                                                                    borderRadius: '4px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '0.8rem',
+                                                                    opacity: (u.id === user.id || u.is_super_admin) ? 0.3 : 1,
+                                                                    cursor: (u.id === user.id || u.is_super_admin) ? 'not-allowed' : 'pointer'
+                                                                }}
+                                                                disabled={u.id === user.id || u.is_super_admin}
+                                                                title={u.id === user.id ? "Cannot delete yourself" : (u.is_super_admin ? "Cannot delete another Super Admin" : "Delete User")}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </td>
+                                                    )}
                                                 </tr>
                                             ))}
                                         </tbody>
