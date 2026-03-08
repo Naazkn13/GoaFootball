@@ -1,6 +1,6 @@
 // Admin API: Get/Update site content (super admin only)
 import { supabaseAdmin } from '@/services/database';
-import { requireSession } from '@/services/auth.service';
+import { requireSession } from '../../../services/session.service';
 
 const SUPER_ADMIN_EMAILS = (process.env.SUPER_ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
 

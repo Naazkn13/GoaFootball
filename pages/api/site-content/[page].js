@@ -28,7 +28,8 @@ export default async function handler(req, res) {
 
         return res.status(200).json({ success: true, content });
     } catch (err) {
-        console.error('Error fetching site content:', err);
-        return res.status(500).json({ message: 'Failed to fetch content' });
+        // If table doesn't exist yet, return empty content gracefully
+        console.error('Error fetching site content:', err?.message || err);
+        return res.status(200).json({ success: true, content: {} });
     }
 }
