@@ -138,16 +138,52 @@ export default function RegisterPage() {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Upload a document file
-    const uploadDocument = async (file, docType) => {
-        const formDataUpload = new FormData();
-        formDataUpload.append('file', file);
-        formDataUpload.append('documentType', docType);
+    // Upload a document file with explicit error handling
+    const DOC_LABELS = {
+        photo: 'Passport Photo',
+        id_proof: 'ID Proof',
+        birth_certificate: 'Birth Certificate',
+        gff_consent_form: 'GFF Consent Form',
+    };
 
-        const response = await axiosInstance.post('/api/user/upload-document', formDataUpload, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        return response.data;
+    const uploadDocument = async (file, docType) => {
+        const label = DOC_LABELS[docType] || docType;
+
+        // Pre-flight size check before even hitting the server
+        const maxSize = docType === 'photo' ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            throw new Error(`${label} is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum allowed: ${maxSize / (1024 * 1024)}MB. Please compress or choose a smaller file.`);
+        }
+
+        try {
+            const formDataUpload = new FormData();
+            formDataUpload.append('file', file);
+            formDataUpload.append('documentType', docType);
+
+            const response = await axiosInstance.post('/api/user/upload-document', formDataUpload, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                timeout: 60000, // 60s timeout for large files
+            });
+
+            if (!response.data?.url) {
+                throw new Error(`${label} uploaded but server did not return a file URL. Please try again.`);
+            }
+
+            return response.data;
+        } catch (err) {
+            // Build a user-friendly message
+            const serverMsg = err.response?.data?.message;
+            if (serverMsg) {
+                throw new Error(`${label} upload failed: ${serverMsg}`);
+            }
+            if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+                throw new Error(`${label} upload timed out. The file may be too large. Please compress and try again.`);
+            }
+            if (!err.response) {
+                throw new Error(`${label} upload failed: Network error. Please check your connection and try again.`);
+            }
+            throw new Error(`${label} upload failed: ${err.message || 'Unknown error'}`);
+        }
     };
 
     // Step 2 → Step 3 (Submit form + proceed to pay)
@@ -164,17 +200,17 @@ export default function RegisterPage() {
         setError('');
 
         try {
-            // 1. Upload documents
-            setUploadProgress('Uploading photo...');
+            // 1. Upload documents one by one with clear progress
+            setUploadProgress('Uploading Passport Photo (1/4)...');
             const photoResult = await uploadDocument(formData.photo_file, 'photo');
 
-            setUploadProgress('Uploading ID proof...');
+            setUploadProgress('Uploading ID Proof (2/4)...');
             const idProofResult = await uploadDocument(formData.id_proof_file, 'id_proof');
 
-            setUploadProgress('Uploading birth certificate...');
+            setUploadProgress('Uploading Birth Certificate (3/4)...');
             const birthCertResult = await uploadDocument(formData.birth_certificate_file, 'birth_certificate');
 
-            setUploadProgress('Uploading GFF consent form...');
+            setUploadProgress('Uploading GFF Consent Form (4/4)...');
             const consentResult = await uploadDocument(formData.gff_consent_form_file, 'gff_consent_form');
 
             // 3. Submit registration data
@@ -260,7 +296,9 @@ export default function RegisterPage() {
             razorpay.open();
         } catch (err) {
             console.error('Registration error:', err);
-            setError(err.response?.data?.message || 'Registration failed. Please try again.');
+            // Show specific error message from upload/registration failures
+            const message = err.message || err.response?.data?.message || 'Registration failed. Please try again.';
+            setError(message);
             setLoading(false);
             setUploadProgress('');
         }
