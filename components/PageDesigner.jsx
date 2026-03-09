@@ -8,7 +8,7 @@ const DEFAULTS = {
         hero: {
             badge_text: 'Registrations Open for 2026',
             title: 'Your Football\nJourney Starts Here',
-            subtitle: 'Register as a Player, Coach, Referee, or Manager. Get your unique Football UID and become part of the community.',
+            subtitle: 'Register as a Player, Coach, Referee, or Others. Get your unique Football UID and become part of the community.',
             primary_btn: 'Register Now',
             secondary_btn: 'Learn More ↓',
             images: [],
@@ -33,7 +33,7 @@ const DEFAULTS = {
                 { icon: '🏃', title: 'Athlete', desc: 'Register as a football player and showcase your skills', color: '#3b82f6' },
                 { icon: '🏋️', title: 'Coach', desc: 'Guide and mentor the next generation of footballers', color: '#22c55e' },
                 { icon: '🏁', title: 'Referee', desc: 'Ensure fair play and uphold the spirit of the game', color: '#f59e0b' },
-                { icon: '📋', title: 'Manager', desc: 'Lead teams and manage operations behind the scenes', color: '#a855f7' },
+                { icon: '📋', title: 'Others', desc: 'Parents, Physio, Support Staff, Etc.', color: '#a855f7' },
             ],
         },
         how_it_works: {
@@ -47,7 +47,7 @@ const DEFAULTS = {
         },
         about: {
             title: 'About the Platform',
-            paragraph1: 'Our Football Registration platform provides a seamless, secure way for players, coaches, referees, and managers to register for football events and obtain their unique Football UID.',
+            paragraph1: 'Our Football Registration platform provides a seamless, secure way for players, coaches, referees, and others to register for football events and obtain their unique Football UID.',
             paragraph2: 'Built with security at its core — email OTP authentication, secure document handling, and admin-verified approval ensures only legitimate registrations are processed.',
             features: ['Secure email OTP login', 'Role-based registration', 'Document verification', 'Admin approval system', 'Real-time chat support', 'Secure payment processing'],
         },
