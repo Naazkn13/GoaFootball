@@ -259,14 +259,7 @@ export default function AdminDashboard() {
                                 ⚙️ Settings
                             </button>
                         )}
-                        {user?.is_super_admin && (
-                            <button
-                                className={`${styles.navBtn} ${activeTab === 'designer' ? styles.navBtnActive : ''}`}
-                                onClick={() => setActiveTab('designer')}
-                            >
-                                🎨 Page Designer
-                            </button>
-                        )}
+
                     </nav>
                     <button className={styles.backBtn} onClick={() => router.push('/profile')}>
                         ← Back to Profile
