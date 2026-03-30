@@ -74,7 +74,7 @@ async function createTables() {
     if (error) {
       console.log('\n⚠️  Direct table creation not supported via Supabase client.');
       console.log('📝 Please run the SQL script manually:');
-      console.log('\n1. Go to: https://supabase.com/dashboard/project/dohuftotzdgxgzsbxvis/sql');
+      console.log('\n1. Go to: https://supabase.com/dashboard/project/hxfzvqtukdchylhqpgwc/sql');
       console.log('2. Copy and paste the content from CREATE_TABLES.sql');
       console.log('3. Click "Run" to execute\n');
       
