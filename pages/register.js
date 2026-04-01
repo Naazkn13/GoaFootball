@@ -32,6 +32,7 @@ export default function RegisterPage() {
         id_proof_file: null,
         birth_certificate_file: null,
         gff_consent_form_file: null,
+        accepted_tc: false,
         club_id: router.query.club_id || '',
     });
     const [isClubRegistration, setIsClubRegistration] = useState(false);
@@ -86,7 +87,7 @@ export default function RegisterPage() {
             newErrors.date_of_birth = 'Date of birth is required';
         } else {
             const age = (new Date() - new Date(formData.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000);
-            if (age < 10) newErrors.date_of_birth = 'Must be at least 10 years old';
+            if (age < 5) newErrors.date_of_birth = 'Must be at least 5 years old';
         }
 
         if (!formData.gender) newErrors.gender = 'Gender is required';
@@ -119,15 +120,29 @@ export default function RegisterPage() {
         if (!formData.photo_file) newErrors.photo = 'Passport-size photo is required';
         if (!formData.id_proof_file) newErrors.id_proof = 'ID proof document is required';
         if (!formData.birth_certificate_file) newErrors.birth_certificate = 'Birth certificate is required';
-        if (!formData.gff_consent_form_file) newErrors.gff_consent_form = 'GFF consent form is required';
+
+        const isAthlete = selectedRole.toLowerCase() === 'athlete' || selectedRole.toLowerCase() === 'player';
+        let age = 100;
+        if (formData.date_of_birth) {
+            age = (new Date() - new Date(formData.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000);
+        }
+        const requireConsent = isAthlete && age < 18;
+
+        if (requireConsent && !formData.gff_consent_form_file) {
+            newErrors.gff_consent_form = 'GFF consent form is required for athletes under 18';
+        }
 
         if (formData.photo_file && formData.photo_file.size > 2 * 1024 * 1024) newErrors.photo = 'Photo must be less than 2MB';
         if (formData.id_proof_file && formData.id_proof_file.size > 5 * 1024 * 1024) newErrors.id_proof = 'ID proof must be less than 5MB';
         if (formData.birth_certificate_file && formData.birth_certificate_file.size > 5 * 1024 * 1024) newErrors.birth_certificate = 'Birth certificate must be less than 5MB';
         
-        if (formData.gff_consent_form_file) {
+        if (requireConsent && formData.gff_consent_form_file) {
             if (formData.gff_consent_form_file.size > 5 * 1024 * 1024) newErrors.gff_consent_form = 'Consent form must be less than 5MB';
             if (formData.gff_consent_form_file.type !== 'application/pdf') newErrors.gff_consent_form = 'Consent form must be a PDF file';
+        }
+
+        if (!formData.accepted_tc) {
+            newErrors.accepted_tc = 'You must accept the Terms and Conditions to proceed.';
         }
 
         setErrors(newErrors);
@@ -210,13 +225,14 @@ export default function RegisterPage() {
             const photoResult = await uploadDocument(formData.photo_file, 'photo');
 
             setUploadProgress('Uploading ID Proof (2/4)...');
-            const idProofResult = await uploadDocument(formData.id_proof_file, 'id_proof');
-
-            setUploadProgress('Uploading Birth Certificate (3/4)...');
+            const idProofResult = await uploadDocument(formData.id_proof_file, 'id_proof');            setUploadProgress('Uploading Birth Certificate (3/4)...');
             const birthCertResult = await uploadDocument(formData.birth_certificate_file, 'birth_certificate');
 
-            setUploadProgress('Uploading GFF Consent Form (4/4)...');
-            const consentResult = await uploadDocument(formData.gff_consent_form_file, 'gff_consent_form');
+            let consentResult = null;
+            if (formData.gff_consent_form_file) {
+                setUploadProgress('Uploading GFF Consent Form (4/4)...');
+                consentResult = await uploadDocument(formData.gff_consent_form_file, 'gff_consent_form');
+            }
 
             // 3. Submit registration data
             setUploadProgress('Saving registration...');
@@ -224,6 +240,16 @@ export default function RegisterPage() {
             const nameParts = formData.only_first_name 
                 ? [formData.first_name]
                 : [formData.first_name, formData.middle_name, formData.last_name].filter(Boolean);
+
+            const documentList = [
+                { type: 'photo', url: photoResult.url, filename: photoResult.filename },
+                { type: 'id_proof', url: idProofResult.url, filename: idProofResult.filename },
+                { type: 'birth_certificate', url: birthCertResult.url, filename: birthCertResult.filename },
+            ];
+
+            if (consentResult) {
+                documentList.push({ type: 'gff_consent_form', url: consentResult.url, filename: consentResult.filename });
+            }
 
             const registrationPayload = {
                 first_name: formData.first_name,
@@ -244,12 +270,7 @@ export default function RegisterPage() {
                     state: formData.state || 'Same as proof',
                     pin_code: formData.pin_code || '000000',
                 },
-                documents: [
-                    { type: 'photo', url: photoResult.url, filename: photoResult.filename },
-                    { type: 'id_proof', url: idProofResult.url, filename: idProofResult.filename },
-                    { type: 'birth_certificate', url: birthCertResult.url, filename: birthCertResult.filename },
-                    { type: 'gff_consent_form', url: consentResult.url, filename: consentResult.filename },
-                ],
+                documents: documentList,
                 profile_photo_url: photoResult.url,
             };
 

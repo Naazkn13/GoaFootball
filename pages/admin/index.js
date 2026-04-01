@@ -429,7 +429,9 @@ export default function AdminDashboard() {
                                                 </div>
                                                 {reg.address && (
                                                     <div className={styles.regDetail}>
-                                                        <strong>Address:</strong> {`${reg.address.line1 || ''}, ${reg.address.city || ''}, ${reg.address.state || ''}`}
+                                                        <strong>Address:</strong> {reg.address.line1 === 'Same as proof' 
+                                                            ? 'Same as proof' 
+                                                            : `${reg.address.line1 || ''}, ${reg.address.city || ''}, ${reg.address.state || ''}`}
                                                     </div>
                                                 )}
                                                 {reg.football_id && (

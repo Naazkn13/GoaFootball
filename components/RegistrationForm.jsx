@@ -33,6 +33,13 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
     const [fileError, setFileError] = useState('');
     const addressSameAsProof = formData.address_same_as_proof || false;
 
+    const isAthlete = role === 'athlete' || role === 'player';
+    let age = 100;
+    if (formData.date_of_birth) {
+        age = (new Date() - new Date(formData.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000);
+    }
+    const requireConsent = isAthlete && age < 18;
+
     // Fetch clubs
     useEffect(() => {
         fetch('/api/clubs')
@@ -530,28 +537,58 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                     {errors?.birth_certificate && <span className={styles.fieldError}>{errors.birth_certificate}</span>}
                 </div>
 
-                <div className={styles.inputGroup}>
-                    <label htmlFor="reg-consent">GFF Consent Form * (PDF, max 5MB)</label>
-                    <input
-                        id="reg-consent"
-                        type="file"
-                        accept="application/pdf"
-                        onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file && file.type !== 'application/pdf') {
-                                setFileError('Please select a valid PDF file for the GFF Consent Form.');
-                                e.target.value = ''; // clear input
-                                handleChange('gff_consent_form_file', null);
-                            } else {
-                                handleChange('gff_consent_form_file', file);
-                            }
-                        }}
-                        required
-                        className={styles.fileInput}
-                    />
+                {requireConsent && (
+                    <div className={styles.inputGroup}>
+                        <label htmlFor="reg-consent">GFF Consent Form * (PDF, max 5MB)</label>
+                        <input
+                            id="reg-consent"
+                            type="file"
+                            accept="application/pdf"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file && file.type !== 'application/pdf') {
+                                    setFileError('Please select a valid PDF file for the GFF Consent Form.');
+                                    e.target.value = ''; // clear input
+                                    handleChange('gff_consent_form_file', null);
+                                } else {
+                                    handleChange('gff_consent_form_file', file);
+                                }
+                            }}
+                            required
+                            className={styles.fileInput}
+                        />
 
-                    {errors?.gff_consent_form && <span className={styles.fieldError}>{errors.gff_consent_form}</span>}
+                        {errors?.gff_consent_form && <span className={styles.fieldError}>{errors.gff_consent_form}</span>}
+                    </div>
+                )}
+            </div>
+
+            {/* Terms and Conditions */}
+            <div className={styles.tcContainer} style={{ marginTop: '30px', padding: '20px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <h4 style={{ marginTop: '0', marginBottom: '15px', color: '#1e293b' }}>Terms and Conditions</h4>
+                <div style={{ fontSize: '13px', color: '#475569', maxHeight: '200px', overflowY: 'auto', marginBottom: '20px', paddingRight: '10px' }}>
+                    <ul style={{ paddingLeft: '20px', margin: '0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <li>I hereby confirm my participation in the 14th Goa Football Festival (GFF) organized by National Sports Academy.</li>
+                        <li>I hereby authorize the staff of Goa Football Festival to act for me according to their best judgment in any emergency requiring medical attention.</li>
+                        <li>I hereby waive and release Goa Football Festival and its staff from any and all liabilities for any accident or injuries incurred while the tournament, travelling or sightseeing from the venue.</li>
+                        <li>All medical expenses incurred will be the responsibility of the participant or the participant's family/guardian.</li>
+                        <li>Goa Football Festival is not responsible for the lost, stolen or damage of any personal belonging of participants.</li>
+                        <li>I acknowledge and agree to assume and be fully responsible for any and all property or other damage to the facilities used at the venue.</li>
+                        <li>Misbehaviour or indiscipline will not be tolerated and the participant will be asked to leave the tournament as well as the venue.</li>
+                        <li>The GFF Team has a Zero-Tolerance Policy towards alcohol, tobacco, and any other harmful substances. If any such substances are used or found in the possession of any athlete, the athlete will be Banned & will not be allowed to participate in any competitions.</li>
+                        <li>I understand Goa Football Festival retains the rights to use any photographs, videotapes, motion picture recording or any other record of the event for publicity, advertising or any legitimate purpose.</li>
+                    </ul>
                 </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', color: '#0f172a', cursor: 'pointer' }}>
+                    <input 
+                        type="checkbox" 
+                        checked={formData.accepted_tc || false}
+                        onChange={(e) => onChange('accepted_tc', e.target.checked)}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    I have read and agree to these Terms and Conditions
+                </label>
+                {errors?.accepted_tc && <span className={styles.fieldError} style={{ display: 'block', marginTop: '8px' }}>{errors.accepted_tc}</span>}
             </div>
             </>
             )}
