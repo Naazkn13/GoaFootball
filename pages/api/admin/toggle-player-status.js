@@ -1,5 +1,6 @@
 import database from '../../../services/database';
 import { requireSuperAdmin } from '../../../services/session.service';
+import emailService from '../../../services/email.service';
 
 export default async function handler(req, res) {
     const session = requireSuperAdmin(req, res);
@@ -29,6 +30,18 @@ export default async function handler(req, res) {
         const updated = await database.updateUser(userId, {
             is_active,
             updated_at: new Date().toISOString()
+        });
+
+        // Fetch club to send notification
+        let club = null;
+        if (updated.club_id) {
+            club = await database.getClubById(updated.club_id).catch(() => null);
+        }
+
+        // Dispatch email notification (non-blocking)
+        const actionStr = is_active ? 'active' : 'inactive';
+        emailService.sendStatusUpdateEmail(updated, club, actionStr).catch(err => {
+            console.error('Error dispatching status email:', err);
         });
 
         return res.status(200).json({

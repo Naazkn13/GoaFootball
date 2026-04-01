@@ -84,6 +84,91 @@ class EmailService {
     console.log('Email logged to console (development mode)');
     return { success: true, provider: 'console' };
   }
+
+  // Helper to send status notifications
+  async sendStatusUpdateEmail(user, club, action, reason = '') {
+    // Determine subject and descriptive action
+    let actionDesc = '';
+    let subject = '';
+    let color = '#1a56db';
+
+    switch (action) {
+      case 'approve':
+        actionDesc = 'Approved';
+        subject = 'Registration Approved - Goa Football Festival';
+        color = '#16a34a';
+        break;
+      case 'reject':
+        actionDesc = 'Rejected';
+        subject = 'Registration Rejected - Goa Football Festival';
+        color = '#dc2626';
+        break;
+      case 'hold':
+        actionDesc = 'Placed on Hold';
+        subject = 'Registration on Hold - Goa Football Festival';
+        color = '#f59e0b';
+        break;
+      case 'inactive':
+        actionDesc = 'Marked as Inactive';
+        subject = 'Profile Marked Inactive - Goa Football Festival';
+        color = '#dc2626';
+        break;
+      case 'active':
+        actionDesc = 'Re-activated';
+        subject = 'Profile Re-activated - Goa Football Festival';
+        color = '#16a34a';
+        break;
+      default:
+        actionDesc = 'Updated';
+        subject = 'Registration Status Updated - Goa Football Festival';
+    }
+
+    const htmlTemplate = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: ${color}; color: white; padding: 20px; text-align: center;">
+          <h2 style="margin: 0;">Registration Status Update</h2>
+        </div>
+        <div style="padding: 20px;">
+          <p>Hello,</p>
+          <p>The registration status for the following entity has been updated by the administration:</p>
+          
+          <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>Name:</strong> ${user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}</p>
+            <p style="margin: 5px 0;"><strong>Role:</strong> <span style="text-transform: capitalize;">${user.role || 'Player'}</span></p>
+            ${user.football_id ? `<p style="margin: 5px 0;"><strong>Football ID:</strong> ${user.football_id}</p>` : ''}
+            <p style="margin: 5px 0;"><strong>New Status:</strong> <span style="font-weight: bold; color: ${color};">${actionDesc}</span></p>
+            ${reason ? `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;"><strong>Admin Notes/Reason:</strong><br/> <i style="color: #475569;">${reason}</i></div>` : ''}
+          </div>
+
+          <p>If you have any questions regarding this decision, please log in to your dashboard and use the communication module to contact support.</p>
+          <p>Thank you,<br/>Goa Football Festival Team</p>
+        </div>
+      </div>
+    `;
+
+    const recipients = [user.email];
+    if (club && club.email) {
+      recipients.push(club.email);
+    }
+
+    // Send completely separate emails for better deliverability and privacy mapping
+    const promises = recipients.filter(Boolean).map(email => 
+      this.send({
+        to: email,
+        subject: subject,
+        html: htmlTemplate
+      })
+    );
+
+    try {
+      await Promise.all(promises);
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to send status email:', error);
+      // We don't want to throw and break API workflows
+      return { success: false, error };
+    }
+  }
 }
 
 export default new EmailService();
