@@ -63,6 +63,39 @@ export default async function handler(req, res) {
         }
     }
 
+    if (req.method === 'PUT') {
+        try {
+            const { id, name, email, location, logo_url } = req.body;
+
+            if (!id || !name || !email || !location) {
+                return res.status(400).json({ success: false, message: 'ID, name, email, and location are required' });
+            }
+
+            // Check if email collides
+            const existingClub = await database.getClubByEmail(email);
+            if (existingClub && existingClub.id !== id) {
+                return res.status(400).json({ success: false, message: 'Another club with this email already exists' });
+            }
+
+            const existingUser = await database.getUserByEmail(email);
+            if (existingUser) {
+                return res.status(400).json({ success: false, message: 'This email is already registered to a user' });
+            }
+
+            const updates = { name, email, location };
+            if (logo_url !== undefined) {
+                updates.logo_url = logo_url || null; // allow empty strings to null out
+            }
+
+            const updatedClub = await database.updateClub(id, updates);
+
+            return res.status(200).json({ success: true, club: updatedClub });
+        } catch (error) {
+            console.error('Error updating club:', error);
+            return res.status(500).json({ success: false, message: 'Failed to update club' });
+        }
+    }
+
     if (req.method === 'DELETE') {
         try {
             const { id } = req.query;

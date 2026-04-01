@@ -25,6 +25,7 @@ export default function AdminDashboard() {
     const [newAdminEmail, setNewAdminEmail] = useState('');
     const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, on_hold: 0, inactive: 0 });
     const [clubs, setClubs] = useState([]);
+    const [editingClub, setEditingClub] = useState(null);
     const [newClub, setNewClub] = useState({ name: '', email: '', location: '', logo_url: '', password: '' });
     const [clubLogoFile, setClubLogoFile] = useState(null);
 
@@ -106,13 +107,13 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleCreateClub = async (e) => {
+    const handleSaveClub = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
 
         try {
-            let logo_url = '';
+            let logo_url = editingClub ? editingClub.logo_url : '';
             if (clubLogoFile) {
                 const formDataUpload = new FormData();
                 formDataUpload.append('file', clubLogoFile);
@@ -123,23 +124,54 @@ export default function AdminDashboard() {
                 logo_url = uploadRes.data.url;
             }
 
-            await axiosInstance.post('/api/admin/clubs', {
-                name: newClub.name,
-                email: newClub.email,
-                location: newClub.location,
-                password: newClub.password,
-                logo_url,
-            });
+            if (editingClub) {
+                await axiosInstance.put('/api/admin/clubs', {
+                    id: editingClub.id,
+                    name: newClub.name,
+                    email: newClub.email,
+                    location: newClub.location,
+                    logo_url,
+                });
+                toastSuccess(`Club ${newClub.name} updated successfully`);
+                setEditingClub(null);
+            } else {
+                await axiosInstance.post('/api/admin/clubs', {
+                    name: newClub.name,
+                    email: newClub.email,
+                    location: newClub.location,
+                    password: newClub.password,
+                    logo_url,
+                });
+                toastSuccess(`Club ${newClub.name} created successfully`);
+            }
 
-            toastSuccess(`Club ${newClub.name} created successfully`);
             setNewClub({ name: '', email: '', location: '', logo_url: '', password: '' });
             setClubLogoFile(null);
             fetchClubs();
         } catch (err) {
-            toastError(err.response?.data?.message || 'Failed to create club');
+            toastError(err.response?.data?.message || `Failed to ${editingClub ? 'update' : 'create'} club`);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleEditClubClick = (club) => {
+        setEditingClub(club);
+        setNewClub({
+            name: club.name,
+            email: club.email,
+            location: club.location,
+            logo_url: club.logo_url || '',
+            password: '' // Explicitly wiped
+        });
+        setClubLogoFile(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const cancelEditClub = () => {
+        setEditingClub(null);
+        setNewClub({ name: '', email: '', location: '', logo_url: '', password: '' });
+        setClubLogoFile(null);
     };
 
     const handleDeleteClub = async (clubId, clubName) => {
@@ -651,57 +683,74 @@ export default function AdminDashboard() {
                                 <h2>Manage Clubs</h2>
                             </div>
 
-                            {user?.is_super_admin && (
-                                <div className={styles.settingsCard} style={{ marginBottom: '20px' }}>
-                                    <h3>Create New Club</h3>
-                                    <p>Fill out the details below to add a new club.</p>
-                                    <form onSubmit={handleCreateClub} className={styles.adminForm} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                        <input
-                                            type="text"
-                                            placeholder="Club Name"
-                                            value={newClub.name}
-                                            onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
-                                            required
-                                        />
-                                        <input
-                                            type="email"
-                                            placeholder="Club Email (Login ID)"
-                                            value={newClub.email}
-                                            onChange={(e) => setNewClub({ ...newClub, email: e.target.value })}
-                                            required
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Location (City/Area)"
-                                            value={newClub.location}
-                                            onChange={(e) => setNewClub({ ...newClub, location: e.target.value })}
-                                            required
-                                        />
-                                        <input
-                                            type="password"
-                                            placeholder="Initial Password for Club (min 6 chars)"
-                                            value={newClub.password}
-                                            onChange={(e) => setNewClub({ ...newClub, password: e.target.value })}
-                                            required
-                                            minLength={6}
-                                        />
-                                        <div>
-                                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>Club Logo (Optional)</label>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 350px) 1fr', gap: '24px', alignItems: 'start' }}>
+                                {/* Left Side Form */}
+                                {user?.is_super_admin && (
+                                    <div className={styles.settingsCard} style={{ position: 'sticky', top: '20px', marginBottom: 0 }}>
+                                        <h3 style={{ marginTop: '0' }}>{editingClub ? 'Update Club' : 'Create New Club'}</h3>
+                                        <p style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: '20px' }}>
+                                            {editingClub ? 'Modify the details for this club.' : 'Fill out the details below to add a new club.'}
+                                        </p>
+                                        <form onSubmit={handleSaveClub} className={styles.adminForm} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                             <input
-                                                type="file"
-                                                accept="image/jpeg,image/png"
-                                                onChange={(e) => setClubLogoFile(e.target.files[0])}
-                                                style={{ backgroundColor: 'transparent', padding: '0', border: 'none' }}
+                                                type="text"
+                                                placeholder="Club Name"
+                                                value={newClub.name}
+                                                onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
+                                                required
                                             />
-                                        </div>
-                                        <button type="submit" disabled={loading} style={{ alignSelf: 'flex-start' }}>
-                                            {loading ? 'Creating...' : '+ Add Club'}
-                                        </button>
-                                    </form>
-                                </div>
-                            )}
+                                            <input
+                                                type="email"
+                                                placeholder="Club Email (Login ID)"
+                                                value={newClub.email}
+                                                onChange={(e) => setNewClub({ ...newClub, email: e.target.value })}
+                                                required
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Location (City/Area)"
+                                                value={newClub.location}
+                                                onChange={(e) => setNewClub({ ...newClub, location: e.target.value })}
+                                                required
+                                            />
+                                            {!editingClub && (
+                                                <input
+                                                    type="password"
+                                                    placeholder="Initial Password for Club (min 6 chars)"
+                                                    value={newClub.password}
+                                                    onChange={(e) => setNewClub({ ...newClub, password: e.target.value })}
+                                                    required
+                                                    minLength={6}
+                                                />
+                                            )}
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>Club Logo (Optional)</label>
+                                                <input
+                                                    type="file"
+                                                    accept="image/jpeg,image/png"
+                                                    onChange={(e) => setClubLogoFile(e.target.files[0])}
+                                                    style={{ backgroundColor: 'transparent', padding: '0', border: 'none' }}
+                                                />
+                                                {editingClub && editingClub.logo_url && !clubLogoFile && (
+                                                    <div style={{ marginTop: '8px', fontSize: '0.8rem', color: '#666' }}>Current logo retained if empty</div>
+                                                )}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                                <button type="submit" disabled={loading} style={{ flex: 1, padding: '10px', fontWeight: 'bold' }}>
+                                                    {loading ? 'Saving...' : (editingClub ? 'Update Club' : '+ Add Club')}
+                                                </button>
+                                                {editingClub && (
+                                                    <button type="button" onClick={cancelEditClub} disabled={loading} style={{ flex: 1, padding: '10px', backgroundColor: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db', cursor: 'pointer', fontWeight: 'bold', borderRadius: '4px' }}>
+                                                        Cancel
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </form>
+                                    </div>
+                                )}
 
-                            <div className={styles.tableWrapper}>
+                                {/* Right Side Table */}
+                                <div className={styles.tableWrapper} style={{ marginTop: 0, height: '100%' }}>
                                 {loading && !clubs.length ? (
                                     <p className={styles.loadingText}>Loading clubs...</p>
                                 ) : (
@@ -746,20 +795,38 @@ export default function AdminDashboard() {
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <button
-                                                            onClick={() => handleDeleteClub(c.id, c.name)}
-                                                            style={{
-                                                                backgroundColor: '#dc2626',
-                                                                color: 'white',
-                                                                border: 'none',
-                                                                padding: '6px 12px',
-                                                                borderRadius: '4px',
-                                                                cursor: 'pointer',
-                                                                fontSize: '0.8rem'
-                                                            }}
-                                                        >
-                                                            🗑 Delete
-                                                        </button>
+                                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                                            <button
+                                                                onClick={() => handleEditClubClick(c)}
+                                                                style={{
+                                                                    backgroundColor: '#f3f4f6',
+                                                                    color: '#374151',
+                                                                    border: '1px solid #d1d5db',
+                                                                    padding: '6px 12px',
+                                                                    borderRadius: '4px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '0.8rem',
+                                                                    fontWeight: 'bold'
+                                                                }}
+                                                            >
+                                                                ✎ Edit
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeleteClub(c.id, c.name)}
+                                                                style={{
+                                                                    backgroundColor: '#dc2626',
+                                                                    color: 'white',
+                                                                    border: 'none',
+                                                                    padding: '6px 12px',
+                                                                    borderRadius: '4px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '0.8rem',
+                                                                    fontWeight: 'bold'
+                                                                }}
+                                                            >
+                                                                🗑 Delete
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -769,11 +836,12 @@ export default function AdminDashboard() {
                                                 </tr>
                                             )}
                                         </tbody>
-                                    </table>
+                                                    </table>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </section>
                                 )}
-                            </div>
-                        </section>
-                    )}
 
                     {/* Chat Tab - Full Implementation */}
                     {activeTab === 'chat' && (
