@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
 import styles from '@/styles/Register.module.css';
 
 // Indian states list
@@ -52,78 +53,19 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
             .catch(err => console.error("Error fetching clubs:", err));
     }, []);
 
-    // --- Date of Birth dropdown helpers ---
-    const currentYear = new Date().getFullYear();
-    const MONTHS = [
-        { value: '01', label: 'January' }, { value: '02', label: 'February' },
-        { value: '03', label: 'March' }, { value: '04', label: 'April' },
-        { value: '05', label: 'May' }, { value: '06', label: 'June' },
-        { value: '07', label: 'July' }, { value: '08', label: 'August' },
-        { value: '09', label: 'September' }, { value: '10', label: 'October' },
-        { value: '11', label: 'November' }, { value: '12', label: 'December' },
-    ];
-
-    // Use separate fields for partial selection so dropdowns always reflect values
-    const dobDay = formData._dob_day || '';
-    const dobMonth = formData._dob_month || '';
-    const dobYear = formData._dob_year || '';
-
-    // Calculate max days for selected month/year
-    const getDaysInMonth = (month, year) => {
-        if (!month) return 31;
-        return new Date(year || 2000, parseInt(month), 0).getDate();
-    };
-    const maxDays = getDaysInMonth(dobMonth, dobYear);
-
-    // When any dropdown changes, update individual fields + combined date_of_birth
-    const handleDobChange = (part, value) => {
-        let intVal = parseInt(value, 10);
-        let strVal = value.trim();
-
-        // If the user typed non-numbers (e.g. 'e', '-', '.'), ignore it.
-        if (strVal !== '' && isNaN(intVal)) return; 
+    // Datepicker handler mapping
+    const dobValue = formData.date_of_birth ? new Date(formData.date_of_birth) : null;
+    const handleDatePickerChange = (date) => {
+        if (!date) {
+            handleChange('date_of_birth', '');
+            return;
+        }
+        if (isNaN(date.getTime())) return;
         
-        let y = dobYear, m = dobMonth, d = dobDay;
-
-        if (part === 'day') {
-            if (strVal === '') d = '';
-            else {
-                if (intVal > 31) return; // Disallow typing > 31
-                d = String(intVal);
-            }
-        } else if (part === 'month') {
-            if (strVal === '') m = '';
-            else {
-                if (intVal > 12) return; // Disallow typing > 12
-                m = String(intVal);
-            }
-        } else if (part === 'year') {
-            if (strVal === '') y = '';
-            else {
-                if (strVal.length > 4) return; // Disallow > 4 digits length
-                if (strVal.length === 4 && intVal > currentYear) return; // Disallow future years
-                y = String(intVal);
-            }
-        }
-
-        // Auto-clamp day if month changed and day exceeds new max
-        // Only clamp if full date is somewhat formed, or if changing month/year
-        if (d && m && part !== 'day') {
-            const newMax = getDaysInMonth(m, y || currentYear);
-            if (parseInt(d) > newMax) d = String(newMax);
-        }
-
-        // Only commit fully formed dates to the backend payload string
-        const isComplete = (y && y.length === 4 && m && d);
-        const combined = isComplete ? `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}` : '';
-
-        onChange({
-            ...formData,
-            _dob_day: d,
-            _dob_month: m,
-            _dob_year: y,
-            date_of_birth: combined,
-        });
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        handleChange('date_of_birth', `${year}-${month}-${day}`);
     };
 
     const handleChange = (field, value) => {
@@ -268,63 +210,31 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                 <div className={styles.inputGroup}>
                     <label>Date of Birth *</label>
                     <div className={styles.dobDropdownRow}>
-                        <input
-                            type="number"
-                            list="dob-days-list"
-                            id="reg-dob-day"
-                            value={dobDay}
-                            onChange={(e) => handleDobChange('day', e.target.value)}
+                        <DatePicker
+                            selected={dobValue}
+                            onChange={handleDatePickerChange}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="DD/MM/YYYY"
+                            maxDate={new Date()}
+                            showMonthDropdown
+                            showYearDropdown
+                            dropdownMode="select"
                             required
-                            placeholder="DD"
-                            min="1"
-                            max={maxDays}
-                            aria-label="Day"
-                            style={{ flex: 1, padding: '12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '1rem' }}
+                            wrapperClassName={styles.fullWidth}
+                            className={styles.fileInput} // Resusing fileInput for padding/border look
+                            customInput={
+                                <input style={{ 
+                                    width: '100%', 
+                                    padding: '12px', 
+                                    border: '2px solid #e5e7eb', 
+                                    borderRadius: '8px', 
+                                    fontSize: '1rem',
+                                    color: '#1f2937',
+                                    fontFamily: 'inherit',
+                                    backgroundColor: '#ffffff'
+                                }} />
+                            }
                         />
-                        <datalist id="dob-days-list">
-                            {Array.from({ length: maxDays }, (_, i) => (
-                                <option key={i} value={i + 1} />
-                            ))}
-                        </datalist>
-
-                        <input
-                            type="number"
-                            list="dob-months-list"
-                            id="reg-dob-month"
-                            value={dobMonth}
-                            onChange={(e) => handleDobChange('month', e.target.value)}
-                            required
-                            placeholder="MM"
-                            min="1"
-                            max="12"
-                            aria-label="Month"
-                            style={{ flex: 1, padding: '12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '1rem' }}
-                        />
-                        <datalist id="dob-months-list">
-                            {MONTHS.map((m) => (
-                                <option key={m.value} value={parseInt(m.value, 10)} label={m.label} />
-                            ))}
-                        </datalist>
-
-                        <input
-                            type="number"
-                            list="dob-years-list"
-                            id="reg-dob-year"
-                            value={dobYear}
-                            onChange={(e) => handleDobChange('year', e.target.value)}
-                            required
-                            placeholder="YYYY"
-                            min="1900"
-                            max={currentYear}
-                            aria-label="Year"
-                            style={{ flex: 1, padding: '12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '1rem' }}
-                        />
-                        <datalist id="dob-years-list">
-                            {Array.from({ length: currentYear - 1950 + 1 }, (_, i) => {
-                                const y = currentYear - i;
-                                return <option key={y} value={y} />;
-                            })}
-                        </datalist>
                     </div>
                     {errors?.date_of_birth && <span className={styles.fieldError}>{errors.date_of_birth}</span>}
                 </div>
