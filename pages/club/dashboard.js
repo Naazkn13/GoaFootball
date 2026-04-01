@@ -15,6 +15,11 @@ export default function ClubDashboard() {
     const [error, setError] = useState('');
     const [flagModal, setFlagModal] = useState({ isOpen: false, player: null, reason: '' });
 
+    // Filter states
+    const [filterRole, setFilterRole] = useState('All');
+    const [filterStatus, setFilterStatus] = useState('All');
+    const [filterAgeGroup, setFilterAgeGroup] = useState('All');
+
     // Change password state
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -69,6 +74,29 @@ export default function ClubDashboard() {
             alert(err.response?.data?.message || 'Failed to update flag');
         }
     };
+
+    // Calculate age group logic based on Date of Birth
+    const getAgeGroup = (dob) => {
+        if (!dob) return 'N/A';
+        const age = (new Date() - new Date(dob)) / (365.25 * 24 * 60 * 60 * 1000);
+        if (age < 10) return 'U10';
+        if (age < 12) return 'U12';
+        if (age < 14) return 'U14';
+        if (age < 17) return 'U17';
+        if (age < 18) return 'U18';
+        return 'Senior';
+    };
+
+    // Filter list
+    const filteredPlayers = players.map(p => ({
+        ...p,
+        age_group: getAgeGroup(p.date_of_birth)
+    })).filter(p => {
+        const roleMatch = filterRole === 'All' || (p.role && p.role.toLowerCase() === filterRole.toLowerCase());
+        const statusMatch = filterStatus === 'All' || (p.approval_status && p.approval_status.toLowerCase() === filterStatus.toLowerCase());
+        const ageMatch = filterAgeGroup === 'All' || p.age_group === filterAgeGroup;
+        return roleMatch && statusMatch && ageMatch;
+    });
 
     if (authLoading || user?.role !== 'club') {
         return (
@@ -170,6 +198,47 @@ export default function ClubDashboard() {
                                 <h2>Registered Players</h2>
                             </div>
 
+                            <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                                <select 
+                                    value={filterRole} 
+                                    onChange={(e) => setFilterRole(e.target.value)}
+                                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer' }}
+                                >
+                                    <option value="All">All Roles</option>
+                                    <option value="athlete">Athlete</option>
+                                    <option value="coach">Coach</option>
+                                    <option value="physio">Physio</option>
+                                    <option value="referee">Referee</option>
+                                    <option value="manager">Manager</option>
+                                </select>
+
+                                <select 
+                                    value={filterStatus} 
+                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer' }}
+                                >
+                                    <option value="All">All Statuses</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+
+                                <select 
+                                    value={filterAgeGroup} 
+                                    onChange={(e) => setFilterAgeGroup(e.target.value)}
+                                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer' }}
+                                >
+                                    <option value="All">All Age Groups</option>
+                                    <option value="U10">Under 10</option>
+                                    <option value="U12">Under 12</option>
+                                    <option value="U14">Under 14</option>
+                                    <option value="U17">Under 17</option>
+                                    <option value="U18">Under 18</option>
+                                    <option value="Senior">Senior</option>
+                                    <option value="N/A">N/A</option>
+                                </select>
+                            </div>
+
                             {error && <div className={styles.errorMsg}>{error}</div>}
 
                             <div className={styles.tableWrapper}>
@@ -182,6 +251,7 @@ export default function ClubDashboard() {
                                                 <th>Photo</th>
                                                 <th>Name</th>
                                                 <th>Role</th>
+                                                <th>Age Group</th>
                                                 <th>Football ID</th>
                                                 <th>Phone</th>
                                                 <th>Status</th>
@@ -189,7 +259,7 @@ export default function ClubDashboard() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {players.map((p) => (
+                                            {filteredPlayers.map((p) => (
                                                 <tr key={p.id} style={{ backgroundColor: p.club_flag_reason ? '#fef2f2' : 'transparent' }}>
                                                     <td>
                                                         {p.profile_photo_url ? (
@@ -209,6 +279,16 @@ export default function ClubDashboard() {
                                                         )}
                                                     </td>
                                                     <td style={{ textTransform: 'capitalize' }}>{p.role || '—'}</td>
+                                                    <td>
+                                                        <span style={{ 
+                                                            padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold',
+                                                            backgroundColor: p.age_group === 'Senior' ? '#f1f5f9' : '#dbeafe',
+                                                            color: p.age_group === 'Senior' ? '#475569' : '#1e40af',
+                                                            border: p.age_group === 'Senior' ? '1px solid #cbd5e1' : '1px solid #bfdbfe'
+                                                        }}>
+                                                            {p.age_group}
+                                                        </span>
+                                                    </td>
                                                     <td>{p.football_id || '—'}</td>
                                                     <td>{p.phone || '—'}</td>
                                                     <td>
@@ -232,10 +312,10 @@ export default function ClubDashboard() {
                                                     </td>
                                                 </tr>
                                             ))}
-                                            {players.length === 0 && (
+                                            {filteredPlayers.length === 0 && (
                                                 <tr>
-                                                    <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
-                                                        No players registered under your club yet.
+                                                    <td colSpan="8" style={{ textAlign: 'center', padding: '2rem' }}>
+                                                        No players match the selected criteria.
                                                     </td>
                                                 </tr>
                                             )}
