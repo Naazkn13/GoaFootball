@@ -75,7 +75,8 @@ export default async function handler(req, res) {
             is_admin: false,
             is_super_admin: false,
             registration_completed: true, // Bypass reg check
-            approval_status: 'approved'
+            approval_status: 'approved',
+            must_change_password: club.must_change_password || false,
           };
 
           await database.client.from('clubs').update({ updated_at: new Date().toISOString() }).eq('id', club.id);
@@ -97,6 +98,14 @@ export default async function handler(req, res) {
           });
         }
       } else {
+        // Block inactive users from logging in
+        if (user.is_active === false) {
+          return res.status(403).json({
+            success: false,
+            message: 'Your account has been inactivated. Please contact the administrator.'
+          });
+        }
+
         // Update last login
         await database.updateUser(user.id, {
           last_login: new Date().toISOString(),

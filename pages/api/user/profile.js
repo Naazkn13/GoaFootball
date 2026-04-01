@@ -27,6 +27,7 @@ export default async function handler(req, res) {
           is_super_admin: false,
           registration_completed: true,
           approval_status: 'approved',
+          must_change_password: club.must_change_password || false,
         };
       } else {
         // Get user profile

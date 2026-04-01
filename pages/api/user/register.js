@@ -36,81 +36,41 @@ export default async function handler(req, res) {
 
         let updatedUser;
 
-        // If a CLUB is registering an entity, we must create a brand new user row for them
+        // If a CLUB is trying to register an entity, block it
         if (session.role === 'club') {
-            if (!email) {
-                return res.status(400).json({ success: false, message: 'Email address is required for new entity registrations' });
-            }
-
-            // Check if email already exists
-            const existingUser = await database.getUserByEmail(email);
-            if (existingUser) {
-                return res.status(409).json({ success: false, message: 'An account with this email already exists' });
-            }
-
-            // Generate a dummy password since they will login via OTP
-            const dummyPassword = Math.random().toString(36).slice(-8);
-            const passwordHash = await bcrypt.hash(dummyPassword, 10);
-
-            // Create new user and populate registration details immediately
-            const newUser = await database.createUser({
-                name: fullName,
-                email: email,
-                password_hash: passwordHash,
-                phone: phone,
-                aadhaar: null,
-                football_id: null,
-                email_verified: false,
-                is_paid: false,
+            return res.status(403).json({
+                success: false,
+                message: 'Clubs are no longer permitted to add entities. Please contact the administrator.'
             });
-
-            // Now update the newly created user with their registration payload
-            const updates = {
-                date_of_birth,
-                gender,
-                role,
-                club_id: club_id || null,
-                role_details: role_details || {},
-                address: address || {},
-                documents: documents || [],
-                profile_photo_url: profile_photo_url || null,
-                registration_completed: true,
-                approval_status: 'pending',
-                updated_at: new Date().toISOString(),
-            };
-
-            updatedUser = await database.updateUser(newUser.id, updates);
-            delete updatedUser.password_hash;
-
-        } else {
-            // STANDARD individual user registration (they already signed up and are completing their profile)
-            const updates = {
-                name: fullName,
-                first_name: first_name || '',
-                middle_name: middle_name || '',
-                last_name: last_name || '',
-                date_of_birth,
-                gender,
-                phone,
-                role,
-                club_id: club_id || null,
-                role_details: role_details || {},
-                address: address || {},
-                documents: documents || [],
-                profile_photo_url: profile_photo_url || null,
-                registration_completed: true,
-                approval_status: 'pending',
-                updated_at: new Date().toISOString(),
-            };
-
-            updatedUser = await database.updateUser(session.id, updates);
-
-            // Re-create session with updated data
-            createSession(res, updatedUser);
-
-            // Remove sensitive data
-            delete updatedUser.password_hash;
         }
+
+        // STANDARD individual user registration (they already signed up and are completing their profile)
+        const updates = {
+            name: fullName,
+            first_name: first_name || '',
+            middle_name: middle_name || '',
+            last_name: last_name || '',
+            date_of_birth,
+            gender,
+            phone,
+            role,
+            club_id: club_id || null,
+            role_details: role_details || {},
+            address: address || {},
+            documents: documents || [],
+            profile_photo_url: profile_photo_url || null,
+            registration_completed: true,
+            approval_status: 'pending',
+            updated_at: new Date().toISOString(),
+        };
+
+        updatedUser = await database.updateUser(session.id, updates);
+
+        // Re-create session with updated data
+        createSession(res, updatedUser);
+
+        // Remove sensitive data
+        delete updatedUser.password_hash;
 
         res.status(200).json({
             success: true,
