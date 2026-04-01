@@ -1,9 +1,40 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '../styles/PolicyPages.module.css';
 
+const DEFAULT_CONTENT = {
+    intro: {
+        title: 'Contact Us',
+        subtitle: "We're Here to Help!",
+        heading: 'Get in Touch',
+        description: "Have questions, feedback, or need assistance? We'd love to hear from you!\nOur team at Goa Football Festival is dedicated to providing excellent customer service and ensuring you have the best experience."
+    },
+    faq: {
+        title: 'Frequently Asked Questions',
+        items: [
+            { q: 'How do I register?', a: 'Simply sign up or log in to your account, fill out your details, and complete the process.' },
+            { q: 'What payment methods do you accept?', a: 'We accept all major credit/debit cards, net banking, UPI, and digital wallets through our secure payment partner Razorpay.' },
+            { q: 'Can I cancel or reschedule?', a: 'Yes! You can cancel or reschedule according to our refund policy. Please refer to our Refund Policy for detailed information.' },
+            { q: 'Do you offer group bookings?', a: 'Yes, we can accommodate group bookings and tournaments. Please contact us directly.' }
+        ]
+    },
+    business: {
+        title: 'Business Inquiries',
+        description: "Interested in partnering with Goa Football Festival?\nWe'd love to hear from you! Please reach out to us at contactus.sksports@gmail.com with details about your proposal."
+    }
+};
+
 export default function Contact() {
+    const [content, setContent] = useState(DEFAULT_CONTENT);
+    const [contactInfo, setContactInfo] = useState({
+        email: 'contactus.sksports@gmail.com',
+        phone: '+91 9326 394341',
+        company_name: 'Goa Football Festival',
+        address: 'Andheri West, Mumbai 400053, Maharashtra, India',
+        support_hours: 'Monday - Sunday: 9:00 AM - 9:00 PM IST'
+    });
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -12,6 +43,32 @@ export default function Contact() {
         message: ''
     });
     const [submitStatus, setSubmitStatus] = useState('');
+
+    useEffect(() => {
+        // Fetch contact page content (intro, faq, business text blocks)
+        fetch('/api/site-content/contact')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.content) {
+                    setContent(prev => ({
+                        intro: { ...prev.intro, ...data.content.intro },
+                        faq: { ...prev.faq, ...data.content.faq },
+                        business: { ...prev.business, ...data.content.business }
+                    }));
+                }
+            })
+            .catch(() => { });
+
+        // Fetch footer contact info
+        fetch('/api/site-content/footer')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.content?.contact) {
+                    setContactInfo(prev => ({ ...prev, ...data.content.contact }));
+                }
+            })
+            .catch(() => { });
+    }, []);
 
     const handleChange = (e) => {
         setFormData({
@@ -22,7 +79,6 @@ export default function Contact() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // For now, just show a success message
         // In production, you would send this to your backend API
         setSubmitStatus('success');
         setTimeout(() => {
@@ -34,24 +90,22 @@ export default function Contact() {
     return (
         <>
             <Head>
-                <title>Contact Us - Futsalindia</title>
-                <meta name="description" content="Get in touch with Futsalindia for support, inquiries, or feedback about our futsal and football court booking services." />
+                <title>{content.intro?.title} - {contactInfo.company_name}</title>
+                <meta name="description" content={`Get in touch with ${contactInfo.company_name} for support, inquiries, or feedback.`} />
             </Head>
 
             <div className={styles.container}>
                 <div className={styles.content}>
                     <div className={styles.header}>
-                        <h1 className={styles.title}>Contact Us</h1>
-                        <p className={styles.lastUpdated}>We're Here to Help!</p>
+                        <h1 className={styles.title}>{content.intro?.title}</h1>
+                        <p className={styles.lastUpdated}>{content.intro?.subtitle}</p>
                     </div>
 
                     <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Get in Touch</h2>
-                        <p className={styles.text}>
-                            Have questions, feedback, or need assistance? We'd love to hear from you!
-                            Our team at <span className={styles.highlight}>Futsalindia</span> is dedicated to providing excellent customer service
-                            and ensuring you have the best experience booking your futsal and football courts.
-                        </p>
+                        <h2 className={styles.sectionTitle}>{content.intro?.heading}</h2>
+                        {(content.intro?.description || '').split('\n').map((paragraph, j) => (
+                            <p key={j} className={styles.text}>{paragraph}</p>
+                        ))}
                     </section>
 
                     <div className={styles.contactInfo}>
@@ -59,31 +113,31 @@ export default function Contact() {
 
                         <div className={styles.contactItem}>
                             <span className={styles.contactLabel}>Company:</span>
-                            <span>Futsalindia</span>
+                            <span>{contactInfo.company_name}</span>
                         </div>
 
                         <div className={styles.contactItem}>
                             <span className={styles.contactLabel}>Email:</span>
-                            <a href="mailto:contactus.sksports@gmail.com" className={styles.contactLink}>
-                                contactus.sksports@gmail.com
+                            <a href={`mailto:${contactInfo.email}`} className={styles.contactLink}>
+                                {contactInfo.email}
                             </a>
                         </div>
 
                         <div className={styles.contactItem}>
                             <span className={styles.contactLabel}>Phone:</span>
-                            <a href="tel:+919326394341" className={styles.contactLink}>
-                                +91 9326 394341
+                            <a href={`tel:${contactInfo.phone.replace(/\\s/g, '')}`} className={styles.contactLink}>
+                                {contactInfo.phone}
                             </a>
                         </div>
 
                         <div className={styles.contactItem}>
                             <span className={styles.contactLabel}>Address:</span>
-                            <span>Andheri West, Mumbai 400053, Maharashtra, India</span>
+                            <span>{contactInfo.address}</span>
                         </div>
 
                         <div className={styles.contactItem}>
                             <span className={styles.contactLabel}>Support Hours:</span>
-                            <span>Monday - Sunday: 9:00 AM - 9:00 PM IST</span>
+                            <span>{contactInfo.support_hours}</span>
                         </div>
                     </div>
 
@@ -258,40 +312,20 @@ export default function Contact() {
                     </section>
 
                     <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Frequently Asked Questions</h2>
-
-                        <h3 className={styles.subsectionTitle}>How do I book a court?</h3>
-                        <p className={styles.text}>
-                            Simply sign up or log in to your account, browse available courts, select your preferred date and time,
-                            and complete the payment. You'll receive instant confirmation via email and SMS.
-                        </p>
-
-                        <h3 className={styles.subsectionTitle}>What payment methods do you accept?</h3>
-                        <p className={styles.text}>
-                            We accept all major credit/debit cards, net banking, UPI, and digital wallets through our secure payment partner Razorpay.
-                        </p>
-
-                        <h3 className={styles.subsectionTitle}>Can I cancel or reschedule my booking?</h3>
-                        <p className={styles.text}>
-                            Yes! You can cancel or reschedule your booking according to our refund policy.
-                            Please refer to our <Link href="/refund-policy">Refund Policy</Link> for detailed information.
-                        </p>
-
-                        <h3 className={styles.subsectionTitle}>Do you offer group bookings or tournaments?</h3>
-                        <p className={styles.text}>
-                            Yes, we can accommodate group bookings and tournaments. Please contact us directly to discuss your requirements
-                            and we'll be happy to assist you with special arrangements.
-                        </p>
+                        <h2 className={styles.sectionTitle}>{content.faq?.title}</h2>
+                        {(content.faq?.items || []).map((faq, i) => (
+                            <div key={i} style={{ marginBottom: '20px' }}>
+                                <h3 className={styles.subsectionTitle}>{faq.q}</h3>
+                                <p className={styles.text}>{faq.a}</p>
+                            </div>
+                        ))}
                     </section>
 
                     <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Business Inquiries</h2>
-                        <p className={styles.text}>
-                            Interested in partnering with Futsalindia or listing your sports facility on our platform?
-                            We'd love to hear from you! Please reach out to us at
-                            <a href="mailto:contactus.sksports@gmail.com" className={styles.contactLink}> contactus.sksports@gmail.com </a>
-                            with details about your facility or partnership proposal.
-                        </p>
+                        <h2 className={styles.sectionTitle}>{content.business?.title}</h2>
+                        {(content.business?.description || '').split('\n').map((paragraph, j) => (
+                            <p key={j} className={styles.text}>{paragraph}</p>
+                        ))}
                     </section>
 
                     <Link href="/" className={styles.backButton}>
