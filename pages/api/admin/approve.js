@@ -1,6 +1,7 @@
 import database from '../../../services/database';
 import uuidService from '../../../services/uuid.service';
 import { requireAdmin } from '../../../services/session.service';
+import emailService from '../../../services/email.service';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -59,6 +60,17 @@ export default async function handler(req, res) {
         }
 
         const updatedUser = await database.updateUser(userId, updates);
+
+        // Fetch club to send notification
+        let club = null;
+        if (updatedUser.club_id) {
+            club = await database.getClubById(updatedUser.club_id).catch(() => null);
+        }
+        
+        // Dispatch email notification (non-blocking)
+        emailService.sendStatusUpdateEmail(updatedUser, club, action, reason).catch(err => {
+            console.error('Error dispatching status email:', err);
+        });
 
         // Whitelist response fields
         const { password_hash, ...safeUser } = updatedUser;
