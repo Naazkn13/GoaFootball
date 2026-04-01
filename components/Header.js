@@ -98,18 +98,20 @@ export default function Header() {
                                         <span className={styles.dropdownEmail}>{user.email}</span>
                                     </div>
                                     <div className={styles.dropdownDivider} />
-                                    <Link
-                                        href={getDashboardLink()}
-                                        className={styles.dropdownItem}
-                                        onClick={() => setDropdownOpen(false)}
-                                    >
-                                        {user?.is_admin || user?.is_super_admin
-                                            ? '⚙️ Admin Dashboard'
-                                            : user?.role === 'club'
-                                            ? '🛡️ Club Dashboard'
-                                            : '👤 My Profile'}
-                                    </Link>
-                                    {(user?.is_admin || user?.is_super_admin) && (
+                                    {getDashboardLink() !== router.pathname && (
+                                        <Link
+                                            href={getDashboardLink()}
+                                            className={styles.dropdownItem}
+                                            onClick={() => setDropdownOpen(false)}
+                                        >
+                                            {user?.is_admin || user?.is_super_admin
+                                                ? '⚙️ Admin Dashboard'
+                                                : user?.role === 'club'
+                                                ? '🛡️ Club Dashboard'
+                                                : '👤 My Profile'}
+                                        </Link>
+                                    )}
+                                    {(user?.is_admin || user?.is_super_admin) && router.pathname !== '/profile' && (
                                         <Link
                                             href="/profile"
                                             className={styles.dropdownItem}
