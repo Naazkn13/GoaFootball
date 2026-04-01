@@ -185,9 +185,9 @@
 }
 
 .filterActive {
-    background: rgba(26, 86, 219, 0.3) !important;
-    border-color: #3b82f6 !important;
-    color: #93c5fd !important;
+    background: #1d4ed8 !important;
+    border-color: #1e3a8a !important;
+    color: #ffffff !important;
 }
 
 /* ---- Registration Cards ---- */

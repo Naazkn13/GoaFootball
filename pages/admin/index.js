@@ -58,7 +58,7 @@ export default function AdminDashboard() {
             const statuses = ['pending', 'approved', 'rejected', 'on_hold'];
             const results = {};
             for (const s of statuses) {
-                const resp = await axiosInstance.get(`/api/admin/registrations?status=${s}`);
+                const resp = await axiosInstance.get(`/api/admin/users?status=${s}`);
                 results[s] = resp.data.count || 0;
             }
             const inactiveResp = await axiosInstance.get('/api/admin/users?inactive=true');
@@ -367,7 +367,7 @@ export default function AdminDashboard() {
                             <div className={styles.sectionHeader}>
                                 <h2>Registration Queue</h2>
                                 <div className={styles.filterGroup}>
-                                    {['pending', 'approved', 'rejected', 'on_hold'].map((s) => (
+                                    {['pending', 'approved', 'rejected', 'on_hold', 'inactive'].map((s) => (
                                         <button
                                             key={s}
                                             className={`${styles.filterBtn} ${statusFilter === s ? styles.filterActive : ''}`}

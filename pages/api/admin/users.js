@@ -26,6 +26,9 @@ export default async function handler(req, res) {
         }
         if (status) {
             query = query.eq('approval_status', status);
+            if (status === 'approved') {
+                query = query.eq('is_active', true);
+            }
         }
         if (inactive === 'true') {
             query = query.eq('is_active', false);
@@ -35,10 +38,14 @@ export default async function handler(req, res) {
 
         if (error) throw error;
 
+        const filteredUsers = (data || []).filter(u => 
+            !((u.is_admin || u.is_super_admin) && (!u.role || u.role.trim() === ''))
+        );
+
         res.status(200).json({
             success: true,
-            users: data || [],
-            count: data?.length || 0,
+            users: filteredUsers,
+            count: filteredUsers.length,
         });
     } catch (error) {
         console.error('Users fetch error:', error);
