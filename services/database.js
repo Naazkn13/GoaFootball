@@ -173,6 +173,41 @@ class Database {
     return data || [];
   }
 
+  async deleteClub(id) {
+    const { data, error } = await this.client
+      .from('clubs')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getActivePlayerCountByClub(clubId) {
+    const { count, error } = await this.client
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .eq('club_id', clubId)
+      .eq('is_active', true);
+
+    if (error) throw error;
+    return count || 0;
+  }
+
+  async updateClub(id, updates) {
+    const { data, error } = await this.client
+      .from('clubs')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
   // ==========================================
   // OTP operations
   // ==========================================

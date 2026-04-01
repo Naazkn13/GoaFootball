@@ -6,6 +6,7 @@ import styles from "@/styles/Auth.module.css";
 import { authAPI } from "@/services/api/auth.api";
 import OTPModal from "@/components/OTPModal";
 import { useAuth } from "@/store/AuthContext";
+import axiosInstance from "@/services/axios";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,6 +19,10 @@ export default function LoginPage() {
   // OTP Modal state
   const [showOTPModal, setShowOTPModal] = useState(false);
 
+  // Club password login state
+  const [isClubEmail, setIsClubEmail] = useState(false);
+  const [password, setPassword] = useState("");
+
   const handleSendOTP = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -27,11 +32,49 @@ export default function LoginPage() {
     setSuccessMessage("");
 
     try {
-      const response = await authAPI.sendOTP(email);
+      // If club email detected and password provided, do password login
+      if (isClubEmail && password) {
+        const response = await axiosInstance.post("/api/auth/club-login", {
+          email,
+          password,
+        });
+
+        if (response.data.success) {
+          setSuccessMessage("Login successful! Redirecting...");
+
+          if (response.data.user) {
+            login(response.data.user);
+          }
+
+          const redirectTo = response.data.redirectTo || "/club/dashboard";
+          setTimeout(() => {
+            router.push(redirectTo);
+          }, 800);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // First, check if this is a club email
+      if (!isClubEmail) {
+        const checkRes = await axiosInstance.post("/api/auth/check-club-email", {
+          email,
+        });
+        if (checkRes.data.isClub) {
+          setIsClubEmail(true);
+          setLoading(false);
+          return; // Show password field, don't send OTP
+        }
+      }
+
+      // Regular user — send OTP
+      await authAPI.sendOTP(email);
       setShowOTPModal(true);
       setSuccessMessage("OTP sent to your email!");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
+      setError(
+        err.response?.data?.message || "Failed to proceed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -50,12 +93,14 @@ export default function LoginPage() {
       }
 
       // Redirect based on registration status
-      const redirectTo = response.redirectTo || '/profile';
+      const redirectTo = response.redirectTo || "/profile";
       setTimeout(() => {
         router.push(redirectTo);
       }, 800);
     } catch (err) {
-      throw new Error(err.response?.data?.message || "Invalid OTP. Please try again.");
+      throw new Error(
+        err.response?.data?.message || "Invalid OTP. Please try again."
+      );
     }
   };
 
@@ -64,7 +109,19 @@ export default function LoginPage() {
       await authAPI.resendOTP(email);
       setSuccessMessage("OTP resent successfully!");
     } catch (err) {
-      throw new Error(err.response?.data?.message || "Failed to resend OTP.");
+      throw new Error(
+        err.response?.data?.message || "Failed to resend OTP."
+      );
+    }
+  };
+
+  // Reset club state when email changes
+  const handleEmailChange = (e) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    if (isClubEmail) {
+      setIsClubEmail(false);
+      setPassword("");
     }
   };
 
@@ -72,15 +129,25 @@ export default function LoginPage() {
     <>
       <Head>
         <title>Login — Football Registration</title>
-        <meta name="description" content="Login to your football registration account" />
+        <meta
+          name="description"
+          content="Login to your football registration account"
+        />
       </Head>
 
       <div className={styles.authContainer}>
         <div className={styles.formsWrapper}>
           <div className={styles.formsInner}>
-            <form className={`${styles.form} ${styles.loginForm}`} onSubmit={handleSendOTP}>
+            <form
+              className={`${styles.form} ${styles.loginForm}`}
+              onSubmit={handleSendOTP}
+            >
               <h2>Greetings! 🏟️</h2>
-              <p className={styles.subtitle}>Enter your email to receive an OTP</p>
+              <p className={styles.subtitle}>
+                {isClubEmail
+                  ? "Enter your club password to login"
+                  : "Enter your email to receive an OTP"}
+              </p>
 
               <div className={styles.inputGroup}>
                 <label htmlFor="login-email">Email</label>
@@ -89,11 +156,27 @@ export default function LoginPage() {
                   type="email"
                   placeholder="you@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
                   required
-                  autoFocus
+                  autoFocus={!isClubEmail}
                 />
               </div>
+
+              {/* Club password field — shown only when club email is detected */}
+              {isClubEmail && (
+                <div className={styles.inputGroup}>
+                  <label htmlFor="club-password">Club Password</label>
+                  <input
+                    id="club-password"
+                    type="password"
+                    placeholder="Enter your club password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoFocus
+                  />
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -101,7 +184,15 @@ export default function LoginPage() {
                 disabled={loading}
               >
                 {loading && <span className={styles.spinner} />}
-                <span>{loading ? "Sending OTP..." : "Send OTP"}</span>
+                <span>
+                  {loading
+                    ? isClubEmail
+                      ? "Logging in..."
+                      : "Sending OTP..."
+                    : isClubEmail
+                    ? "Login"
+                    : "Send OTP"}
+                </span>
               </button>
 
               <div className={styles.dividerRow}>
@@ -112,12 +203,12 @@ export default function LoginPage() {
 
               <p className={styles.switchText}>
                 New here?{" "}
-                <strong>Just enter your email above</strong> &mdash; we&apos;ll create your account
-                and redirect you to complete registration as a{" "}
-                <strong>Player, Coach, Referee, or Manager</strong>.
+                <strong>Just enter your email above</strong> &mdash; we&apos;ll
+                create your account and redirect you to complete registration as
+                a <strong>Player, Coach, Referee, or Manager</strong>.
               </p>
 
-              <p className={styles.switchText} style={{ marginTop: '0.5rem' }}>
+              <p className={styles.switchText} style={{ marginTop: "0.5rem" }}>
                 Want to explore first?{" "}
                 <Link href="/" className={styles.linkBtn}>
                   ← Back to Home
@@ -132,8 +223,8 @@ export default function LoginPage() {
           <div className={styles.panelContent}>
             <h2>Join the Game! ⚽</h2>
             <p>
-              Register as a Player, Coach, Referee, or Manager.
-              Get your unique Football UID and join the community.
+              Register as a Player, Coach, Referee, or Manager. Get your unique
+              Football UID and join the community.
             </p>
             <div className={styles.panelRoles}>
               <span>🏃 Athlete</span>
@@ -148,15 +239,9 @@ export default function LoginPage() {
         </div>
 
         {/* Error/Success Messages */}
-        {error && (
-          <div className={styles.errorMessage}>
-            {error}
-          </div>
-        )}
+        {error && <div className={styles.errorMessage}>{error}</div>}
         {successMessage && (
-          <div className={styles.successMessage}>
-            {successMessage}
-          </div>
+          <div className={styles.successMessage}>{successMessage}</div>
         )}
 
         {/* OTP Modal */}

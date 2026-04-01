@@ -24,7 +24,7 @@ export default function AdminDashboard() {
     const [newAdminEmail, setNewAdminEmail] = useState('');
     const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, on_hold: 0 });
     const [clubs, setClubs] = useState([]);
-    const [newClub, setNewClub] = useState({ name: '', email: '', location: '', logo_url: '' });
+    const [newClub, setNewClub] = useState({ name: '', email: '', location: '', logo_url: '', password: '' });
     const [clubLogoFile, setClubLogoFile] = useState(null);
 
     useEffect(() => {
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
             if (clubLogoFile) {
                 const formDataUpload = new FormData();
                 formDataUpload.append('file', clubLogoFile);
-                formDataUpload.append('documentType', 'photo'); // Reuse generic upload
+                formDataUpload.append('documentType', 'photo');
                 const uploadRes = await axiosInstance.post('/api/user/upload-document', formDataUpload, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
@@ -121,12 +121,15 @@ export default function AdminDashboard() {
             }
 
             await axiosInstance.post('/api/admin/clubs', {
-                ...newClub,
-                logo_url
+                name: newClub.name,
+                email: newClub.email,
+                location: newClub.location,
+                password: newClub.password,
+                logo_url,
             });
 
             setSuccess(`Club ${newClub.name} created successfully`);
-            setNewClub({ name: '', email: '', location: '', logo_url: '' });
+            setNewClub({ name: '', email: '', location: '', logo_url: '', password: '' });
             setClubLogoFile(null);
             fetchClubs();
             setTimeout(() => setSuccess(''), 3000);
@@ -134,6 +137,31 @@ export default function AdminDashboard() {
             setError(err.response?.data?.message || 'Failed to create club');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDeleteClub = async (clubId, clubName) => {
+        if (!user?.is_super_admin) return;
+
+        if (window.confirm(
+            `⚠️ WARNING ⚠️\nAre you sure you want to delete the club: ${clubName}?\n\n` +
+            `This can only succeed if ALL players in this club have been inactivated first.\n\n` +
+            `This action cannot be undone.`
+        )) {
+            setLoading(true);
+            setError('');
+            try {
+                const res = await axiosInstance.delete(`/api/admin/clubs?id=${clubId}`);
+                if (res.data.success) {
+                    setSuccess(`Club "${clubName}" deleted successfully`);
+                    setTimeout(() => setSuccess(''), 3000);
+                    fetchClubs();
+                }
+            } catch (err) {
+                setError(err.response?.data?.message || 'Failed to delete club');
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -148,12 +176,38 @@ export default function AdminDashboard() {
                 if (res.data.success) {
                     setSuccess('User deleted successfully');
                     setTimeout(() => setSuccess(''), 3000);
-                    // Refresh current active tab
                     if (activeTab === 'users') fetchUsers();
                     else if (activeTab === 'registrations') fetchRegistrations();
                 }
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to delete user');
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    const handleTogglePlayerStatus = async (userId, userName, currentlyActive) => {
+        if (!user?.is_super_admin) return;
+        const newStatus = !currentlyActive;
+        const action = newStatus ? 'activate' : 'inactivate';
+
+        if (window.confirm(`Are you sure you want to ${action} the user: ${userName || 'No Name'}?`)) {
+            setLoading(true);
+            setError('');
+            try {
+                const res = await axiosInstance.put('/api/admin/toggle-player-status', {
+                    userId,
+                    is_active: newStatus
+                });
+                if (res.data.success) {
+                    setSuccess(`User ${action}d successfully`);
+                    setTimeout(() => setSuccess(''), 3000);
+                    if (activeTab === 'users') fetchUsers();
+                    else if (activeTab === 'registrations') fetchRegistrations();
+                }
+            } catch (err) {
+                setError(err.response?.data?.message || `Failed to ${action} user`);
             } finally {
                 setLoading(false);
             }
@@ -331,7 +385,7 @@ export default function AdminDashboard() {
                                             <div className={styles.regCardHeader}>
                                                 <div className={styles.regAvatar} style={{ padding: reg.profile_photo_url ? 0 : '', overflow: 'hidden' }}>
                                                     {reg.profile_photo_url ? (
-                                                        <img src={reg.profile_photo_url} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                        <img src={reg.profile_photo_url} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                     ) : (
                                                         reg.name ? reg.name.charAt(0).toUpperCase() : '?'
                                                     )}
@@ -381,7 +435,6 @@ export default function AdminDashboard() {
                                                         <strong>Documents:</strong>
                                                         <div className={styles.docList}>
                                                             {(() => {
-                                                                // Group documents by type to show history
                                                                 const groupedDocs = {};
                                                                 reg.documents.forEach(doc => {
                                                                     if (!groupedDocs[doc.type]) groupedDocs[doc.type] = [];
@@ -483,15 +536,19 @@ export default function AdminDashboard() {
                                                 <th>Football ID</th>
                                                 <th>Paid</th>
                                                 <th>Joined</th>
+                                                <th>Active</th>
                                                 {user?.is_super_admin && <th>Actions</th>}
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {users.map((u) => (
-                                                <tr key={u.id} style={{ backgroundColor: u.club_flag_reason ? '#fef2f2' : 'transparent' }}>
+                                                <tr key={u.id} style={{
+                                                    backgroundColor: (u.is_active === false) ? '#f3f4f6' : (u.club_flag_reason ? '#fef2f2' : 'transparent'),
+                                                    opacity: (u.is_active === false) ? 0.6 : 1
+                                                }}>
                                                     <td>
                                                         {u.profile_photo_url ? (
-                                                            <img src={u.profile_photo_url} alt="Photo" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                            <img src={u.profile_photo_url} alt="Profile" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
                                                         ) : (
                                                             <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                 {u.name ? u.name.charAt(0).toUpperCase() : '?'}
@@ -517,8 +574,31 @@ export default function AdminDashboard() {
                                                     <td>{u.football_id || '—'}</td>
                                                     <td>{u.is_paid ? '✓' : '✕'}</td>
                                                     <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                                                    <td>
+                                                        <span style={{ color: (u.is_active !== false) ? '#10b981' : '#dc2626', fontWeight: 'bold' }}>
+                                                            {(u.is_active !== false) ? '✓ Active' : '✕ Inactive'}
+                                                        </span>
+                                                    </td>
                                                     {user?.is_super_admin && (
-                                                        <td>
+                                                        <td style={{ whiteSpace: 'nowrap' }}>
+                                                            <button
+                                                                onClick={() => handleTogglePlayerStatus(u.id, u.name, u.is_active !== false)}
+                                                                style={{
+                                                                    backgroundColor: (u.is_active !== false) ? '#f59e0b' : '#10b981',
+                                                                    color: 'white',
+                                                                    border: 'none',
+                                                                    padding: '4px 8px',
+                                                                    borderRadius: '4px',
+                                                                    cursor: (u.is_admin || u.is_super_admin) ? 'not-allowed' : 'pointer',
+                                                                    fontSize: '0.8rem',
+                                                                    marginRight: '4px',
+                                                                    opacity: (u.is_admin || u.is_super_admin) ? 0.3 : 1,
+                                                                }}
+                                                                disabled={u.is_admin || u.is_super_admin}
+                                                                title={(u.is_active !== false) ? 'Inactivate User' : 'Activate User'}
+                                                            >
+                                                                {(u.is_active !== false) ? '⏸ Inactivate' : '▶ Activate'}
+                                                            </button>
                                                             <button
                                                                 onClick={() => handleDeleteUser(u.id, u.name)}
                                                                 style={{
@@ -527,10 +607,9 @@ export default function AdminDashboard() {
                                                                     border: 'none',
                                                                     padding: '4px 8px',
                                                                     borderRadius: '4px',
-                                                                    cursor: 'pointer',
+                                                                    cursor: (u.id === user.id || u.is_super_admin) ? 'not-allowed' : 'pointer',
                                                                     fontSize: '0.8rem',
                                                                     opacity: (u.id === user.id || u.is_super_admin) ? 0.3 : 1,
-                                                                    cursor: (u.id === user.id || u.is_super_admin) ? 'not-allowed' : 'pointer'
                                                                 }}
                                                                 disabled={u.id === user.id || u.is_super_admin}
                                                                 title={u.id === user.id ? "Cannot delete yourself" : (u.is_super_admin ? "Cannot delete another Super Admin" : "Delete User")}
@@ -581,6 +660,14 @@ export default function AdminDashboard() {
                                             onChange={(e) => setNewClub({ ...newClub, location: e.target.value })}
                                             required
                                         />
+                                        <input
+                                            type="password"
+                                            placeholder="Initial Password for Club (min 6 chars)"
+                                            value={newClub.password}
+                                            onChange={(e) => setNewClub({ ...newClub, password: e.target.value })}
+                                            required
+                                            minLength={6}
+                                        />
                                         <div>
                                             <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>Club Logo (Optional)</label>
                                             <input
@@ -609,6 +696,8 @@ export default function AdminDashboard() {
                                                 <th>Email</th>
                                                 <th>Location</th>
                                                 <th>Created At</th>
+                                                <th>Players</th>
+                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -627,11 +716,39 @@ export default function AdminDashboard() {
                                                     <td>{c.email}</td>
                                                     <td>{c.location}</td>
                                                     <td>{new Date(c.created_at).toLocaleDateString()}</td>
+                                                    <td>
+                                                        <span style={{
+                                                            backgroundColor: (c.active_player_count > 0) ? '#dbeafe' : '#f3f4f6',
+                                                            color: (c.active_player_count > 0) ? '#1d4ed8' : '#6b7280',
+                                                            padding: '2px 8px',
+                                                            borderRadius: '12px',
+                                                            fontSize: '0.85rem',
+                                                            fontWeight: 'bold'
+                                                        }}>
+                                                            {c.active_player_count ?? '—'}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            onClick={() => handleDeleteClub(c.id, c.name)}
+                                                            style={{
+                                                                backgroundColor: '#dc2626',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                padding: '6px 12px',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                                fontSize: '0.8rem'
+                                                            }}
+                                                        >
+                                                            🗑 Delete
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                             ))}
                                             {clubs.length === 0 && (
                                                 <tr>
-                                                    <td colSpan="5" style={{ textAlign: 'center' }}>No clubs found.</td>
+                                                    <td colSpan="7" style={{ textAlign: 'center' }}>No clubs found.</td>
                                                 </tr>
                                             )}
                                         </tbody>

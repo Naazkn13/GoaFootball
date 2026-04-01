@@ -7,7 +7,7 @@ import { useAuth } from '@/store/AuthContext';
 
 export default function ClubDashboard() {
     const router = useRouter();
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, refreshUser } = useAuth();
 
     const [players, setPlayers] = useState([]);
     const [activeTab, setActiveTab] = useState('players');
@@ -15,9 +15,21 @@ export default function ClubDashboard() {
     const [error, setError] = useState('');
     const [flagModal, setFlagModal] = useState({ isOpen: false, player: null, reason: '' });
 
+    // Change password state
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [pwdLoading, setPwdLoading] = useState(false);
+    const [pwdError, setPwdError] = useState('');
+    const [pwdSuccess, setPwdSuccess] = useState('');
+
     useEffect(() => {
-        if (!authLoading && user?.role !== 'club') {
-            router.push('/');
+        if (!authLoading) {
+            if (!user || user.role !== 'club') {
+                router.push('/');
+            } else if (user.must_change_password) {
+                router.push('/club/change-password');
+            }
         }
     }, [authLoading, user, router]);
 
@@ -92,6 +104,12 @@ export default function ClubDashboard() {
                         >
                             🏠 My Profile
                         </button>
+                        <button
+                            className={`${styles.navBtn} ${activeTab === 'changePassword' ? styles.navBtnActive : ''}`}
+                            onClick={() => setActiveTab('changePassword')}
+                        >
+                            🔑 Change Password
+                        </button>
                     </nav>
                     <button className={styles.backBtn} onClick={async () => {
                         await axiosInstance.post('/api/auth/logout');
@@ -150,16 +168,6 @@ export default function ClubDashboard() {
                         <section>
                             <div className={styles.sectionHeader}>
                                 <h2>Registered Players</h2>
-                                <button
-                                    onClick={() => router.push(`/register?club_id=${user.id}&club_name=${encodeURIComponent(user.name)}`)}
-                                    style={{
-                                        backgroundColor: '#10b981', color: '#fff', border: 'none',
-                                        padding: '10px 20px', borderRadius: '5px', cursor: 'pointer',
-                                        fontWeight: 'bold'
-                                    }}
-                                >
-                                    + Add Entity
-                                </button>
                             </div>
 
                             {error && <div className={styles.errorMsg}>{error}</div>}
@@ -234,6 +242,56 @@ export default function ClubDashboard() {
                                         </tbody>
                                     </table>
                                 )}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Change Password Tab */}
+                    {activeTab === 'changePassword' && (
+                        <section>
+                            <div className={styles.sectionHeader}>
+                                <h2>Change Password</h2>
+                            </div>
+                            <div className={styles.settingsCard} style={{ padding: '30px', maxWidth: '500px' }}>
+                                {pwdError && <div className={styles.errorMsg} style={{ marginBottom: '15px' }}>{pwdError}</div>}
+                                {pwdSuccess && <div className={styles.successMsg} style={{ marginBottom: '15px' }}>{pwdSuccess}</div>}
+                                <form onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    setPwdError('');
+                                    setPwdSuccess('');
+                                    if (newPassword.length < 6) { setPwdError('New password must be at least 6 characters'); return; }
+                                    if (newPassword !== confirmPassword) { setPwdError('Passwords do not match'); return; }
+                                    if (currentPassword === newPassword) { setPwdError('New password must be different'); return; }
+                                    setPwdLoading(true);
+                                    try {
+                                        const res = await axiosInstance.post('/api/club/change-password', { currentPassword, newPassword });
+                                        if (res.data.success) {
+                                            setPwdSuccess('Password changed successfully!');
+                                            setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+                                            await refreshUser();
+                                        }
+                                    } catch (err) {
+                                        setPwdError(err.response?.data?.message || 'Failed to change password');
+                                    } finally {
+                                        setPwdLoading(false);
+                                    }
+                                }} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#374151' }}>Current Password</label>
+                                        <input type="password" placeholder="Enter current password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#374151' }}>New Password</label>
+                                        <input type="password" placeholder="Enter new password (min 6 chars)" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#374151' }}>Confirm New Password</label>
+                                        <input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={6} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
+                                    </div>
+                                    <button type="submit" disabled={pwdLoading} style={{ alignSelf: 'flex-start', backgroundColor: '#1a56db', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                        {pwdLoading ? 'Changing...' : 'Change Password'}
+                                    </button>
+                                </form>
                             </div>
                         </section>
                     )}
