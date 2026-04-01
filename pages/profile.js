@@ -286,13 +286,6 @@ export default function ProfilePage() {
                 </p>
               )}
             </div>
-            <button
-              className={styles.logoutBtn}
-              onClick={handleLogout}
-              type="button"
-            >
-              Logout
-            </button>
           </div>
 
           {/* Approval Status Badge */}
