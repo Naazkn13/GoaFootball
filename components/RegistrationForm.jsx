@@ -27,7 +27,7 @@ const ROLE_FIELDS = {
     ],
 };
 
-export default function RegistrationForm({ role, formData, onChange, errors, prefilledClubId, prefilledClubName, isClubRegistration }) {
+export default function RegistrationForm({ role, formData, onChange, errors, prefilledClubId, prefilledClubName, isClubRegistration, formStep }) {
     const roleFields = ROLE_FIELDS[role] || [];
     const [clubs, setClubs] = useState([]);
     const [fileError, setFileError] = useState('');
@@ -70,18 +70,46 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
 
     // When any dropdown changes, update individual fields + combined date_of_birth
     const handleDobChange = (part, value) => {
-        let y = dobYear, m = dobMonth, d = dobDay;
-        if (part === 'year') y = value;
-        if (part === 'month') m = value;
-        if (part === 'day') d = value;
+        let intVal = parseInt(value, 10);
+        let strVal = value.trim();
 
-        // Auto-clamp day if month changed and day exceeds new max
-        if (d && m) {
-            const newMax = getDaysInMonth(m, y);
-            if (parseInt(d) > newMax) d = String(newMax).padStart(2, '0');
+        // If the user typed non-numbers (e.g. 'e', '-', '.'), ignore it.
+        if (strVal !== '' && isNaN(intVal)) return; 
+        
+        let y = dobYear, m = dobMonth, d = dobDay;
+
+        if (part === 'day') {
+            if (strVal === '') d = '';
+            else {
+                if (intVal > 31) return; // Disallow typing > 31
+                d = String(intVal);
+            }
+        } else if (part === 'month') {
+            if (strVal === '') m = '';
+            else {
+                if (intVal > 12) return; // Disallow typing > 12
+                m = String(intVal);
+            }
+        } else if (part === 'year') {
+            if (strVal === '') y = '';
+            else {
+                if (strVal.length > 4) return; // Disallow > 4 digits length
+                if (strVal.length === 4 && intVal > currentYear) return; // Disallow future years
+                y = String(intVal);
+            }
         }
 
-        const combined = (y && m && d) ? `${y}-${m}-${d}` : '';
+        // Auto-clamp day if month changed and day exceeds new max
+        // Only clamp if full date is somewhat formed, or if changing month/year
+        if (d && m && part !== 'day') {
+            const newMax = getDaysInMonth(m, y || currentYear);
+            if (parseInt(d) > newMax) d = String(newMax);
+        }
+
+        // Only commit fully formed dates to the backend payload string
+        const isComplete = (y && y.length === 4 && m && d);
+        const combined = isComplete ? `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}` : '';
+
         onChange({
             ...formData,
             _dob_day: d,
@@ -125,8 +153,10 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
 
     return (
         <div className={styles.formSection}>
-            {/* Common Fields */}
-            <h3 className={styles.stepTitle}>Personal Information</h3>
+            {formStep === 1 && (
+                <>
+                    {/* Common Fields */}
+                    <h3 className={styles.stepTitle}>Personal Information</h3>
 
             <div className={styles.formGrid}>
                 {/* Select Club (Mandatory) */}
@@ -165,30 +195,53 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                         onChange={(e) => handleChange('first_name', e.target.value)}
                         required
                     />
+                    <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <input
+                            type="checkbox"
+                            id="only-first-name"
+                            checked={formData.only_first_name || false}
+                            onChange={(e) => {
+                                const checked = e.target.checked;
+                                if (checked) {
+                                    onChange({ ...formData, only_first_name: true, middle_name: '', last_name: '' });
+                                } else {
+                                    onChange({ ...formData, only_first_name: false });
+                                }
+                            }}
+                            style={{ cursor: 'pointer', width: '1rem', height: '1rem' }}
+                        />
+                        <label htmlFor="only-first-name" style={{ cursor: 'pointer', margin: 0, fontWeight: 'normal', fontSize: '0.85rem' }}>
+                            I only have a first name
+                        </label>
+                    </div>
                     {errors?.first_name && <span className={styles.fieldError}>{errors.first_name}</span>}
                 </div>
 
-                <div className={styles.inputGroup}>
-                    <label htmlFor="reg-middle-name">Middle Name</label>
-                    <input
-                        id="reg-middle-name"
-                        type="text"
-                        placeholder="Middle name (optional)"
-                        value={formData.middle_name || ''}
-                        onChange={(e) => handleChange('middle_name', e.target.value)}
-                    />
-                </div>
+                {!formData.only_first_name && (
+                    <>
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="reg-middle-name">Middle Name</label>
+                            <input
+                                id="reg-middle-name"
+                                type="text"
+                                placeholder="Middle name (optional)"
+                                value={formData.middle_name || ''}
+                                onChange={(e) => handleChange('middle_name', e.target.value)}
+                            />
+                        </div>
 
-                <div className={styles.inputGroup}>
-                    <label htmlFor="reg-last-name">Last Name</label>
-                    <input
-                        id="reg-last-name"
-                        type="text"
-                        placeholder="Last name (optional)"
-                        value={formData.last_name || ''}
-                        onChange={(e) => handleChange('last_name', e.target.value)}
-                    />
-                </div>
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="reg-last-name">Last Name</label>
+                            <input
+                                id="reg-last-name"
+                                type="text"
+                                placeholder="Last name (optional)"
+                                value={formData.last_name || ''}
+                                onChange={(e) => handleChange('last_name', e.target.value)}
+                            />
+                        </div>
+                    </>
+                )}
 
                 {isClubRegistration && (
                     <div className={styles.inputGroup}>
@@ -208,46 +261,63 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                 <div className={styles.inputGroup}>
                     <label>Date of Birth *</label>
                     <div className={styles.dobDropdownRow}>
-                        <select
+                        <input
+                            type="number"
+                            list="dob-days-list"
                             id="reg-dob-day"
                             value={dobDay}
                             onChange={(e) => handleDobChange('day', e.target.value)}
                             required
+                            placeholder="DD"
+                            min="1"
+                            max={maxDays}
                             aria-label="Day"
-                        >
-                            <option value="">Day</option>
-                            {Array.from({ length: maxDays }, (_, i) => {
-                                const d = String(i + 1).padStart(2, '0');
-                                return <option key={d} value={d}>{i + 1}</option>;
-                            })}
-                        </select>
+                            style={{ flex: 1, padding: '12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '1rem' }}
+                        />
+                        <datalist id="dob-days-list">
+                            {Array.from({ length: maxDays }, (_, i) => (
+                                <option key={i} value={i + 1} />
+                            ))}
+                        </datalist>
 
-                        <select
+                        <input
+                            type="number"
+                            list="dob-months-list"
                             id="reg-dob-month"
                             value={dobMonth}
                             onChange={(e) => handleDobChange('month', e.target.value)}
                             required
+                            placeholder="MM"
+                            min="1"
+                            max="12"
                             aria-label="Month"
-                        >
-                            <option value="">Month</option>
+                            style={{ flex: 1, padding: '12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '1rem' }}
+                        />
+                        <datalist id="dob-months-list">
                             {MONTHS.map((m) => (
-                                <option key={m.value} value={m.value}>{m.label}</option>
+                                <option key={m.value} value={parseInt(m.value, 10)} label={m.label} />
                             ))}
-                        </select>
+                        </datalist>
 
-                        <select
+                        <input
+                            type="number"
+                            list="dob-years-list"
                             id="reg-dob-year"
                             value={dobYear}
                             onChange={(e) => handleDobChange('year', e.target.value)}
                             required
+                            placeholder="YYYY"
+                            min="1900"
+                            max={currentYear}
                             aria-label="Year"
-                        >
-                            <option value="">Year</option>
+                            style={{ flex: 1, padding: '12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '1rem' }}
+                        />
+                        <datalist id="dob-years-list">
                             {Array.from({ length: currentYear - 1950 + 1 }, (_, i) => {
                                 const y = currentYear - i;
-                                return <option key={y} value={String(y)}>{y}</option>;
+                                return <option key={y} value={y} />;
                             })}
-                        </select>
+                        </datalist>
                     </div>
                     {errors?.date_of_birth && <span className={styles.fieldError}>{errors.date_of_birth}</span>}
                 </div>
@@ -409,9 +479,13 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                     </div>
                 </>
             )}
+            </>
+            )}
 
+            {formStep === 2 && (
+                <>
             {/* Document Uploads */}
-            <h3 className={styles.stepTitle} style={{ marginTop: '2rem' }}>Documents</h3>
+            <h3 className={styles.stepTitle} style={{ marginTop: '0' }}>Documents</h3>
 
             <div className={styles.formGrid}>
                 <div className={styles.inputGroup}>
@@ -479,6 +553,8 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                     {errors?.gff_consent_form && <span className={styles.fieldError}>{errors.gff_consent_form}</span>}
                 </div>
             </div>
+            </>
+            )}
 
             {/* Custom Error Modal */}
             {fileError && (

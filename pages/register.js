@@ -10,12 +10,13 @@ import paymentAPI from '@/services/api/payment.api';
 
 export default function RegisterPage() {
     const router = useRouter();
-    const [step, setStep] = useState(1); // 1: Role, 2: Form, 3: Payment
+    const [step, setStep] = useState(1); // 1: Role, 2: Details, 3: Documents, 4: Payment
     const [selectedRole, setSelectedRole] = useState('');
     const [formData, setFormData] = useState({
         first_name: '',
         middle_name: '',
         last_name: '',
+        only_first_name: false,
         date_of_birth: '',
         gender: '',
         email: '',
@@ -69,35 +70,35 @@ export default function RegisterPage() {
 
 
     // Validate form data
-    const validateForm = () => {
+    // Validate Details (Step 2)
+    const validateDetails = () => {
         const newErrors = {};
 
         if (!formData.first_name || formData.first_name.trim().length < 2) {
             newErrors.first_name = 'First name is required (min 2 characters)';
         }
 
-        // Ensure club is selected (unless prefilled from Dashbaord, which we init in state)
         if (!formData.club_id) {
             newErrors.club_id = 'You must select a club to register under';
         }
+
         if (!formData.date_of_birth) {
             newErrors.date_of_birth = 'Date of birth is required';
         } else {
             const age = (new Date() - new Date(formData.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000);
             if (age < 10) newErrors.date_of_birth = 'Must be at least 10 years old';
         }
+
         if (!formData.gender) newErrors.gender = 'Gender is required';
+        
         if (!formData.phone || !/^[0-9]{10}$/.test(formData.phone)) {
             newErrors.phone = 'Valid 10-digit phone number is required';
         }
 
-        // Only require email if a club is registering them
         if (isClubRegistration && (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))) {
             newErrors.email = 'Valid email is required';
         }
 
-        // We check address info only if we don't have "Address same as proofs" active
-        // (If it was checked, the component cleared these fields, but we should just ensure they are non-empty if required)
         if (!formData.address_same_as_proof) {
             if (!formData.address_line1) newErrors.address_line1 = 'Address is required';
             if (!formData.city) newErrors.city = 'City is required';
@@ -107,35 +108,39 @@ export default function RegisterPage() {
             }
         }
 
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    // Validate Documents (Step 3)
+    const validateDocuments = () => {
+        const newErrors = {};
+
         if (!formData.photo_file) newErrors.photo = 'Passport-size photo is required';
         if (!formData.id_proof_file) newErrors.id_proof = 'ID proof document is required';
         if (!formData.birth_certificate_file) newErrors.birth_certificate = 'Birth certificate is required';
         if (!formData.gff_consent_form_file) newErrors.gff_consent_form = 'GFF consent form is required';
 
-        // Validate photo size (max 2MB)
-        if (formData.photo_file && formData.photo_file.size > 2 * 1024 * 1024) {
-            newErrors.photo = 'Photo must be less than 2MB';
-        }
-        // Validate ID proof size (max 5MB)
-        if (formData.id_proof_file && formData.id_proof_file.size > 5 * 1024 * 1024) {
-            newErrors.id_proof = 'ID proof must be less than 5MB';
-        }
-        // Validate birth certificate size (max 5MB)
-        if (formData.birth_certificate_file && formData.birth_certificate_file.size > 5 * 1024 * 1024) {
-            newErrors.birth_certificate = 'Birth certificate must be less than 5MB';
-        }
-        // Validate GFF consent form size (max 5MB)
+        if (formData.photo_file && formData.photo_file.size > 2 * 1024 * 1024) newErrors.photo = 'Photo must be less than 2MB';
+        if (formData.id_proof_file && formData.id_proof_file.size > 5 * 1024 * 1024) newErrors.id_proof = 'ID proof must be less than 5MB';
+        if (formData.birth_certificate_file && formData.birth_certificate_file.size > 5 * 1024 * 1024) newErrors.birth_certificate = 'Birth certificate must be less than 5MB';
+        
         if (formData.gff_consent_form_file) {
-            if (formData.gff_consent_form_file.size > 5 * 1024 * 1024) {
-                newErrors.gff_consent_form = 'GFF consent form must be less than 5MB';
-            }
-            if (formData.gff_consent_form_file.type !== 'application/pdf') {
-                newErrors.gff_consent_form = 'GFF consent form must be a PDF file';
-            }
+            if (formData.gff_consent_form_file.size > 5 * 1024 * 1024) newErrors.gff_consent_form = 'Consent form must be less than 5MB';
+            if (formData.gff_consent_form_file.type !== 'application/pdf') newErrors.gff_consent_form = 'Consent form must be a PDF file';
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    const handleNextDetails = () => {
+        if (!validateDetails()) {
+            setError('Please correct the errors in your details before proceeding.');
+            return;
+        }
+        setError('');
+        setStep(3);
     };
 
     // Upload a document file with explicit error handling
@@ -186,13 +191,13 @@ export default function RegisterPage() {
         }
     };
 
-    // Step 2 → Step 3 (Submit form + proceed to pay)
+    // Step 3 → Step 4 (Submit form + proceed to pay)
     const handleSubmitAndPay = async (e) => {
         e.preventDefault();
         if (loading) return;
 
-        if (!validateForm()) {
-            setError('Please fix the errors above before proceeding.');
+        if (!validateDocuments()) {
+            setError('Please upload all required documents correctly before proceeding to payment.');
             return;
         }
 
@@ -215,11 +220,16 @@ export default function RegisterPage() {
 
             // 3. Submit registration data
             setUploadProgress('Saving registration...');
+            
+            const nameParts = formData.only_first_name 
+                ? [formData.first_name]
+                : [formData.first_name, formData.middle_name, formData.last_name].filter(Boolean);
+
             const registrationPayload = {
                 first_name: formData.first_name,
-                middle_name: formData.middle_name || '',
-                last_name: formData.last_name || '',
-                name: [formData.first_name, formData.middle_name, formData.last_name].filter(Boolean).join(' '),
+                middle_name: formData.only_first_name ? null : (formData.middle_name || ''),
+                last_name: formData.only_first_name ? null : (formData.last_name || ''),
+                name: nameParts.join(' '),
                 email: isClubRegistration ? formData.email : undefined,
                 date_of_birth: formData.date_of_birth,
                 gender: formData.gender,
@@ -328,6 +338,11 @@ export default function RegisterPage() {
                         <div className={styles.progressLine} />
                         <div className={`${styles.progressStep} ${step >= 3 ? styles.active : ''}`}>
                             <span className={styles.stepNumber}>3</span>
+                            <span className={styles.stepLabel}>Documents</span>
+                        </div>
+                        <div className={styles.progressLine} />
+                        <div className={`${styles.progressStep} ${step >= 4 ? styles.active : ''}`}>
+                            <span className={styles.stepNumber}>4</span>
                             <span className={styles.stepLabel}>Payment</span>
                         </div>
                     </div>
@@ -344,8 +359,41 @@ export default function RegisterPage() {
                         />
                     )}
 
-                    {/* Step 2: Registration Form + Documents */}
+                    {/* Step 2: Personal Details Form */}
                     {step === 2 && (
+                        <div>
+                            <RegistrationForm
+                                role={selectedRole}
+                                formData={formData}
+                                onChange={setFormData}
+                                errors={errors}
+                                prefilledClubId={router.query.club_id}
+                                prefilledClubName={router.query.club_name}
+                                isClubRegistration={isClubRegistration}
+                                formStep={1}
+                            />
+
+                            <div className={styles.formActions}>
+                                <button
+                                    type="button"
+                                    className={styles.backBtn}
+                                    onClick={() => setStep(1)}
+                                >
+                                    ← Back
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.submitBtn}
+                                    onClick={handleNextDetails}
+                                >
+                                    Next →
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 3: Documents Upload & Final Submit */}
+                    {step === 3 && (
                         <form onSubmit={handleSubmitAndPay}>
                             <RegistrationForm
                                 role={selectedRole}
@@ -355,13 +403,14 @@ export default function RegisterPage() {
                                 prefilledClubId={router.query.club_id}
                                 prefilledClubName={router.query.club_name}
                                 isClubRegistration={isClubRegistration}
+                                formStep={2}
                             />
 
                             <div className={styles.formActions}>
                                 <button
                                     type="button"
                                     className={styles.backBtn}
-                                    onClick={() => setStep(1)}
+                                    onClick={() => setStep(2)}
                                     disabled={loading}
                                 >
                                     ← Back
