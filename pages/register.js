@@ -328,7 +328,7 @@ export default function RegisterPage() {
         } catch (err) {
             console.error('Registration error:', err);
             // Show specific error message from upload/registration failures
-            const message = err.message || err.response?.data?.message || 'Registration failed. Please try again.';
+            const message = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
             setError(message);
             setLoading(false);
             setUploadProgress('');
