@@ -16,7 +16,6 @@ export default async function handler(req, res) {
         let query = database.client
             .from('users')
             .select('id, email, name, phone, role, role_details, registration_completed, approval_status, approval_reason, date_of_birth, gender, address, documents, profile_photo_url, football_id, is_paid, created_at, updated_at, club_flag_reason, clubs(name)')
-            .eq('registration_completed', true)
             .order('created_at', { ascending: false });
 
         if (status === 'inactive') {
