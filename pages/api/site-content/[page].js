@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
     const { page } = req.query;
 
-    if (!page || !['home', 'about', 'footer'].includes(page)) {
+    if (!page || !['home', 'about', 'footer', 'contact', 'privacy', 'terms', 'refund'].includes(page)) {
         return res.status(400).json({ message: 'Invalid page parameter' });
     }
 

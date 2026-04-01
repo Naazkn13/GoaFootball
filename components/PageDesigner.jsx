@@ -75,6 +75,54 @@ const DEFAULTS = {
             company_name: 'Goa Football Festival',
         },
     },
+    contact: {
+        intro: {
+            title: 'Contact Us',
+            subtitle: "We're Here to Help!",
+            heading: 'Get in Touch',
+            description: "Have questions, feedback, or need assistance? We'd love to hear from you!\nOur team at Goa Football Festival is dedicated to providing excellent customer service."
+        },
+        faq: {
+            title: 'Frequently Asked Questions',
+            items: [
+                { q: 'How do I register?', a: 'Simply sign up or log in to your account, select your role, fill out your details, and complete the payment.' },
+                { q: 'What payment methods do you accept?', a: 'We accept all major credit/debit cards, net banking, UPI, and digital wallets through our secure payment partner Razorpay.' },
+                { q: 'Can I cancel or reschedule?', a: 'Please refer to our Refund Policy for detailed information.' }
+            ]
+        },
+        business: {
+            title: 'Business Inquiries',
+            description: "Interested in partnering with Goa Football Festival?\nWe'd love to hear from you! Please reach out to us at contactus.sksports@gmail.com with details about your proposal."
+        }
+    },
+    privacy: {
+        main: {
+            page_title: 'Privacy Policy',
+            last_updated: 'Last Updated: December 3, 2024',
+            sections: [
+                { heading: '1. Introduction', content: 'Welcome to Goa Football Festival. We are committed to protecting your personal information and your right to privacy.\n\nBy using our services, you agree to the collection and use of information in accordance with this policy.' },
+                { heading: '2. Information We Collect', content: 'We collect personal information that you voluntarily provide to us when you:\n- Register for an account\n- Process a payment\n- Contact us for support' }
+            ]
+        }
+    },
+    terms: {
+        main: {
+            page_title: 'Terms & Conditions',
+            last_updated: 'Last Updated: December 3, 2024',
+            sections: [
+                { heading: '1. Acceptance of Terms', content: 'Welcome to Goa Football Festival. By accessing or using our platform, you agree to be bound by these Terms and Conditions.' }
+            ]
+        }
+    },
+    refund: {
+        main: {
+            page_title: 'Refund & Cancellation Policy',
+            last_updated: 'Last Updated: December 3, 2024',
+            sections: [
+                { heading: '1. Overview', content: 'At Goa Football Festival, we operate a strict no-refund policy. All payments made are final and non-refundable.' }
+            ]
+        }
+    }
 };
 
 const SECTION_LABELS = {
@@ -87,6 +135,9 @@ const SECTION_LABELS = {
     gallery: '🖼️ Image Gallery',
     main: '📄 About Page Content',
     contact: '📞 Footer Contact Info',
+    intro: '👋 Introduction',
+    faq: '❓ FAQ Section',
+    business: '🤝 Business Inquiries',
 };
 
 export default function PageDesigner() {
@@ -179,13 +230,13 @@ export default function PageDesigner() {
         <div className={styles.designer}>
             {/* Page Tabs */}
             <div className={styles.pageTabs}>
-                {['home', 'about', 'footer'].map(page => (
+                {['home', 'about', 'contact', 'privacy', 'terms', 'refund', 'footer'].map(page => (
                     <button
                         key={page}
                         className={`${styles.pageTab} ${activePage === page ? styles.pageTabActive : ''}`}
                         onClick={() => { setActivePage(page); setEditingSection(null); }}
                     >
-                        {page === 'home' ? '🏠 Home Page' : page === 'about' ? '📄 About Page' : '🔗 Footer'}
+                        {page.replace('_', ' ').replace(/^\w/, c => c.toUpperCase())}
                     </button>
                 ))}
             </div>
@@ -399,7 +450,7 @@ function renderSectionEditor(page, section, data, setData, handleImageUpload, up
         );
     }
 
-    if (page === 'about' && section === 'main') {
+    if (['about', 'privacy', 'terms', 'refund'].includes(page) && section === 'main') {
         const addSection = () => {
             setData(prev => ({
                 ...prev,
@@ -416,16 +467,59 @@ function renderSectionEditor(page, section, data, setData, handleImageUpload, up
         return (
             <>
                 <label>Page Title<input value={data.page_title || ''} onChange={e => update('page_title', e.target.value)} /></label>
-                <label>Page Subtitle<input value={data.page_subtitle || ''} onChange={e => update('page_subtitle', e.target.value)} /></label>
+                <label>{page === 'about' ? 'Page Subtitle' : 'Last Updated Text'}<input value={data.page_subtitle || data.last_updated || ''} onChange={e => update(page === 'about' ? 'page_subtitle' : 'last_updated', e.target.value)} /></label>
                 <p style={{ fontSize: '0.85rem', color: '#888', margin: '10px 0 5px' }}>Content Sections:</p>
                 {(data.sections || []).map((sec, i) => (
                     <div key={i} style={{ padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '8px', marginBottom: '10px', position: 'relative' }}>
                         <button onClick={() => removeSection(i)} style={{ position: 'absolute', top: '5px', right: '8px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
                         <label>Heading<input value={sec.heading || ''} onChange={e => updateNested('sections', i, 'heading', e.target.value)} /></label>
-                        <label>Content<textarea rows={4} value={sec.content || ''} onChange={e => updateNested('sections', i, 'content', e.target.value)} /></label>
+                        <label>Content (use \n for new paragraphs/bullet points)<textarea rows={4} value={sec.content || ''} onChange={e => updateNested('sections', i, 'content', e.target.value)} /></label>
                     </div>
                 ))}
                 <button onClick={addSection} style={{ background: '#10b981', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>+ Add Section</button>
+            </>
+        );
+    }
+
+    if (page === 'contact' && section === 'intro') {
+        return (
+            <>
+                <label>Title<input value={data.title || ''} onChange={e => update('title', e.target.value)} /></label>
+                <label>Subtitle<input value={data.subtitle || ''} onChange={e => update('subtitle', e.target.value)} /></label>
+                <label>Heading<input value={data.heading || ''} onChange={e => update('heading', e.target.value)} /></label>
+                <label>Description (Intro Text)<textarea rows={4} value={data.description || ''} onChange={e => update('description', e.target.value)} /></label>
+            </>
+        );
+    }
+
+    if (page === 'contact' && section === 'faq') {
+        const addSection = () => {
+            setData(prev => ({ ...prev, items: [...(prev.items || []), { q: '', a: '' }] }));
+        };
+        const removeSection = (i) => {
+            setData(prev => ({ ...prev, items: prev.items.filter((_, idx) => idx !== i) }));
+        };
+        return (
+            <>
+                <label>Section Title<input value={data.title || ''} onChange={e => update('title', e.target.value)} /></label>
+                <p style={{ fontSize: '0.85rem', color: '#888', margin: '10px 0 5px' }}>FAQ Items:</p>
+                {(data.items || []).map((item, i) => (
+                    <div key={i} style={{ padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '8px', marginBottom: '10px', position: 'relative' }}>
+                        <button onClick={() => removeSection(i)} style={{ position: 'absolute', top: '5px', right: '8px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
+                        <label>Question<input value={item.q || ''} onChange={e => updateNested('items', i, 'q', e.target.value)} /></label>
+                        <label>Answer<textarea rows={3} value={item.a || ''} onChange={e => updateNested('items', i, 'a', e.target.value)} /></label>
+                    </div>
+                ))}
+                <button onClick={addSection} style={{ background: '#10b981', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>+ Add Item</button>
+            </>
+        );
+    }
+
+    if (page === 'contact' && section === 'business') {
+        return (
+            <>
+                <label>Title<input value={data.title || ''} onChange={e => update('title', e.target.value)} /></label>
+                <label>Description<textarea rows={4} value={data.description || ''} onChange={e => update('description', e.target.value)} /></label>
             </>
         );
     }
@@ -524,12 +618,39 @@ function renderSectionPreview(page, section, content) {
         );
     }
 
-    if (page === 'about' && section === 'main') {
+    if (['about', 'privacy', 'terms', 'refund'].includes(page) && section === 'main') {
         return (
             <div>
                 <p style={{ fontWeight: '600', marginBottom: '4px' }}>{content.page_title}</p>
-                <p style={{ fontSize: '0.8rem', color: '#666' }}>{content.page_subtitle}</p>
+                <p style={{ fontSize: '0.8rem', color: '#666' }}>{content.page_subtitle || content.last_updated}</p>
                 <p style={{ fontSize: '0.75rem', color: '#999', marginTop: '4px' }}>{(content.sections || []).length} sections</p>
+            </div>
+        );
+    }
+
+    if (page === 'contact' && section === 'intro') {
+        return (
+            <div>
+                <p style={{ fontWeight: '600', marginBottom: '4px' }}>{content.heading}</p>
+                <p style={{ fontSize: '0.8rem', color: '#666' }}>{(content.description || '').substring(0, 100)}...</p>
+            </div>
+        );
+    }
+
+    if (page === 'contact' && section === 'faq') {
+        return (
+            <div>
+                <p style={{ fontWeight: '600', marginBottom: '4px' }}>{content.title}</p>
+                <p style={{ fontSize: '0.8rem', color: '#666' }}>{(content.items || []).length} FAQ items</p>
+            </div>
+        );
+    }
+
+    if (page === 'contact' && section === 'business') {
+        return (
+            <div>
+                <p style={{ fontWeight: '600', marginBottom: '4px' }}>{content.title}</p>
+                <p style={{ fontSize: '0.8rem', color: '#666' }}>{(content.description || '').substring(0, 100)}...</p>
             </div>
         );
     }
