@@ -583,7 +583,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                     <input 
                         type="checkbox" 
                         checked={formData.accepted_tc || false}
-                        onChange={(e) => onChange('accepted_tc', e.target.checked)}
+                        onChange={(e) => handleChange('accepted_tc', e.target.checked)}
                         style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                     />
                     I have read and agree to these Terms and Conditions
