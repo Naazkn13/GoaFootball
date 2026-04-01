@@ -10,11 +10,11 @@ export default async function handler(req, res) {
     if (!session) return;
 
     try {
-        const { search, role, status } = req.query;
+        const { search, role, status, inactive } = req.query;
 
         let query = supabaseAdmin
             .from('users')
-            .select('id, email, name, phone, role, registration_completed, approval_status, football_id, is_paid, is_admin, is_super_admin, created_at, profile_photo_url, club_flag_reason, clubs(name)')
+            .select('id, email, name, phone, role, registration_completed, approval_status, football_id, is_paid, is_admin, is_super_admin, is_active, created_at, profile_photo_url, club_flag_reason, clubs(name)')
             .order('created_at', { ascending: false });
 
         // Apply filters
@@ -26,6 +26,9 @@ export default async function handler(req, res) {
         }
         if (status) {
             query = query.eq('approval_status', status);
+        }
+        if (inactive === 'true') {
+            query = query.eq('is_active', false);
         }
 
         const { data, error } = await query;
