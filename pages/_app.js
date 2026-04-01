@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "react-datepicker/dist/react-datepicker.css";
 import { AuthProvider } from "@/store/AuthContext";
 import Header from '../components/Header';
 import Footer from '../components/Footer';
