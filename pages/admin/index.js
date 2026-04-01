@@ -6,6 +6,7 @@ import axiosInstance from '@/services/axios';
 import { useAuth } from '@/store/AuthContext';
 import ChatTab from '@/components/ChatTab';
 import PageDesigner from '@/components/PageDesigner';
+import { toastSuccess, toastError, confirmAction } from '@/utils/toast';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -22,7 +23,7 @@ export default function AdminDashboard() {
     const [actionModal, setActionModal] = useState(null);
     const [actionReason, setActionReason] = useState('');
     const [newAdminEmail, setNewAdminEmail] = useState('');
-    const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, on_hold: 0 });
+    const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, on_hold: 0, inactive: 0 });
     const [clubs, setClubs] = useState([]);
     const [newClub, setNewClub] = useState({ name: '', email: '', location: '', logo_url: '', password: '' });
     const [clubLogoFile, setClubLogoFile] = useState(null);
@@ -60,6 +61,8 @@ export default function AdminDashboard() {
                 const resp = await axiosInstance.get(`/api/admin/registrations?status=${s}`);
                 results[s] = resp.data.count || 0;
             }
+            const inactiveResp = await axiosInstance.get('/api/admin/users?inactive=true');
+            results.inactive = inactiveResp.data.count || 0;
             setStats(results);
         } catch (err) {
             console.error('Failed to fetch stats:', err);
@@ -128,13 +131,12 @@ export default function AdminDashboard() {
                 logo_url,
             });
 
-            setSuccess(`Club ${newClub.name} created successfully`);
+            toastSuccess(`Club ${newClub.name} created successfully`);
             setNewClub({ name: '', email: '', location: '', logo_url: '', password: '' });
             setClubLogoFile(null);
             fetchClubs();
-            setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to create club');
+            toastError(err.response?.data?.message || 'Failed to create club');
         } finally {
             setLoading(false);
         }
@@ -143,22 +145,21 @@ export default function AdminDashboard() {
     const handleDeleteClub = async (clubId, clubName) => {
         if (!user?.is_super_admin) return;
 
-        if (window.confirm(
-            `⚠️ WARNING ⚠️\nAre you sure you want to delete the club: ${clubName}?\n\n` +
-            `This can only succeed if ALL players in this club have been inactivated first.\n\n` +
-            `This action cannot be undone.`
-        )) {
+        const confirmed = await confirmAction(
+            `Delete Club: ${clubName}?`,
+            `This can only succeed if ALL players in this club have been inactivated first. This action cannot be undone.`
+        );
+
+        if (confirmed) {
             setLoading(true);
-            setError('');
             try {
                 const res = await axiosInstance.delete(`/api/admin/clubs?id=${clubId}`);
                 if (res.data.success) {
-                    setSuccess(`Club "${clubName}" deleted successfully`);
-                    setTimeout(() => setSuccess(''), 3000);
+                    toastSuccess(`Club "${clubName}" deleted successfully`);
                     fetchClubs();
                 }
             } catch (err) {
-                setError(err.response?.data?.message || 'Failed to delete club');
+                toastError(err.response?.data?.message || 'Failed to delete club');
             } finally {
                 setLoading(false);
             }
@@ -168,19 +169,22 @@ export default function AdminDashboard() {
     const handleDeleteUser = async (userId, userName) => {
         if (!user?.is_super_admin) return;
 
-        if (window.confirm(`⚠️ WARNING ⚠️\nAre you sure you want to completely delete the user: ${userName || 'No Name'}?\nThis action cannot be undone.`)) {
+        const confirmed = await confirmAction(
+            `Delete user: ${userName || 'No Name'}?`,
+            `Are you sure you want to completely delete this user? This action cannot be undone.`
+        );
+
+        if (confirmed) {
             setLoading(true);
-            setError('');
             try {
                 const res = await axiosInstance.delete(`/api/admin/delete-user?id=${userId}`);
                 if (res.data.success) {
-                    setSuccess('User deleted successfully');
-                    setTimeout(() => setSuccess(''), 3000);
+                    toastSuccess('User deleted successfully');
                     if (activeTab === 'users') fetchUsers();
                     else if (activeTab === 'registrations') fetchRegistrations();
                 }
             } catch (err) {
-                setError(err.response?.data?.message || 'Failed to delete user');
+                toastError(err.response?.data?.message || 'Failed to delete user');
             } finally {
                 setLoading(false);
             }
@@ -192,22 +196,25 @@ export default function AdminDashboard() {
         const newStatus = !currentlyActive;
         const action = newStatus ? 'activate' : 'inactivate';
 
-        if (window.confirm(`Are you sure you want to ${action} the user: ${userName || 'No Name'}?`)) {
+        const confirmed = await confirmAction(
+            `${newStatus ? 'Activate' : 'Inactivate'} User`,
+            `Are you sure you want to ${action} ${userName || 'No Name'}?`
+        );
+
+        if (confirmed) {
             setLoading(true);
-            setError('');
             try {
                 const res = await axiosInstance.put('/api/admin/toggle-player-status', {
                     userId,
                     is_active: newStatus
                 });
                 if (res.data.success) {
-                    setSuccess(`User ${action}d successfully`);
-                    setTimeout(() => setSuccess(''), 3000);
+                    toastSuccess(`User ${action}d successfully`);
                     if (activeTab === 'users') fetchUsers();
                     else if (activeTab === 'registrations') fetchRegistrations();
                 }
             } catch (err) {
-                setError(err.response?.data?.message || `Failed to ${action} user`);
+                toastError(err.response?.data?.message || `Failed to ${action} user`);
             } finally {
                 setLoading(false);
             }
@@ -216,12 +223,11 @@ export default function AdminDashboard() {
 
     const handleAction = async (userId, action) => {
         if ((action === 'reject' || action === 'hold') && !actionReason) {
-            setError('Reason is required for rejection/hold');
+            toastError('Reason is required for rejection/hold');
             return;
         }
 
         setLoading(true);
-        setError('');
         try {
             await axiosInstance.post('/api/admin/approve', {
                 userId,
@@ -229,14 +235,13 @@ export default function AdminDashboard() {
                 reason: actionReason,
             });
 
-            setSuccess(`User ${action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'put on hold'} successfully`);
+            toastSuccess(`User ${action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'put on hold'} successfully`);
             setActionModal(null);
             setActionReason('');
             fetchRegistrations();
             fetchStats();
-            setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Action failed');
+            toastError(err.response?.data?.message || 'Action failed');
         } finally {
             setLoading(false);
         }
@@ -244,15 +249,13 @@ export default function AdminDashboard() {
 
     const handleCreateAdmin = async (e) => {
         e.preventDefault();
-        setError('');
         setLoading(true);
         try {
             await axiosInstance.post('/api/admin/create-admin', { email: newAdminEmail });
-            setSuccess(`${newAdminEmail} has been granted admin access`);
+            toastSuccess(`${newAdminEmail} has been granted admin access`);
             setNewAdminEmail('');
-            setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to create admin');
+            toastError(err.response?.data?.message || 'Failed to create admin');
         } finally {
             setLoading(false);
         }
@@ -347,6 +350,10 @@ export default function AdminDashboard() {
                         <div className={`${styles.statCard} ${styles.statOnHold}`}>
                             <span className={styles.statNumber}>{stats.on_hold}</span>
                             <span className={styles.statLabel}>On Hold</span>
+                        </div>
+                        <div className={`${styles.statCard} ${styles.statInactive}`}>
+                            <span className={styles.statNumber}>{stats.inactive}</span>
+                            <span className={styles.statLabel}>Inactive</span>
                         </div>
                     </div>
 
@@ -575,8 +582,16 @@ export default function AdminDashboard() {
                                                     <td>{u.is_paid ? '✓' : '✕'}</td>
                                                     <td>{new Date(u.created_at).toLocaleDateString()}</td>
                                                     <td>
-                                                        <span style={{ color: (u.is_active !== false) ? '#10b981' : '#dc2626', fontWeight: 'bold' }}>
-                                                            {(u.is_active !== false) ? '✓ Active' : '✕ Inactive'}
+                                                        <span style={{
+                                                            display: 'inline-block',
+                                                            padding: '4px 12px',
+                                                            borderRadius: '9999px',
+                                                            fontSize: '0.8rem',
+                                                            fontWeight: '600',
+                                                            backgroundColor: (u.is_active !== false) ? '#dcfce7' : '#fee2e2',
+                                                            color: (u.is_active !== false) ? '#166534' : '#991b1b',
+                                                        }}>
+                                                            {(u.is_active !== false) ? 'Active' : 'Inactive'}
                                                         </span>
                                                     </td>
                                                     {user?.is_super_admin && (

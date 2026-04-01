@@ -102,7 +102,7 @@ export default async function handler(req, res) {
         if (user.is_active === false) {
           return res.status(403).json({
             success: false,
-            message: 'Your account has been inactivated. Please contact the administrator.'
+            message: 'Your account has been inactivated. Please contact support at goafootballfestival.info@gmail.com'
           });
         }
 
