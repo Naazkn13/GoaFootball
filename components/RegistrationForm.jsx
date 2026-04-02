@@ -23,7 +23,7 @@ const ROLE_FIELDS = {
         { name: 'previous_club', label: 'Previous Club/Academy', type: 'text', required: false },
     ],
     referee: [
-        { name: 'grade_level', label: 'Grade/Level', type: 'select', options: ['District', 'State', 'National', 'FIFA'], required: true },
+        { name: 'grade_level', label: 'Grade/Level', type: 'select', options: ['District', 'State', 'National'], required: true },
         { name: 'years_experience', label: 'Years of Experience', type: 'number', required: true },
     ],
     others: [
@@ -313,8 +313,18 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                                         type={field.type}
                                         placeholder={field.label}
                                         value={formData.role_details?.[field.name] || ''}
-                                        onChange={(e) => handleRoleDetailChange(field.name, e.target.value)}
+                                        onChange={(e) => {
+                                            let val = e.target.value;
+                                            if (field.type === 'number') {
+                                                if (val && val.length > 2) val = val.slice(0, 2);
+                                                if (val && Number(val) > 60) val = '60';
+                                                if (val && Number(val) < 0) val = '0';
+                                            }
+                                            handleRoleDetailChange(field.name, val);
+                                        }}
                                         required={field.required}
+                                        min={field.type === 'number' ? '0' : undefined}
+                                        max={field.type === 'number' ? '60' : undefined}
                                     />
                                 )}
                             </div>
