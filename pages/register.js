@@ -79,7 +79,7 @@ export default function RegisterPage() {
             newErrors.first_name = 'First name is required (min 2 characters)';
         }
 
-        if (!formData.club_id) {
+        if (!formData.club_id && selectedRole !== 'others') {
             newErrors.club_id = 'You must select a club to register under';
         }
 
