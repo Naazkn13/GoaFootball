@@ -49,12 +49,11 @@ export default async function handler(req, res) {
             first_name: updates.first_name,
             last_name: updates.last_name,
             name: `${updates.first_name || ''} ${updates.last_name || ''}`.trim(),
-            date_of_birth: updates.date_of_birth,
+            date_of_birth: updates.date_of_birth || null,
             gender: updates.gender,
             phone: updates.phone,
             role: updates.role,
             club_id: updates.club_id || null, // Ensure empty string becomes null
-            football_id: updates.football_id,
             updated_at: new Date().toISOString()
         };
 

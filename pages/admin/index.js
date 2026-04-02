@@ -229,11 +229,11 @@ export default function AdminDashboard() {
     const handleEditUserClick = (u) => {
         setEditUserModal(u);
         setEditUserModalUpdates({
-            first_name: u.first_name || '',
-            last_name: u.last_name || '',
+            first_name: u.first_name || (u.name ? u.name.split(' ')[0] : ''),
+            last_name: u.last_name || (u.name ? u.name.split(' ').slice(1).join(' ') : ''),
             phone: u.phone || '',
-            date_of_birth: u.date_of_birth ? u.date_of_birth.split('T')[0] : '',
-            gender: u.gender || '',
+            date_of_birth: u.date_of_birth && !isNaN(new Date(u.date_of_birth)) ? new Date(u.date_of_birth).toISOString().split('T')[0] : '',
+            gender: u.gender ? u.gender.toLowerCase() : '',
             football_id: u.football_id || '',
             role: u.role || '',
             club_id: u.club_id || ''
@@ -998,7 +998,6 @@ export default function AdminDashboard() {
                                             type="text"
                                             value={editUserModalUpdates.last_name}
                                             onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, last_name: e.target.value})}
-                                            required
                                             style={{ width: '100%' }}
                                         />
                                     </div>
@@ -1020,7 +1019,6 @@ export default function AdminDashboard() {
                                             type="date"
                                             value={editUserModalUpdates.date_of_birth}
                                             onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, date_of_birth: e.target.value})}
-                                            required
                                             style={{ width: '100%' }}
                                         />
                                     </div>
@@ -1032,13 +1030,12 @@ export default function AdminDashboard() {
                                         <select
                                             value={editUserModalUpdates.gender}
                                             onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, gender: e.target.value})}
-                                            required
                                             style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db' }}
                                         >
                                             <option value="">Select Gender</option>
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
-                                            <option value="Other">Other</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Other</option>
                                         </select>
                                     </div>
                                     <div>
@@ -1047,7 +1044,8 @@ export default function AdminDashboard() {
                                             type="text"
                                             value={editUserModalUpdates.football_id}
                                             onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, football_id: e.target.value})}
-                                            style={{ width: '100%' }}
+                                            disabled
+                                            style={{ width: '100%', backgroundColor: '#f3f4f6', cursor: 'not-allowed', color: '#6b7280' }}
                                         />
                                     </div>
                                 </div>
@@ -1058,7 +1056,6 @@ export default function AdminDashboard() {
                                         <select
                                             value={editUserModalUpdates.role}
                                             onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, role: e.target.value})}
-                                            required
                                             style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db' }}
                                         >
                                             <option value="">Select Role</option>
