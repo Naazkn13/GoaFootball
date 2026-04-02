@@ -40,6 +40,12 @@ export default async function handler(req, res) {
           });
         }
 
+        let clubName = null;
+        if (profile.club_id) {
+          const club = await database.getClubById(profile.club_id);
+          if (club) clubName = club.name;
+        }
+
         // Whitelist response fields — never send raw DB objects to client
         safeProfile = {
           id: profile.id,
@@ -63,6 +69,8 @@ export default async function handler(req, res) {
           is_paid: profile.is_paid,
           email_verified: profile.email_verified,
           created_at: profile.created_at,
+          club_id: profile.club_id,
+          club_name: clubName
         };
       }
 
