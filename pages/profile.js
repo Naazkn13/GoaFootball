@@ -317,7 +317,7 @@ export default function ProfilePage() {
                     <option value="photo">Passport-size Photo</option>
                     <option value="id_proof">ID Proof (Aadhaar/PAN)</option>
                     <option value="birth_certificate">Birth Certificate</option>
-                    <option value="gff_consent_form">GFF Consent Form</option>
+                    <option value="gff_consent_form">NSA Consent Form</option>
                   </select>
 
                   <input

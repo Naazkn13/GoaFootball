@@ -22,17 +22,17 @@ class OTPService {
         </div>
         <p style="color: #888888; font-size: 14px; margin-bottom: 30px;">This security code will expire in <strong>5 minutes</strong>.</p>
         <hr style="border: none; border-top: 1px solid #eeeeee; margin: 20px 0;" />
-        <p style="color: #aaaaaa; font-size: 12px; line-height: 1.4;">If you didn't request this code, please ignore this email or secure your account.<br/>&copy; ${new Date().getFullYear()} Goa Football Festival</p>
+        <p style="color: #aaaaaa; font-size: 12px; line-height: 1.4;">If you didn't request this code, please ignore this email or secure your account.<br/>&copy; ${new Date().getFullYear()} National Sports Academy</p>
       </div>
     `;
 
     const emailTemplates = {
       signup: {
-        subject: 'Goa Football Festival - Verify Your Email',
-        body: baseTemplate('Welcome to Goa Football Festival!', 'We are excited to have you on board. Please use the verification code below to complete your registration:', '#10b981')
+        subject: 'National Sports Academy - Verify Your Email',
+        body: baseTemplate('Welcome to National Sports Academy!', 'We are excited to have you on board. Please use the verification code below to complete your registration:', '#10b981')
       },
       login: {
-        subject: 'Goa Football Festival - Login Verification',
+        subject: 'National Sports Academy - Login Verification',
         body: baseTemplate('Login Verification', 'Please enter the code below to securely access your account:', '#3b82f6')
       },
     };

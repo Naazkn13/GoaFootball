@@ -186,7 +186,7 @@ export default function RegisterPage() {
         photo: 'Passport Photo',
         id_proof: 'ID Proof',
         birth_certificate: 'Birth Certificate',
-        gff_consent_form: 'GFF Consent Form',
+        gff_consent_form: 'NSA Consent Form',
     };
 
     const uploadDocument = async (file, docType) => {
