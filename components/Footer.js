@@ -5,7 +5,7 @@ import styles from '../styles/Footer.module.css';
 const DEFAULTS = {
     email: 'contactus.sksports@gmail.com',
     phone: '+91 9326 394341',
-    company_name: 'Goa Football Festival',
+    company_name: 'National Sports Academy',
 };
 
 export default function Footer() {

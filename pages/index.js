@@ -78,7 +78,7 @@ const DEFAULTS = {
   },
   gallery: {
     title: 'Our Gallery',
-    subtitle: 'Moments from the Goa Football Festival',
+    subtitle: 'Moments from the National Sports Academy',
     images: [],
   },
   cta: {
@@ -129,8 +129,8 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>Goa Football Festival — Join the Game</title>
-        <meta name="description" content="Register for the Goa Football Festival as a player, coach, referee, or manager. Get your Football UID and join the community." />
+        <title>National Sports Academy — Join the Game</title>
+        <meta name="description" content="Register for the National Sports Academy as a player, coach, referee, or manager. Get your Football UID and join the community." />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </Head>
 
@@ -262,7 +262,7 @@ export default function HomePage() {
               </div>
               <div className={styles.aboutVisual}>
                 <div className={styles.aboutCard}>
-                  <Image src="/images/logo.png" alt="Goa Football Festival" width={80} height={80} className={styles.aboutLogoImg} />
+                  <Image src="/images/logo.jpeg" alt="National Sports Academy" width={80} height={80} className={styles.aboutLogoImg} />
                   <h3>One Platform.<br />Every Role.</h3>
                   <p>Join the community that powers football events.</p>
                 </div>

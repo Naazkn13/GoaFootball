@@ -95,32 +95,32 @@ class EmailService {
     switch (action) {
       case 'approve':
         actionDesc = 'Approved';
-        subject = 'Registration Approved - Goa Football Festival';
+        subject = 'Registration Approved - National Sports Academy';
         color = '#16a34a';
         break;
       case 'reject':
         actionDesc = 'Rejected';
-        subject = 'Registration Rejected - Goa Football Festival';
+        subject = 'Registration Rejected - National Sports Academy';
         color = '#dc2626';
         break;
       case 'hold':
         actionDesc = 'Placed on Hold';
-        subject = 'Registration on Hold - Goa Football Festival';
+        subject = 'Registration on Hold - National Sports Academy';
         color = '#f59e0b';
         break;
       case 'inactive':
         actionDesc = 'Marked as Inactive';
-        subject = 'Profile Marked Inactive - Goa Football Festival';
+        subject = 'Profile Marked Inactive - National Sports Academy';
         color = '#dc2626';
         break;
       case 'active':
         actionDesc = 'Re-activated';
-        subject = 'Profile Re-activated - Goa Football Festival';
+        subject = 'Profile Re-activated - National Sports Academy';
         color = '#16a34a';
         break;
       default:
         actionDesc = 'Updated';
-        subject = 'Registration Status Updated - Goa Football Festival';
+        subject = 'Registration Status Updated - National Sports Academy';
     }
 
     const htmlTemplate = `
@@ -141,7 +141,7 @@ class EmailService {
           </div>
 
           <p>If you have any questions regarding this decision, please log in to your dashboard and use the communication module to contact support.</p>
-          <p>Thank you,<br/>Goa Football Festival Team</p>
+          <p>Thank you,<br/>National Sports Academy Team</p>
         </div>
       </div>
     `;
@@ -171,7 +171,7 @@ class EmailService {
   }
 
   async sendTransferEmail(user, oldClub, newClub) {
-    const subject = 'Club Transfer Notification - Goa Football Festival';
+    const subject = 'Club Transfer Notification - National Sports Academy';
     const htmlTemplate = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
         <div style="background-color: #1d4ed8; color: white; padding: 20px; text-align: center;">
@@ -189,7 +189,7 @@ class EmailService {
           </div>
 
           <p>If you have any concerns regarding this automated administrative transfer, please contact the support team immediately.</p>
-          <p>Thank you,<br/>Goa Football Festival</p>
+          <p>Thank you,<br/>National Sports Academy</p>
         </div>
       </div>
     `;
@@ -213,7 +213,7 @@ class EmailService {
   }
 
   async sendUserUpdateEmail(user, currentClub) {
-    const subject = 'Profile Details Updated - Goa Football Festival';
+    const subject = 'Profile Details Updated - National Sports Academy';
     const htmlTemplate = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
         <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
@@ -229,7 +229,7 @@ class EmailService {
           </div>
 
           <p>Please log into your dashboard to review your current profile details. If any information appears incorrect, you may update it directly or contact support.</p>
-          <p>Thank you,<br/>Goa Football Festival Team</p>
+          <p>Thank you,<br/>National Sports Academy Team</p>
         </div>
       </div>
     `;
