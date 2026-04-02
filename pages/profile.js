@@ -375,6 +375,13 @@ export default function ProfilePage() {
             <h3 className={styles.sectionTitle}>Profile Details</h3>
 
             <div className={styles.profileGrid}>
+              {user.club_id && (
+                <div className={styles.profileField}>
+                  <span className={styles.fieldLabel}>Club</span>
+                  <span className={styles.fieldValue}>{user.club_name || user.club_id}</span>
+                </div>
+              )}
+
               <div className={styles.profileField}>
                 <span className={styles.fieldLabel}>Full Name</span>
                 {isEditing ? (
