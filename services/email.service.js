@@ -169,6 +169,88 @@ class EmailService {
       return { success: false, error };
     }
   }
+
+  async sendTransferEmail(user, oldClub, newClub) {
+    const subject = 'Club Transfer Notification - Goa Football Festival';
+    const htmlTemplate = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: #1d4ed8; color: white; padding: 20px; text-align: center;">
+          <h2 style="margin: 0;">Official Club Transfer</h2>
+        </div>
+        <div style="padding: 20px;">
+          <p>Hello,</p>
+          <p>This is an official notification that a club transfer has been processed by the central administration.</p>
+          
+          <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>Player Name:</strong> ${user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}</p>
+            ${user.football_id ? `<p style="margin: 5px 0;"><strong>Football ID:</strong> ${user.football_id}</p>` : ''}
+            <p style="margin: 5px 0;"><strong>Previous Club:</strong> ${oldClub ? oldClub.name : 'None / Independent'}</p>
+            <p style="margin: 5px 0;"><strong>New Club:</strong> <span style="font-weight: bold; color: #16a34a;">${newClub ? newClub.name : 'None'}</span></p>
+          </div>
+
+          <p>If you have any concerns regarding this automated administrative transfer, please contact the support team immediately.</p>
+          <p>Thank you,<br/>Goa Football Festival</p>
+        </div>
+      </div>
+    `;
+
+    const recipients = [user.email, newClub?.email, oldClub?.email].filter(Boolean);
+    const promises = recipients.map(email => 
+      this.send({
+        to: email,
+        subject: subject,
+        html: htmlTemplate
+      })
+    );
+
+    try {
+      await Promise.all(promises);
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to send transfer email:', error);
+      return { success: false, error };
+    }
+  }
+
+  async sendUserUpdateEmail(user, currentClub) {
+    const subject = 'Profile Details Updated - Goa Football Festival';
+    const htmlTemplate = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
+          <h2 style="margin: 0;">Profile Administration Update</h2>
+        </div>
+        <div style="padding: 20px;">
+          <p>Hello,</p>
+          <p>Your profile details have been explicitly updated by the central administration team.</p>
+          
+          <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>Name:</strong> ${user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}</p>
+            ${user.football_id ? `<p style="margin: 5px 0;"><strong>Football ID:</strong> ${user.football_id}</p>` : ''}
+          </div>
+
+          <p>Please log into your dashboard to review your current profile details. If any information appears incorrect, you may update it directly or contact support.</p>
+          <p>Thank you,<br/>Goa Football Festival Team</p>
+        </div>
+      </div>
+    `;
+
+    const recipients = [user.email, currentClub?.email].filter(Boolean);
+    const promises = recipients.map(email => 
+      this.send({
+        to: email,
+        subject: subject,
+        html: htmlTemplate
+      })
+    );
+
+    try {
+      await Promise.all(promises);
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to send user update email:', error);
+      return { success: false, error };
+    }
+  }
 }
 
 export default new EmailService();
