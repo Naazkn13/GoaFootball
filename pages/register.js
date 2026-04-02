@@ -100,15 +100,6 @@ export default function RegisterPage() {
             newErrors.email = 'Valid email is required';
         }
 
-        if (!formData.address_same_as_proof) {
-            if (!formData.address_line1) newErrors.address_line1 = 'Address is required';
-            if (!formData.city) newErrors.city = 'City is required';
-            if (!formData.state) newErrors.state = 'State is required';
-            if (!formData.pin_code || !/^[0-9]{1,10}$/.test(formData.pin_code)) {
-                newErrors.pin_code = 'Valid PIN code is required (up to 10 digits)';
-            }
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -141,10 +132,6 @@ export default function RegisterPage() {
             if (formData.gff_consent_form_file.type !== 'application/pdf') newErrors.gff_consent_form = 'Consent form must be a PDF file';
         }
 
-        if (!requireConsent && !formData.accepted_tc) {
-            newErrors.accepted_tc = 'You must accept the Terms and Conditions to proceed.';
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -156,6 +143,42 @@ export default function RegisterPage() {
         }
         setError('');
         setStep(3);
+    };
+
+    const handleNextDocuments = () => {
+        if (!validateDocuments()) {
+            setError('Please upload all required documents correctly before proceeding to address & terms.');
+            return;
+        }
+        setError('');
+        setStep(4);
+    };
+
+    const validateAddress = () => {
+        const newErrors = {};
+        
+        if (!formData.address_same_as_proof) {
+            if (!formData.address_line1) newErrors.address_line1 = 'Address is required';
+            if (!formData.city) newErrors.city = 'City is required';
+            if (!formData.state) newErrors.state = 'State is required';
+            if (!formData.pin_code || !/^[0-9]{1,10}$/.test(formData.pin_code)) {
+                newErrors.pin_code = 'Valid PIN code is required (up to 10 digits)';
+            }
+        }
+
+        const isAthlete = selectedRole.toLowerCase() === 'athlete' || selectedRole.toLowerCase() === 'player';
+        let age = 100;
+        if (formData.date_of_birth) {
+            age = (new Date() - new Date(formData.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000);
+        }
+        const requireConsent = isAthlete && age < 18;
+
+        if (!requireConsent && !formData.accepted_tc) {
+            newErrors.accepted_tc = 'You must accept the Terms and Conditions to proceed.';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     // Upload a document file with explicit error handling
@@ -211,8 +234,8 @@ export default function RegisterPage() {
         e.preventDefault();
         if (loading) return;
 
-        if (!validateDocuments()) {
-            setError('Please upload all required documents correctly before proceeding to payment.');
+        if (!validateAddress()) {
+            setError('Please complete the address and accept the terms and conditions before proceeding to payment.');
             return;
         }
 
@@ -413,9 +436,9 @@ export default function RegisterPage() {
                         </div>
                     )}
 
-                    {/* Step 3: Documents Upload & Final Submit */}
+                    {/* Step 3: Documents Upload */}
                     {step === 3 && (
-                        <form onSubmit={handleSubmitAndPay}>
+                        <div>
                             <RegistrationForm
                                 role={selectedRole}
                                 formData={formData}
@@ -432,6 +455,39 @@ export default function RegisterPage() {
                                     type="button"
                                     className={styles.backBtn}
                                     onClick={() => setStep(2)}
+                                >
+                                    ← Back
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.submitBtn}
+                                    onClick={handleNextDocuments}
+                                >
+                                    Next →
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 4: Address, T&C & Final Submit */}
+                    {step === 4 && (
+                        <form onSubmit={handleSubmitAndPay}>
+                            <RegistrationForm
+                                role={selectedRole}
+                                formData={formData}
+                                onChange={setFormData}
+                                errors={errors}
+                                prefilledClubId={router.query.club_id}
+                                prefilledClubName={router.query.club_name}
+                                isClubRegistration={isClubRegistration}
+                                formStep={3}
+                            />
+
+                            <div className={styles.formActions}>
+                                <button
+                                    type="button"
+                                    className={styles.backBtn}
+                                    onClick={() => setStep(3)}
                                     disabled={loading}
                                 >
                                     ← Back
