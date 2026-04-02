@@ -5,6 +5,7 @@ const ROLE_PREFIX_MAP = {
   referee: 'R',
   athlete: 'A',
   manager: 'M',
+  others: 'O',
 };
 
 class UUIDService {
@@ -58,7 +59,7 @@ class UUIDService {
   // Validate GFF Football ID format
   validateFootballID(footballId) {
     // GFF + 2-digit year + role letter + 3+ digit sequence
-    const pattern = /^GFF\d{2}[ACMR]\d{3,}$/;
+    const pattern = /^GFF\d{2}[ACMRO]\d{3,}$/;
     return pattern.test(footballId);
   }
 }

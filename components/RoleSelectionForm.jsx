@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { useState } from 'react';
 import styles from '@/styles/Register.module.css';
 
 const roles = [
@@ -30,7 +29,6 @@ const roles = [
 ];
 
 export default function RoleSelectionForm({ selectedRole, onSelectRole }) {
-    const [showComingSoon, setShowComingSoon] = useState(false);
 
     return (
         <div className={styles.roleSection}>
@@ -44,11 +42,7 @@ export default function RoleSelectionForm({ selectedRole, onSelectRole }) {
                         type="button"
                         className={`${styles.roleCard} ${selectedRole === role.id ? styles.roleSelected : ''}`}
                         onClick={() => {
-                            if (role.id === 'others') {
-                                setShowComingSoon(true);
-                            } else {
-                                onSelectRole(role.id);
-                            }
+                            onSelectRole(role.id);
                         }}
                     >
                         <span className={styles.roleIcon}>{role.icon}</span>
@@ -58,22 +52,7 @@ export default function RoleSelectionForm({ selectedRole, onSelectRole }) {
                 ))}
             </div>
 
-            {/* Custom Modal for Implementation in Progress */}
-            {showComingSoon && typeof document !== 'undefined' && createPortal(
-                <div className={styles.customModalOverlay} onClick={() => setShowComingSoon(false)}>
-                    <div className={styles.customModal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.customModalIcon}>🚧</div>
-                        <h4 className={styles.customModalTitle}>Implementation in Progress</h4>
-                        <p className={styles.customModalText}>
-                            The registration flow for Others (Parents, Physios, etc) is currently being developed and will be available soon.
-                        </p>
-                        <button className={styles.customModalBtn} onClick={() => setShowComingSoon(false)}>
-                            Got it, thanks!
-                        </button>
-                    </div>
-                </div>,
-                document.body
-            )}
+
         </div>
     );
 }

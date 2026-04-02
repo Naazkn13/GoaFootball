@@ -26,6 +26,9 @@ const ROLE_FIELDS = {
         { name: 'grade_level', label: 'Grade/Level', type: 'select', options: ['District', 'State', 'National', 'FIFA'], required: true },
         { name: 'years_experience', label: 'Years of Experience', type: 'number', required: true },
     ],
+    others: [
+        { name: 'specific_role', label: 'Specific Role', type: 'select', options: ['Club Manager', 'Physiotherapist', 'Medical Staff', 'Parent', 'Fan/Supporter', 'General Support Staff'], required: true },
+    ],
 };
 
 export default function RegistrationForm({ role, formData, onChange, errors, prefilledClubId, prefilledClubName, isClubRegistration, formStep }) {
@@ -108,9 +111,9 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                     <h3 className={styles.stepTitle}>Personal Information</h3>
 
             <div className={styles.formGrid}>
-                {/* Select Club (Mandatory) */}
+                {/* Select Club */}
                 <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
-                    <label htmlFor="reg-club">Select Club *</label>
+                    <label htmlFor="reg-club">Select Club {role !== 'others' ? '*' : '(Optional)'}</label>
                     {prefilledClubId ? (
                         <input
                             type="text"
@@ -123,7 +126,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                             id="reg-club"
                             value={formData.club_id || ''}
                             onChange={(e) => handleChange('club_id', e.target.value)}
-                            required
+                            required={role !== 'others'}
                         >
                             <option value="">Select a Club</option>
                             {clubs.map((club) => (
