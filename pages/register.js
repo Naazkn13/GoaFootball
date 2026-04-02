@@ -310,9 +310,17 @@ export default function RegisterPage() {
             setUploadProgress('Initiating payment...');
             const orderResponse = await paymentAPI.createOrder(registeredUserId);
 
+            // ===== INSTAMOJO: Redirect to payment page =====
+            if (orderResponse.gateway === 'instamojo') {
+                setUploadProgress('Redirecting to payment page...');
+                window.location.href = orderResponse.redirectUrl;
+                return; // User leaves the page
+            }
+
+            // ===== RAZORPAY: Open popup (backup) =====
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: orderResponse.order.amount, // Already in paise from server
+                amount: orderResponse.order.amount,
                 currency: orderResponse.order.currency,
                 name: 'Football Registration',
                 description: 'Registration Payment',
@@ -364,7 +372,10 @@ export default function RegisterPage() {
                 <title>Register — Football Registration</title>
                 <meta name="description" content="Complete your football registration" />
             </Head>
-            <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+            {/* Only load Razorpay script when NOT using Instamojo */}
+            {process.env.NEXT_PUBLIC_PAYMENT_GATEWAY !== 'instamojo' && (
+                <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+            )}
 
             <div className={styles.registerContainer}>
                 <div className={styles.registerCard}>

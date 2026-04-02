@@ -168,9 +168,16 @@ export default function ProfilePage() {
     try {
       const orderResponse = await paymentAPI.createOrder();
 
+      // ===== INSTAMOJO: Redirect to payment page =====
+      if (orderResponse.gateway === 'instamojo') {
+        window.location.href = orderResponse.redirectUrl;
+        return; // User leaves the page
+      }
+
+      // ===== RAZORPAY: Open popup (backup) =====
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderResponse.order.amount, // Already in paise from server
+        amount: orderResponse.order.amount,
         currency: orderResponse.order.currency,
         name: "Football Registration",
         description: "Registration Payment",
@@ -261,7 +268,10 @@ export default function ProfilePage() {
       <Head>
         <title>Profile — Football Registration</title>
       </Head>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      {/* Only load Razorpay script when NOT using Instamojo (Instamojo uses redirect, not popup) */}
+      {process.env.NEXT_PUBLIC_PAYMENT_GATEWAY !== 'instamojo' && (
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      )}
 
       <div className={styles.profileRoot}>
         <div className={styles.profileCard}>
