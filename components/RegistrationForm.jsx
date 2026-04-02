@@ -346,7 +346,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                 </div>
 
                 <div className={styles.inputGroup}>
-                    <label htmlFor="reg-idproof">ID Proof (Aadhaar/Passport) * (PDF/JPEG/PNG, max 5MB)</label>
+                    <label htmlFor="reg-idproof">Aadhaar/Passport * (PDF/JPEG/PNG, max 5MB)</label>
                     <input
                         id="reg-idproof"
                         type="file"
@@ -509,18 +509,19 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                     zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)'
+                    backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', padding: '1rem'
                 }}>
                     <div style={{
-                        background: 'white', padding: '32px 24px', borderRadius: '16px',
-                        maxWidth: '500px', width: '90%', maxHeight: '80vh', overflowY: 'auto',
+                        background: 'white', padding: '2.5rem', borderRadius: '20px',
+                        maxWidth: '800px', width: '100%', maxHeight: '75vh', display: 'flex', flexDirection: 'column',
+                        border: '1px solid #e2e8f0',
                         boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
                     }}>
-                        <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', marginBottom: '16px', margin: 0 }}>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#111827', marginBottom: '20px', margin: 0, borderBottom: '1px solid #e2e8f0', paddingBottom: '15px' }}>
                             Terms and Conditions
                         </h3>
-                        <div style={{ fontSize: '14px', color: '#475569', lineHeight: '1.6', marginBottom: '24px' }}>
-                            <ul style={{ paddingLeft: '20px', margin: '0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ fontSize: '0.95rem', color: '#475569', lineHeight: '1.6', marginBottom: '24px', overflowY: 'auto', paddingRight: '10px', flex: 1 }}>
+                            <ul style={{ paddingLeft: '20px', margin: '0', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                                 <li>I hereby confirm my participation in the 14th Goa Football Festival (GFF) organized by National Sports Academy.</li>
                                 <li>I hereby authorize the staff of Goa Football Festival to act for me according to their best judgment in any emergency requiring medical attention.</li>
                                 <li>I hereby waive and release Goa Football Festival and its staff from any and all liabilities for any accident or injuries incurred while the tournament, travelling or sightseeing from the venue.</li>
@@ -532,19 +533,21 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                                 <li>I understand Goa Football Festival retains the rights to use any photographs, videotapes, motion picture recording or any other record of the event for publicity, advertising or any legitimate purpose.</li>
                             </ul>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => setShowTCModal(false)}
-                            style={{
-                                background: '#2563eb', color: 'white', padding: '12px 24px',
-                                borderRadius: '8px', border: 'none', cursor: 'pointer',
-                                fontWeight: '600', width: '100%', fontSize: '15px', transition: 'all 0.2s'
-                            }}
-                            onMouseOver={(e) => e.target.style.background = '#1d4ed8'}
-                            onMouseOut={(e) => e.target.style.background = '#2563eb'}
-                        >
-                            Close
-                        </button>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>
+                            <button
+                                type="button"
+                                onClick={() => setShowTCModal(false)}
+                                style={{
+                                    background: '#2563eb', color: 'white', padding: '12px 30px',
+                                    borderRadius: '10px', border: 'none', cursor: 'pointer',
+                                    fontWeight: '600', fontSize: '15px', transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => e.target.style.background = '#1d4ed8'}
+                                onMouseOut={(e) => e.target.style.background = '#2563eb'}
+                            >
+                                I Understand
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
