@@ -21,6 +21,8 @@ export default function AdminDashboard() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [actionModal, setActionModal] = useState(null);
+    const [editUserModal, setEditUserModal] = useState(null);
+    const [editUserModalUpdates, setEditUserModalUpdates] = useState({});
     const [actionReason, setActionReason] = useState('');
     const [newAdminEmail, setNewAdminEmail] = useState('');
     const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, on_hold: 0, inactive: 0 });
@@ -41,6 +43,7 @@ export default function AdminDashboard() {
                 fetchRegistrations();
             } else if (activeTab === 'users') {
                 fetchUsers();
+                if (user?.is_super_admin) fetchClubs();
             } else if (activeTab === 'clubs') {
                 fetchClubs();
             }
@@ -220,6 +223,40 @@ export default function AdminDashboard() {
             } finally {
                 setLoading(false);
             }
+        }
+    };
+
+    const handleEditUserClick = (u) => {
+        setEditUserModal(u);
+        setEditUserModalUpdates({
+            first_name: u.first_name || '',
+            last_name: u.last_name || '',
+            phone: u.phone || '',
+            date_of_birth: u.date_of_birth ? u.date_of_birth.split('T')[0] : '',
+            gender: u.gender || '',
+            football_id: u.football_id || '',
+            role: u.role || '',
+            club_id: u.club_id || ''
+        });
+    };
+
+    const handleUpdateUser = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const res = await axiosInstance.put('/api/admin/edit-user', {
+                userId: editUserModal.id,
+                updates: editUserModalUpdates
+            });
+            if (res.data.success) {
+                toastSuccess('User updated successfully');
+                setEditUserModal(null);
+                fetchUsers();
+            }
+        } catch (err) {
+            toastError(err.response?.data?.message || 'Failed to update user');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -649,6 +686,22 @@ export default function AdminDashboard() {
                                                                 {(u.is_active !== false) ? '⏸ Inactivate' : '▶ Activate'}
                                                             </button>
                                                             <button
+                                                                onClick={() => handleEditUserClick(u)}
+                                                                style={{
+                                                                    backgroundColor: '#3b82f6',
+                                                                    color: 'white',
+                                                                    border: 'none',
+                                                                    padding: '4px 8px',
+                                                                    borderRadius: '4px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '0.8rem',
+                                                                    marginRight: '4px',
+                                                                }}
+                                                                title="Edit User"
+                                                            >
+                                                                ✎ Edit
+                                                            </button>
+                                                            <button
                                                                 onClick={() => handleDeleteUser(u.id, u.name)}
                                                                 style={{
                                                                     backgroundColor: '#dc2626',
@@ -914,6 +967,148 @@ export default function AdminDashboard() {
                                     Confirm {actionModal.action === 'reject' ? 'Rejection' : 'Hold'}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Edit User Modal */}
+                {editUserModal && (
+                    <div className={styles.modalOverlay}>
+                        <div className={styles.modalContent} style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                <h3 style={{ margin: 0 }}>Edit User Profile</h3>
+                                <button onClick={() => setEditUserModal(null)} style={{ background: 'transparent', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                            </div>
+                            
+                            <form onSubmit={handleUpdateUser} className={styles.adminForm} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>First Name</label>
+                                        <input
+                                            type="text"
+                                            value={editUserModalUpdates.first_name}
+                                            onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, first_name: e.target.value})}
+                                            required
+                                            style={{ width: '100%' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>Last Name</label>
+                                        <input
+                                            type="text"
+                                            value={editUserModalUpdates.last_name}
+                                            onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, last_name: e.target.value})}
+                                            required
+                                            style={{ width: '100%' }}
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>Phone Number</label>
+                                        <input
+                                            type="tel"
+                                            value={editUserModalUpdates.phone}
+                                            onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, phone: e.target.value})}
+                                            style={{ width: '100%' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>Date of Birth</label>
+                                        <input
+                                            type="date"
+                                            value={editUserModalUpdates.date_of_birth}
+                                            onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, date_of_birth: e.target.value})}
+                                            required
+                                            style={{ width: '100%' }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>Gender</label>
+                                        <select
+                                            value={editUserModalUpdates.gender}
+                                            onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, gender: e.target.value})}
+                                            required
+                                            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                        >
+                                            <option value="">Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>Football ID</label>
+                                        <input
+                                            type="text"
+                                            value={editUserModalUpdates.football_id}
+                                            onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, football_id: e.target.value})}
+                                            style={{ width: '100%' }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>Role</label>
+                                        <select
+                                            value={editUserModalUpdates.role}
+                                            onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, role: e.target.value})}
+                                            required
+                                            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                        >
+                                            <option value="">Select Role</option>
+                                            <option value="athlete">Athlete</option>
+                                            <option value="coach">Coach</option>
+                                            <option value="referee">Referee</option>
+                                            <option value="club-manager">Club Manager</option>
+                                            <option value="club-official">Club Official</option>
+                                            <option value="fan">Fan</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>Club (Transfer)</label>
+                                        <select
+                                            value={editUserModalUpdates.club_id || ''}
+                                            onChange={(e) => setEditUserModalUpdates({...editUserModalUpdates, club_id: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                        >
+                                            <option value="">No Club (Independent)</option>
+                                            {clubs.map(c => (
+                                                <option key={c.id} value={c.id}>{c.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#f3f4f6', borderRadius: '4px', fontSize: '0.85rem' }}>
+                                    <strong>Note:</strong> Email ({editUserModal.email}) cannot be edited for security reasons. Documents must be updated by the user directly.
+                                </div>
+
+                                <div className={styles.modalActions} style={{ marginTop: '20px' }}>
+                                    <button
+                                        type="button"
+                                        className={styles.cancelBtn}
+                                        onClick={() => setEditUserModal(null)}
+                                        disabled={loading}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        style={{
+                                            backgroundColor: '#1d4ed8', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '4px', fontWeight: 'bold'
+                                        }}
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Saving...' : 'Save Changes & Notify'}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 )}

@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '@/styles/Home.module.css';
+import { useAuth } from '@/store/AuthContext';
 
 // Counter animation hook
 function useCountUp(end, duration = 2000) {
@@ -89,6 +90,14 @@ const DEFAULTS = {
 
 export default function HomePage() {
   const [content, setContent] = useState({});
+  const { user, logout } = useAuth();
+
+  useEffect(() => {
+    // Automatically log out the user when they return to the main homepage
+    if (user) {
+      logout();
+    }
+  }, [user, logout]);
 
   useEffect(() => {
     fetch('/api/site-content/home')

@@ -141,7 +141,7 @@ export default function RegisterPage() {
             if (formData.gff_consent_form_file.type !== 'application/pdf') newErrors.gff_consent_form = 'Consent form must be a PDF file';
         }
 
-        if (!formData.accepted_tc) {
+        if (!requireConsent && !formData.accepted_tc) {
             newErrors.accepted_tc = 'You must accept the Terms and Conditions to proceed.';
         }
 
