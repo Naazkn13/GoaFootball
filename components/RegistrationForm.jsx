@@ -35,6 +35,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
     const roleFields = ROLE_FIELDS[role] || [];
     const [clubs, setClubs] = useState([]);
     const [fileError, setFileError] = useState('');
+    const [showTCModal, setShowTCModal] = useState(false);
     const addressSameAsProof = formData.address_same_as_proof || false;
 
     const isAthlete = role === 'athlete' || role === 'player';
@@ -278,89 +279,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                 </div>
             </div>
 
-            {/* Address */}
-            <h3 className={styles.stepTitle} style={{ marginTop: '2rem' }}>Address</h3>
 
-            <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <input
-                    type="checkbox"
-                    id="address-same"
-                    checked={addressSameAsProof}
-                    onChange={handleAddressSameAsProofChange}
-                    style={{ cursor: 'pointer', width: '1rem', height: '1rem' }}
-                />
-                <label htmlFor="address-same" style={{ cursor: 'pointer', margin: 0, fontWeight: 'normal' }}>
-                    Address same as proofs
-                </label>
-            </div>
-
-            {!addressSameAsProof && (
-                <div className={styles.formGrid}>
-                    <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
-                        <label htmlFor="reg-address1">Address Line 1 *</label>
-                        <input
-                            id="reg-address1"
-                            type="text"
-                            placeholder="Street address"
-                            value={formData.address_line1 || ''}
-                            onChange={(e) => handleChange('address_line1', e.target.value)}
-                            required={!addressSameAsProof}
-                        />
-                    </div>
-
-                    <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
-                        <label htmlFor="reg-address2">Address Line 2</label>
-                        <input
-                            id="reg-address2"
-                            type="text"
-                            placeholder="Apartment, suite, etc. (optional)"
-                            value={formData.address_line2 || ''}
-                            onChange={(e) => handleChange('address_line2', e.target.value)}
-                        />
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                        <label htmlFor="reg-city">City *</label>
-                        <input
-                            id="reg-city"
-                            type="text"
-                            placeholder="City"
-                            value={formData.city || ''}
-                            onChange={(e) => handleChange('city', e.target.value)}
-                            required={!addressSameAsProof}
-                        />
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                        <label htmlFor="reg-state">State *</label>
-                        <select
-                            id="reg-state"
-                            value={formData.state || ''}
-                            onChange={(e) => handleChange('state', e.target.value)}
-                            required={!addressSameAsProof}
-                        >
-                            <option value="">Select State</option>
-                            {INDIAN_STATES.map((state) => (
-                                <option key={state} value={state}>{state}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                        <label htmlFor="reg-pin">PIN Code *</label>
-                        <input
-                            id="reg-pin"
-                            type="text"
-                            placeholder="Up to 10-digit PIN"
-                            value={formData.pin_code || ''}
-                            onChange={(e) => handleChange('pin_code', e.target.value)}
-                            pattern="[0-9]{1,10}"
-                            maxLength="10"
-                            required={!addressSameAsProof}
-                        />
-                    </div>
-                </div>
-            )}
 
             {/* Role-Specific Fields (only for coach/referee) */}
             {roleFields.length > 0 && (
@@ -427,7 +346,7 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                 </div>
 
                 <div className={styles.inputGroup}>
-                    <label htmlFor="reg-idproof">ID Proof (Aadhaar/PAN) * (PDF/JPEG/PNG, max 5MB)</label>
+                    <label htmlFor="reg-idproof">ID Proof (Aadhaar/Passport) * (PDF/JPEG/PNG, max 5MB)</label>
                     <input
                         id="reg-idproof"
                         type="file"
@@ -480,36 +399,154 @@ export default function RegistrationForm({ role, formData, onChange, errors, pre
                 )}
             </div>
 
-            {/* Terms and Conditions */}
-            {!requireConsent && (
-                <div className={styles.tcContainer} style={{ marginTop: '30px', padding: '20px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <h4 style={{ marginTop: '0', marginBottom: '15px', color: '#1e293b' }}>Terms and Conditions</h4>
-                    <div style={{ fontSize: '13px', color: '#475569', maxHeight: '200px', overflowY: 'auto', marginBottom: '20px', paddingRight: '10px' }}>
-                        <ul style={{ paddingLeft: '20px', margin: '0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <li>I hereby confirm my participation in the 14th Goa Football Festival (GFF) organized by National Sports Academy.</li>
-                            <li>I hereby authorize the staff of Goa Football Festival to act for me according to their best judgment in any emergency requiring medical attention.</li>
-                            <li>I hereby waive and release Goa Football Festival and its staff from any and all liabilities for any accident or injuries incurred while the tournament, travelling or sightseeing from the venue.</li>
-                            <li>All medical expenses incurred will be the responsibility of the participant or the participant's family/guardian.</li>
-                            <li>Goa Football Festival is not responsible for the lost, stolen or damage of any personal belonging of participants.</li>
-                            <li>I acknowledge and agree to assume and be fully responsible for any and all property or other damage to the facilities used at the venue.</li>
-                            <li>Misbehaviour or indiscipline will not be tolerated and the participant will be asked to leave the tournament as well as the venue.</li>
-                            <li>The GFF Team has a Zero-Tolerance Policy towards alcohol, tobacco, and any other harmful substances. If any such substances are used or found in the possession of any athlete, the athlete will be Banned & will not be allowed to participate in any competitions.</li>
-                            <li>I understand Goa Football Festival retains the rights to use any photographs, videotapes, motion picture recording or any other record of the event for publicity, advertising or any legitimate purpose.</li>
-                        </ul>
-                    </div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', color: '#0f172a', cursor: 'pointer' }}>
-                        <input 
-                            type="checkbox" 
-                            checked={formData.accepted_tc || false}
-                            onChange={(e) => handleChange('accepted_tc', e.target.checked)}
-                            style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                        />
-                        I have read and agree to these Terms and Conditions
-                    </label>
-                    {errors?.accepted_tc && <span className={styles.fieldError} style={{ display: 'block', marginTop: '8px' }}>{errors.accepted_tc}</span>}
-                </div>
-            )}
             </>
+            )}
+
+            {formStep === 3 && (
+                <>
+                    <h3 className={styles.stepTitle} style={{ marginTop: '0' }}>Address</h3>
+
+                    <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <input
+                            type="checkbox"
+                            id="address-same"
+                            checked={addressSameAsProof}
+                            onChange={handleAddressSameAsProofChange}
+                            style={{ cursor: 'pointer', width: '1rem', height: '1rem' }}
+                        />
+                        <label htmlFor="address-same" style={{ cursor: 'pointer', margin: 0, fontWeight: 'normal' }}>
+                            Address same as proofs
+                        </label>
+                    </div>
+
+                    {!addressSameAsProof && (
+                        <div className={styles.formGrid}>
+                            <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
+                                <label htmlFor="reg-address1">Address Line 1 *</label>
+                                <input
+                                    id="reg-address1"
+                                    type="text"
+                                    placeholder="Street address"
+                                    value={formData.address_line1 || ''}
+                                    onChange={(e) => handleChange('address_line1', e.target.value)}
+                                    required={!addressSameAsProof}
+                                />
+                            </div>
+
+                            <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
+                                <label htmlFor="reg-address2">Address Line 2</label>
+                                <input
+                                    id="reg-address2"
+                                    type="text"
+                                    placeholder="Apartment, suite, etc. (optional)"
+                                    value={formData.address_line2 || ''}
+                                    onChange={(e) => handleChange('address_line2', e.target.value)}
+                                />
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label htmlFor="reg-city">City *</label>
+                                <input
+                                    id="reg-city"
+                                    type="text"
+                                    placeholder="City"
+                                    value={formData.city || ''}
+                                    onChange={(e) => handleChange('city', e.target.value)}
+                                    required={!addressSameAsProof}
+                                />
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label htmlFor="reg-state">State *</label>
+                                <select
+                                    id="reg-state"
+                                    value={formData.state || ''}
+                                    onChange={(e) => handleChange('state', e.target.value)}
+                                    required={!addressSameAsProof}
+                                >
+                                    <option value="">Select State</option>
+                                    {INDIAN_STATES.map((state) => (
+                                        <option key={state} value={state}>{state}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label htmlFor="reg-pin">PIN Code *</label>
+                                <input
+                                    id="reg-pin"
+                                    type="text"
+                                    placeholder="Up to 10-digit PIN"
+                                    value={formData.pin_code || ''}
+                                    onChange={(e) => handleChange('pin_code', e.target.value)}
+                                    pattern="[0-9]{1,10}"
+                                    maxLength="10"
+                                    required={!addressSameAsProof}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {!requireConsent && (
+                        <div className={styles.tcContainer} style={{ marginTop: '30px', padding: '20px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', color: '#0f172a', cursor: 'pointer' }}>
+                                <input 
+                                    type="checkbox" 
+                                    checked={formData.accepted_tc || false}
+                                    onChange={(e) => handleChange('accepted_tc', e.target.checked)}
+                                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                                />
+                                <span>I have read and agree to the <a href="#" onClick={(e) => { e.preventDefault(); setShowTCModal(true); }} style={{ color: '#2563eb', textDecoration: 'underline' }}>Terms and Conditions</a></span>
+                            </label>
+                            {errors?.accepted_tc && <span className={styles.fieldError} style={{ display: 'block', marginTop: '8px' }}>{errors.accepted_tc}</span>}
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* Terms and Conditions Modal */}
+            {showTCModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)'
+                }}>
+                    <div style={{
+                        background: 'white', padding: '32px 24px', borderRadius: '16px',
+                        maxWidth: '500px', width: '90%', maxHeight: '80vh', overflowY: 'auto',
+                        boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+                    }}>
+                        <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', marginBottom: '16px', margin: 0 }}>
+                            Terms and Conditions
+                        </h3>
+                        <div style={{ fontSize: '14px', color: '#475569', lineHeight: '1.6', marginBottom: '24px' }}>
+                            <ul style={{ paddingLeft: '20px', margin: '0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <li>I hereby confirm my participation in the 14th Goa Football Festival (GFF) organized by National Sports Academy.</li>
+                                <li>I hereby authorize the staff of Goa Football Festival to act for me according to their best judgment in any emergency requiring medical attention.</li>
+                                <li>I hereby waive and release Goa Football Festival and its staff from any and all liabilities for any accident or injuries incurred while the tournament, travelling or sightseeing from the venue.</li>
+                                <li>All medical expenses incurred will be the responsibility of the participant or the participant's family/guardian.</li>
+                                <li>Goa Football Festival is not responsible for the lost, stolen or damage of any personal belonging of participants.</li>
+                                <li>I acknowledge and agree to assume and be fully responsible for any and all property or other damage to the facilities used at the venue.</li>
+                                <li>Misbehaviour or indiscipline will not be tolerated and the participant will be asked to leave the tournament as well as the venue.</li>
+                                <li>The GFF Team has a Zero-Tolerance Policy towards alcohol, tobacco, and any other harmful substances. If any such substances are used or found in the possession of any athlete, the athlete will be Banned & will not be allowed to participate in any competitions.</li>
+                                <li>I understand Goa Football Festival retains the rights to use any photographs, videotapes, motion picture recording or any other record of the event for publicity, advertising or any legitimate purpose.</li>
+                            </ul>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowTCModal(false)}
+                            style={{
+                                background: '#2563eb', color: 'white', padding: '12px 24px',
+                                borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                fontWeight: '600', width: '100%', fontSize: '15px', transition: 'all 0.2s'
+                            }}
+                            onMouseOver={(e) => e.target.style.background = '#1d4ed8'}
+                            onMouseOut={(e) => e.target.style.background = '#2563eb'}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
             )}
 
             {/* Custom Error Modal */}
