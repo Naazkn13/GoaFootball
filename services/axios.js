@@ -37,7 +37,7 @@ axiosInstance.interceptors.response.use(
     // Handle 401 Unauthorized — try to refresh before redirecting
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Don't retry refresh endpoint itself or login endpoints
-      if (['/api/auth/refresh', '/api/auth/club-login', '/api/auth/login'].includes(originalRequest.url)) {
+      if (['/api/auth/refresh', '/api/auth/club-login', '/api/auth/admin-login', '/api/auth/login'].includes(originalRequest.url)) {
         if (originalRequest.url === '/api/auth/refresh' && typeof window !== 'undefined') {
           const publicPaths = ['/', '/login', '/register', '/about', '/contact', '/privacy-policy', '/refund-policy', '/terms-and-conditions'];
           if (!publicPaths.includes(window.location.pathname)) {

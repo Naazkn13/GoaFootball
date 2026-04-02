@@ -19,8 +19,8 @@ export default function LoginPage() {
   // OTP Modal state
   const [showOTPModal, setShowOTPModal] = useState(false);
 
-  // Club password login state
-  const [isClubEmail, setIsClubEmail] = useState(false);
+  // Password login state (for clubs and superadmins)
+  const [passwordAuth, setPasswordAuth] = useState({ isRequired: false, type: null });
   const [password, setPassword] = useState("");
 
   const handleSendOTP = async (e) => {
@@ -32,9 +32,10 @@ export default function LoginPage() {
     setSuccessMessage("");
 
     try {
-      // If club email detected and password provided, do password login
-      if (isClubEmail && password) {
-        const response = await axiosInstance.post("/api/auth/club-login", {
+      // If password login is required and password provided, do password login
+      if (passwordAuth.isRequired && password) {
+        const endpoint = passwordAuth.type === 'superadmin' ? '/api/auth/admin-login' : '/api/auth/club-login';
+        const response = await axiosInstance.post(endpoint, {
           email,
           password,
         });
@@ -55,13 +56,13 @@ export default function LoginPage() {
         return;
       }
 
-      // First, check if this is a club email
-      if (!isClubEmail) {
-        const checkRes = await axiosInstance.post("/api/auth/check-club-email", {
+      // First, check if this email requires a password
+      if (!passwordAuth.isRequired) {
+        const checkRes = await axiosInstance.post("/api/auth/check-password-required", {
           email,
         });
-        if (checkRes.data.isClub) {
-          setIsClubEmail(true);
+        if (checkRes.data.requiresPassword) {
+          setPasswordAuth({ isRequired: true, type: checkRes.data.userType });
           setLoading(false);
           return; // Show password field, don't send OTP
         }
@@ -115,12 +116,12 @@ export default function LoginPage() {
     }
   };
 
-  // Reset club state when email changes
+  // Reset password state when email changes
   const handleEmailChange = (e) => {
     const newEmail = e.target.value;
     setEmail(newEmail);
-    if (isClubEmail) {
-      setIsClubEmail(false);
+    if (passwordAuth.isRequired) {
+      setPasswordAuth({ isRequired: false, type: null });
       setPassword("");
     }
   };
@@ -144,8 +145,8 @@ export default function LoginPage() {
             >
               <h2>Greetings! 🏟️</h2>
               <p className={styles.subtitle}>
-                {isClubEmail
-                  ? "Enter your club password to login"
+                {passwordAuth.isRequired
+                  ? `Enter your ${passwordAuth.type === 'superadmin' ? 'admin' : 'club'} password to login`
                   : "Enter your email to receive an OTP"}
               </p>
 
@@ -158,16 +159,16 @@ export default function LoginPage() {
                   value={email}
                   onChange={handleEmailChange}
                   required
-                  autoFocus={!isClubEmail}
+                  autoFocus={!passwordAuth.isRequired}
                 />
               </div>
 
-              {/* Club password field — shown only when club email is detected */}
-              {isClubEmail && (
+              {/* Password field — shown only when password login is required */}
+              {passwordAuth.isRequired && (
                 <div className={styles.inputGroup}>
-                  <label htmlFor="club-password">Club Password</label>
+                  <label htmlFor="auth-password">{passwordAuth.type === 'superadmin' ? 'Admin Password' : 'Club Password'}</label>
                   <input
-                    id="club-password"
+                    id="auth-password"
                     type="password"
                     placeholder="Enter your club password"
                     value={password}
@@ -186,10 +187,10 @@ export default function LoginPage() {
                 {loading && <span className={styles.spinner} />}
                 <span>
                   {loading
-                    ? isClubEmail
+                    ? passwordAuth.isRequired
                       ? "Logging in..."
                       : "Sending OTP..."
-                    : isClubEmail
+                    : passwordAuth.isRequired
                     ? "Login"
                     : "Send OTP"}
                 </span>

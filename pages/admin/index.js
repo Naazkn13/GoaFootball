@@ -25,6 +25,7 @@ export default function AdminDashboard() {
     const [editUserModalUpdates, setEditUserModalUpdates] = useState({});
     const [actionReason, setActionReason] = useState('');
     const [newAdminEmail, setNewAdminEmail] = useState('');
+    const [newSuperadminPassword, setNewSuperadminPassword] = useState('');
     const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, on_hold: 0, inactive: 0 });
     const [clubs, setClubs] = useState([]);
     const [editingClub, setEditingClub] = useState(null);
@@ -325,6 +326,20 @@ export default function AdminDashboard() {
             setNewAdminEmail('');
         } catch (err) {
             toastError(err.response?.data?.message || 'Failed to create admin');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSetSuperadminPassword = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await axiosInstance.post('/api/admin/set-password', { newPassword: newSuperadminPassword });
+            toastSuccess(`Superadmin password successfully updated`);
+            setNewSuperadminPassword('');
+        } catch (err) {
+            toastError(err.response?.data?.message || 'Failed to update superadmin password');
         } finally {
             setLoading(false);
         }
@@ -921,6 +936,24 @@ export default function AdminDashboard() {
                                     />
                                     <button type="submit" disabled={loading}>
                                         {loading ? 'Creating...' : 'Grant Admin Access'}
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div className={styles.settingsCard} style={{ marginTop: '20px' }}>
+                                <h3>Super Admin Security</h3>
+                                <p>Set or change your Super Admin password to enable secure email/password logins.</p>
+                                <form onSubmit={handleSetSuperadminPassword} className={styles.adminForm}>
+                                    <input
+                                        type="password"
+                                        placeholder="Enter new password (min 6 characters)"
+                                        value={newSuperadminPassword}
+                                        onChange={(e) => setNewSuperadminPassword(e.target.value)}
+                                        required
+                                        minLength={6}
+                                    />
+                                    <button type="submit" disabled={loading}>
+                                        {loading ? 'Saving...' : 'Set / Update Password'}
                                     </button>
                                 </form>
                             </div>
