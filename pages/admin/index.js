@@ -523,6 +523,20 @@ export default function AdminDashboard() {
                                                         <strong>Football ID:</strong> {reg.football_id}
                                                     </div>
                                                 )}
+                                                {reg.payments && reg.payments.length > 0 && (
+                                                    <div className={styles.regDetail} style={{background: '#f8fafc', padding: '10px', borderRadius: '4px', border: '1px solid #e2e8f0', marginTop: '10px'}}>
+                                                        <strong style={{display: 'block', marginBottom: '8px', color: '#1e40af'}}>Payment Verification Details:</strong>
+                                                        <div style={{marginBottom: '5px'}}>
+                                                            <strong>UPI ID:</strong> {reg.payments[0].upi_transaction_id || 'N/A'}
+                                                        </div>
+                                                        <div>
+                                                            <strong>Screenshot:</strong>{' '}
+                                                            {reg.payments[0].payment_proof_url ? (
+                                                              <a href={reg.payments[0].payment_proof_url} target="_blank" rel="noreferrer" style={{color: '#3b82f6', textDecoration: 'underline'}}>View Screenshot</a>
+                                                            ) : 'N/A'}
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 {reg.documents && reg.documents.length > 0 && (
                                                     <div className={styles.regDetail}>
                                                         <strong>Documents:</strong>

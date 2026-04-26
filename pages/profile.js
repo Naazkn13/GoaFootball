@@ -26,6 +26,12 @@ export default function ProfilePage() {
   const [reuploadFile, setReuploadFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState({ type: '', text: '' });
+  
+  // Payment Form State
+  const [paymentData, setPaymentData] = useState({
+      payment_screenshot_file: null,
+  });
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
@@ -159,57 +165,36 @@ export default function ProfilePage() {
     }
   };
 
-  const handleProceedToPayment = async () => {
-    if (processingPayment) return;
+  const handleProceedToPayment = async (e) => {
+    e.preventDefault();
+    if (!paymentData.payment_screenshot_file) {
+      setError('Please provide the Payment Screenshot.');
+      return;
+    }
 
     setProcessingPayment(true);
     setError("");
 
     try {
-      const orderResponse = await paymentAPI.createOrder();
+      // Upload screenshot
+      const formData = new FormData();
+      formData.append('file', paymentData.payment_screenshot_file);
+      formData.append('documentType', 'payment_proof');
 
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderResponse.order.amount, // Already in paise from server
-        currency: orderResponse.order.currency,
-        name: "Football Registration",
-        description: "Registration Payment",
-        order_id: orderResponse.order.id,
-        handler: async function (response) {
-          try {
-            const verifyResponse = await paymentAPI.verifyPayment({
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature
-            });
-
-            if (verifyResponse.success) {
-              setShowSuccessModal(true);
-              setIsPaid(true);
-              fetchPaymentHistory();
-            }
-          } catch (err) {
-            setError("Payment verification failed. Please contact support.");
-          } finally {
-            setProcessingPayment(false);
-          }
-        },
-        prefill: {
-          name: user.name,
-          email: user.email,
-          contact: user.phone
-        },
-        theme: { color: "#1a56db" }
-      };
-
-      const razorpay = new window.Razorpay(options);
-      razorpay.on("payment.failed", function () {
-        setError("Payment failed. Please try again.");
-        setProcessingPayment(false);
+      const uploadRes = await axiosInstance.post('/api/user/upload-document', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
-      razorpay.open();
+
+      // Submit manual payment
+      await axiosInstance.post('/api/payment/manual-submit', {
+        payment_proof_url: uploadRes.data.url
+      });
+
+      setShowPaymentForm(false);
+      fetchPaymentHistory(); // Refresh payment history to show pending
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to initiate payment");
+      setError(err.response?.data?.message || err.message || "Failed to submit payment details");
+    } finally {
       setProcessingPayment(false);
     }
   };
@@ -261,7 +246,6 @@ export default function ProfilePage() {
       <Head>
         <title>Profile — Football Registration</title>
       </Head>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
       <div className={styles.profileRoot}>
         <div className={styles.profileCard}>
@@ -501,21 +485,70 @@ export default function ProfilePage() {
           {/* Payment section — only show AFTER registration is completed */}
           {user.registration_completed && !isPaid && (
             <div className={styles.profileFooter}>
-              <div>
-                <h3 className={styles.sectionTitle}>Payment</h3>
-                <p className={styles.paymentText}>
-                  Complete your payment securely to activate your account.
-                </p>
-              </div>
-
-              <button
-                className={styles.paymentBtn}
-                type="button"
-                onClick={handleProceedToPayment}
-                disabled={processingPayment}
-              >
-                {processingPayment ? "Processing..." : "Proceed to Payment"}
-              </button>
+              {paymentHistory.length > 0 && paymentHistory[0].status === 'pending' ? (
+                <div>
+                  <h3 className={styles.sectionTitle}>Payment Verification Pending</h3>
+                  <p className={styles.paymentText}>
+                    Your recent payment details have been submitted and are currently waiting for admin approval. You will be notified once it is verified.
+                  </p>
+                </div>
+              ) : showPaymentForm ? (
+                <div style={{ width: '100%' }}>
+                  <h3 className={styles.sectionTitle}>Make Payment</h3>
+                  <p className={styles.paymentText}>
+                    Please pay ₹1 using the generic QR code or UPI details below, then enter your transaction ID and upload the screenshot of your payment.
+                  </p>
+                  <div style={{ textAlign: 'center', margin: '20px auto', background: '#f9fafb', padding: '20px', borderRadius: '8px', border: '1px solid #e5e7eb', maxWidth: '350px' }}>
+                      <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=36010200000864@BARB0MCVERS.ifsc.npci&pn=Ravens%20FC&am=1&cu=INR`} alt="Payment QR" style={{ width: '250px', height: '250px', objectFit: 'contain' }} />
+                      <div style={{marginTop: '15px', fontSize: '0.9rem', textAlign: 'left', lineHeight: '1.5'}}>
+                          <p style={{margin: '4px 0'}}><b>Bank Name:</b> Bank of Baroda</p>
+                          <p style={{margin: '4px 0'}}><b>Account Name:</b> Ravens FC</p>
+                          <p style={{margin: '4px 0'}}><b>Account No:</b> 36010200000864</p>
+                          <p style={{margin: '4px 0'}}><b>IFSC:</b> BARB0MCVERS</p>
+                          <p style={{margin: '4px 0'}}><b>Branch:</b> Seven bunglows, versova</p>
+                      </div>
+                  </div>
+                  <form onSubmit={handleProceedToPayment} style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+                      <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                          <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>Payment Screenshot*</label>
+                          <input 
+                              type="file" 
+                              accept="image/jpeg, image/png, application/pdf"
+                              onChange={(e) => setPaymentData({...paymentData, payment_screenshot_file: e.target.files[0]})}
+                              style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', background: 'white' }}
+                              required
+                          />
+                      </div>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                          <button type="submit" className={styles.paymentBtn} disabled={processingPayment} style={{ flex: 1 }}>
+                              {processingPayment ? 'Submitting...' : 'Submit Payment Details'}
+                          </button>
+                          <button type="button" className={styles.cancelBtn} onClick={() => setShowPaymentForm(false)} disabled={processingPayment} style={{ flex: 1 }}>
+                              Cancel
+                          </button>
+                      </div>
+                  </form>
+                </div>
+              ) : (
+                <div>
+                  <h3 className={styles.sectionTitle}>Payment Missing</h3>
+                  <p className={styles.paymentText}>
+                    Complete your payment securely to activate your account.
+                  </p>
+                  {paymentHistory.length > 0 && paymentHistory[0].status === 'rejected' && (
+                    <p style={{ color: '#dc2626', fontSize: '0.9rem', marginBottom: '10px' }}>
+                      Your previous payment was rejected. Please submit a valid payment again.
+                    </p>
+                  )}
+                  <button
+                    className={styles.paymentBtn}
+                    type="button"
+                    onClick={() => setShowPaymentForm(true)}
+                  >
+                    Proceed to Payment Form
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

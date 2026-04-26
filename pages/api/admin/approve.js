@@ -51,6 +51,7 @@ export default async function handler(req, res) {
 
         // If approving, generate GFF football ID based on the user's role
         if (action === 'approve') {
+            updates.is_paid = true;
             // Fetch the user to get their role
             const user = await database.getUserById(userId);
             if (user && user.role) {
@@ -60,6 +61,23 @@ export default async function handler(req, res) {
         }
 
         const updatedUser = await database.updateUser(userId, updates);
+
+        // Update payment record statuses
+        if (action === 'approve') {
+            try {
+                await database.client.from('payments')
+                    .update({ status: 'approved' })
+                    .eq('user_id', userId)
+                    .eq('status', 'pending');
+            } catch(e) {}
+        } else if (action === 'reject') {
+            try {
+                await database.client.from('payments')
+                    .update({ status: 'failed' })
+                    .eq('user_id', userId)
+                    .eq('status', 'pending');
+            } catch(e) {}
+        }
 
         // Fetch club to send notification
         let club = null;

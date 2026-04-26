@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         // Fetch registrations by approval status
         let query = database.client
             .from('users')
-            .select('id, email, name, phone, role, role_details, registration_completed, approval_status, approval_reason, date_of_birth, gender, address, documents, profile_photo_url, football_id, is_paid, created_at, updated_at, club_flag_reason, clubs(name)')
+            .select('id, email, name, phone, role, role_details, registration_completed, approval_status, approval_reason, date_of_birth, gender, address, documents, profile_photo_url, football_id, is_paid, created_at, updated_at, club_flag_reason, clubs(name), payments(upi_transaction_id, payment_proof_url, status, amount)')
             .order('created_at', { ascending: false });
 
         if (status === 'inactive') {

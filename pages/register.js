@@ -41,6 +41,37 @@ export default function RegisterPage() {
     const [error, setError] = useState('');
     const [uploadProgress, setUploadProgress] = useState('');
     const [isAlreadyPaid, setIsAlreadyPaid] = useState(false);
+    const [paymentData, setPaymentData] = useState({
+        payment_screenshot_file: null,
+    });
+    const [registrationComplete, setRegistrationComplete] = useState(false);
+
+    const handleManualPaymentSubmit = async (e) => {
+        e.preventDefault();
+        if (!paymentData.payment_screenshot_file) {
+            setError('Please provide the Payment Screenshot.');
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+        try {
+            setUploadProgress('Uploading payment screenshot...');
+            const screenshotResult = await uploadDocument(paymentData.payment_screenshot_file, 'payment_proof');
+
+            setUploadProgress('Submitting payment details...');
+            await axiosInstance.post('/api/payment/manual-submit', {
+                payment_proof_url: screenshotResult.url
+            });
+
+            router.push('/profile');
+        } catch (err) {
+            console.error(err);
+            setError(err.message || 'Payment submission failed.');
+            setLoading(false);
+            setUploadProgress('');
+        }
+    };
 
     // Check if a club is registering
     useEffect(() => {
@@ -307,47 +338,9 @@ export default function RegisterPage() {
                 return;
             }
 
-            setUploadProgress('Initiating payment...');
-            const orderResponse = await paymentAPI.createOrder(registeredUserId);
-
-            const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: orderResponse.order.amount, // Already in paise from server
-                currency: orderResponse.order.currency,
-                name: 'Football Registration',
-                description: 'Registration Payment',
-                order_id: orderResponse.order.id,
-                handler: async function (response) {
-                    try {
-                        await paymentAPI.verifyPayment({
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_signature: response.razorpay_signature,
-                        });
-
-                        // Success → redirect to profile
-                        router.push('/profile');
-                    } catch (err) {
-                        setError('Payment verification failed. Please contact support.');
-                    } finally {
-                        setLoading(false);
-                        setUploadProgress('');
-                    }
-                },
-                prefill: {
-                    name: [formData.first_name, formData.middle_name, formData.last_name].filter(Boolean).join(' '),
-                    contact: formData.phone,
-                },
-                theme: { color: '#1a56db' },
-            };
-
-            const razorpay = new window.Razorpay(options);
-            razorpay.on('payment.failed', function () {
-                setError('Payment failed. Please try again.');
-                setLoading(false);
-                setUploadProgress('');
-            });
-            razorpay.open();
+            setRegistrationComplete(true);
+            setLoading(false);
+            setUploadProgress('');
         } catch (err) {
             console.error('Registration error:', err);
             // Show specific error message from upload/registration failures
@@ -395,7 +388,41 @@ export default function RegisterPage() {
                     {error && <div className={styles.errorMessage}>{error}</div>}
                     {uploadProgress && <div className={styles.progressMessage}>{uploadProgress}</div>}
 
-                    {/* Step 1: Role Selection */}
+                    {registrationComplete ? (
+                        <div className={styles.paymentSection} style={{ padding: '20px' }}>
+                            <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Make Payment</h3>
+                            <p style={{ textAlign: 'center', color: '#4b5563' }}>Please pay ₹1 using the generic QR code or UPI details below, then enter your transaction ID and upload the screenshot of your payment.</p>
+                            <div className={styles.qrCodeWrapper} style={{ textAlign: 'center', margin: '20px auto', background: '#f9fafb', padding: '20px', borderRadius: '8px', border: '1px solid #e5e7eb', maxWidth: '350px' }}>
+                                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=36010200000864@BARB0MCVERS.ifsc.npci&pn=Ravens%20FC&am=1&cu=INR`} alt="Payment QR" style={{ width: '250px', height: '250px', objectFit: 'contain' }} />
+                                <div style={{marginTop: '15px', fontSize: '0.9rem', textAlign: 'left', lineHeight: '1.5'}}>
+                                    <p style={{margin: '4px 0'}}><b>Bank Name:</b> Bank of Baroda</p>
+                                    <p style={{margin: '4px 0'}}><b>Account Name:</b> Ravens FC</p>
+                                    <p style={{margin: '4px 0'}}><b>Account No:</b> 36010200000864</p>
+                                    <p style={{margin: '4px 0'}}><b>IFSC:</b> BARB0MCVERS</p>
+                                    <p style={{margin: '4px 0'}}><b>Branch:</b> Seven bunglows, versova</p>
+                                </div>
+                            </div>
+                            <form onSubmit={handleManualPaymentSubmit}>
+                                <div className={styles.formGroup} style={{ marginBottom: '20px' }}>
+                                    <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>Payment Screenshot*</label>
+                                    <input 
+                                        type="file" 
+                                        accept="image/jpeg, image/png, application/pdf"
+                                        onChange={(e) => setPaymentData({...paymentData, payment_screenshot_file: e.target.files[0]})}
+                                        style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', background: 'white' }}
+                                        required
+                                    />
+                                </div>
+                                <div className={styles.formActions} style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <button type="submit" className={styles.submitBtn} disabled={loading} style={{ width: '100%', maxWidth: '300px' }}>
+                                        {loading ? 'Submitting...' : 'Submit Payment Details'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Step 1: Role Selection */}
                     {step === 1 && (
                         <RoleSelectionForm
                             selectedRole={selectedRole}
@@ -508,6 +535,8 @@ export default function RegisterPage() {
                                 </button>
                             </div>
                         </form>
+                    )}
+                        </>
                     )}
                 </div>
             </div>

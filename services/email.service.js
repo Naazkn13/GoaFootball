@@ -251,6 +251,32 @@ class EmailService {
       return { success: false, error };
     }
   }
+
+  async sendGenericEmail(toEmail, subject, text, fromEmail = null) {
+    const htmlTemplate = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
+          <h2 style="margin: 0;">National Sports Academy</h2>
+        </div>
+        <div style="padding: 20px; white-space: pre-wrap;">
+${text}
+        </div>
+      </div>
+    `;
+
+    try {
+      await this.send({
+        to: toEmail,
+        subject: subject,
+        html: htmlTemplate,
+        from: fromEmail
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to send generic email:', error);
+      return { success: false, error };
+    }
+  }
 }
 
 export default new EmailService();
