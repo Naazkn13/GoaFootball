@@ -499,14 +499,7 @@ export default function ProfilePage() {
                     Please pay ₹1 using the generic QR code or UPI details below, then enter your transaction ID and upload the screenshot of your payment.
                   </p>
                   <div style={{ textAlign: 'center', margin: '20px auto', background: '#f9fafb', padding: '20px', borderRadius: '8px', border: '1px solid #e5e7eb', maxWidth: '350px' }}>
-                      <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=36010200000864@BARB0MCVERS.ifsc.npci&pn=Ravens%20FC&am=1&cu=INR`} alt="Payment QR" style={{ width: '250px', height: '250px', objectFit: 'contain' }} />
-                      <div style={{marginTop: '15px', fontSize: '0.9rem', textAlign: 'left', lineHeight: '1.5'}}>
-                          <p style={{margin: '4px 0'}}><b>Bank Name:</b> Bank of Baroda</p>
-                          <p style={{margin: '4px 0'}}><b>Account Name:</b> Ravens FC</p>
-                          <p style={{margin: '4px 0'}}><b>Account No:</b> 36010200000864</p>
-                          <p style={{margin: '4px 0'}}><b>IFSC:</b> BARB0MCVERS</p>
-                          <p style={{margin: '4px 0'}}><b>Branch:</b> Seven bunglows, versova</p>
-                      </div>
+                      <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=36010200000864@barb0mcvers.ifsc.npci&pn=Ravens%20FC&am=1&cu=INR`} alt="Payment QR" style={{ width: '250px', height: '250px', objectFit: 'contain' }} />
                   </div>
                   <form onSubmit={handleProceedToPayment} style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
                       <div style={{ marginBottom: '20px', textAlign: 'left' }}>
