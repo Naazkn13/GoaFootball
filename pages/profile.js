@@ -191,6 +191,7 @@ export default function ProfilePage() {
       });
 
       setShowPaymentForm(false);
+      setShowSuccessModal(true);
       fetchPaymentHistory(); // Refresh payment history to show pending
     } catch (err) {
       setError(err.response?.data?.message || err.message || "Failed to submit payment details");
@@ -595,10 +596,9 @@ export default function ProfilePage() {
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
             <div className={styles.modalSuccessIcon}>✓</div>
-            <h3 className={styles.modalTitle}>Payment Successful!</h3>
+            <h3 className={styles.modalTitle}>Payment Submitted!</h3>
             <p className={styles.modalText}>
-              Your payment has been processed successfully.<br />
-              <strong>Football ID: {user.football_id}</strong>
+              Your payment screenshot has been uploaded successfully. Our team will verify the payment. Once approved, you will receive an email with your GFF Football ID.
             </p>
             <button
               className={styles.modalBtn}

@@ -46,6 +46,8 @@ export default function RegisterPage() {
     });
     const [registrationComplete, setRegistrationComplete] = useState(false);
 
+    const [showRegistrationSuccess, setShowRegistrationSuccess] = useState(false);
+
     const handleManualPaymentSubmit = async (e) => {
         e.preventDefault();
         if (!paymentData.payment_screenshot_file) {
@@ -64,10 +66,11 @@ export default function RegisterPage() {
                 payment_proof_url: screenshotResult.url
             });
 
-            router.push('/profile');
+            setUploadProgress('');
+            setShowRegistrationSuccess(true);
         } catch (err) {
             console.error(err);
-            setError(err.message || 'Payment submission failed.');
+            setError(err.response?.data?.message || err.message || 'Payment submission failed.');
             setLoading(false);
             setUploadProgress('');
         }
@@ -533,6 +536,25 @@ export default function RegisterPage() {
                     )}
                 </div>
             </div>
+
+            {/* Registration Success Modal */}
+            {showRegistrationSuccess && (
+                <div className={styles.modalOverlay} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+                    <div className={styles.modalContent} style={{ background: 'white', padding: '30px', borderRadius: '12px', maxWidth: '400px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                        <div style={{ fontSize: '48px', color: '#10b981', marginBottom: '16px' }}>✓</div>
+                        <h3 style={{ margin: '0 0 16px 0', color: '#1f2937', fontSize: '24px' }}>Payment Submitted!</h3>
+                        <p style={{ color: '#4b5563', lineHeight: '1.5', marginBottom: '24px' }}>
+                            Your payment screenshot has been uploaded successfully. Our team will verify the payment. Once approved, you will receive an email with your GFF Football ID.
+                        </p>
+                        <button
+                            onClick={() => router.push('/profile')}
+                            style={{ background: '#10b981', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '6px', fontSize: '16px', cursor: 'pointer', width: '100%' }}
+                        >
+                            Go to My Profile
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
