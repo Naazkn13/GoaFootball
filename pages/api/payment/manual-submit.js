@@ -1,5 +1,5 @@
 import database from '../../../services/database';
-import { getSession } from '../../../services/session.service';
+import { requireSession } from '../../../services/session.service';
 import emailService from '../../../services/email.service';
 
 export default async function handler(req, res) {
@@ -9,12 +9,10 @@ export default async function handler(req, res) {
 
     try {
         // Authenticate user
-        const session = getSession(req, res);
-        if (!session || !session.user) {
-            return res.status(401).json({ success: false, message: 'Unauthorized' });
-        }
+        const session = requireSession(req, res);
+        if (!session) return;
 
-        const userId = session.user.id;
+        const userId = session.id;
         const { payment_proof_url } = req.body;
 
         if (!payment_proof_url) {

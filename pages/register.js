@@ -393,7 +393,7 @@ export default function RegisterPage() {
                             <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Make Payment</h3>
                             <p style={{ textAlign: 'center', color: '#4b5563' }}>Please pay ₹1 using the generic QR code or UPI details below, then enter your transaction ID and upload the screenshot of your payment.</p>
                             <div className={styles.qrCodeWrapper} style={{ textAlign: 'center', margin: '20px auto', background: '#f9fafb', padding: '20px', borderRadius: '8px', border: '1px solid #e5e7eb', maxWidth: '350px' }}>
-                                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=36010200000864@barb0mcvers.ifsc.npci&pn=Ravens%20FC&am=1&cu=INR`} alt="Payment QR" style={{ width: '250px', height: '250px', objectFit: 'contain' }} />
+                                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=omkarkachre7@oksbi&pn=Ravens%20FC&am=1&cu=INR`} alt="Payment QR" style={{ width: '250px', height: '250px', objectFit: 'contain' }} />
                             </div>
                             <form onSubmit={handleManualPaymentSubmit}>
                                 <div className={styles.formGroup} style={{ marginBottom: '20px' }}>
